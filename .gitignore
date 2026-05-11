@@ -1,0 +1,106 @@
+# =============================================================================
+# Generic .gitignore — add stack-specific rules below the relevant section
+# =============================================================================
+
+# Operating System
+# -----------------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Editor and IDE
+# -----------------------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*~
+
+# Logs
+# -----------------------------------------------------------------------------
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment and Secrets
+# -----------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# Dependencies (common)
+# -----------------------------------------------------------------------------
+node_modules/
+vendor/
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Build output (common)
+# -----------------------------------------------------------------------------
+dist/
+build/
+out/
+target/
+*.egg-info/
+*.class
+
+# Test coverage
+# -----------------------------------------------------------------------------
+coverage/
+.coverage
+*.lcov
+.nyc_output/
+
+# Temporary files
+# -----------------------------------------------------------------------------
+tmp/
+temp/
+*.tmp
+*.bak
+*.orig
+
+# =============================================================================
+# Stack-specific — uncomment or add rules for your stack
+# =============================================================================
+
+# Node.js
+# package-lock.json  ← keep if using npm, remove if using yarn
+# yarn.lock          ← keep if using yarn
+
+# Python
+# *.egg
+# .pytest_cache/
+# .mypy_cache/
+
+# Java / Kotlin
+# *.jar (only if generated, not if committed intentionally)
+# .gradle/
+# local.properties
+
+# .NET / C#
+# bin/
+# obj/
+# *.user
+
+# Go
+# *.exe
+# *.test
