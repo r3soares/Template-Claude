@@ -1,96 +1,77 @@
 # Development Workflow
 
-This file defines the expected development lifecycle. Claude should follow this flow for every feature or change.
+The development lifecycle. Read on demand — `CLAUDE.md` holds the short version; this
+file is the detail. Each step maps to a **skill** that carries its own procedure.
 
-## The Flow
+## Process scales by size
+
+This is a solo-dev template: don't impose feature ceremony on a small change.
+
+| Tier | What it is | Flow |
+|------|-----------|------|
+| **Small change** | Bug fix, copy tweak, config, refactor with no behavior change | Code → commit → dated `CHANGELOG.md` entry → PR. No spec, no ADR, no traceability row. |
+| **Feature / significant change** | New behavior or user-facing surface | Spec → ADR (if needed) → impl → tests → traceability → PR. |
+
+When unsure which tier applies, ask before assuming.
+
+---
+
+## The full flow (feature tier)
 
 ```
-Spec → ADR (if needed) → Implementation → Tests → PR
+Spec → ADR (if needed) → Implementation → Tests → Traceability → PR
 ```
 
-Every step produces a file. Every file lives in a specific folder.
+Every step produces a file in a specific folder, and each is driven by a skill.
+
+| Step | Skill | Output | Location |
+|------|-------|--------|----------|
+| 1. Spec | `feature-spec` | `spec.md` | `specs/features/{name}/` |
+| 2. ADR (if a real decision) | `adr` | `ADR-NNN-title.md` | `docs/adr/` |
+| 3. Implement | — | source files | `src/` |
+| 4. Tests | `test-plan` | test files + plan | `tests/` |
+| 5. Traceability | `traceability` | matrix row | `docs/traceability/` |
+| 6. PR | `open-pr` | branch + commit + PR | Git / GitHub |
+
+### Step notes
+
+1. **Spec first.** No code for a feature before its spec is `[ACCEPTED]`. If the
+   implementation must diverge, update the spec first and note why.
+2. **ADR only for real decisions** — adopting/replacing a library, a non-obvious pattern
+   or data model, anything hard to reverse. Otherwise skip it.
+3. **Implement** in `src/`, following `conventions.md`. No scope beyond the spec.
+4. **Tests** cover happy path, the spec's edge cases, and failure scenarios.
+5. **Traceability** links spec → ADR → source → tests, and reflects real status.
+6. **PR** uses Conventional Commits and links spec/ADR/traceability (or `N/A`).
 
 ---
 
-## Step 1 — Write the Feature Spec
+## Git
 
-**Before writing any code**, create a spec.
+- Work on branches (`feat/…`, `fix/…`, `docs/…`), not directly on `master`/`main`.
+  The `git-guard` hook warns if you forget.
+- Conventional Commits — see `conventions.md`.
+- The `open-pr` skill handles branch → commit → PR for both tiers.
 
-- Location: `specs/features/{feature-name}/spec.md`
-- Template: `templates/feature-template.md`
-- The spec defines: what the feature does, acceptance criteria, edge cases, and open questions.
+## CI/CD
 
-> Do not start implementation until the spec is reviewed and accepted.
+- A stack-agnostic GitHub Actions workflow lives at `.github/workflows/ci.yml`
+  (lint + test on push/PR). Fill it in with the `setup-ci` skill.
+- CI runs the same lint/test commands you run locally.
 
----
+## Docker (conditional)
 
-## Step 2 — Record Architecture Decisions (when needed)
-
-If the feature requires a significant technical decision (choice of library, pattern, data model, integration approach), record it as an ADR.
-
-- Location: `docs/adr/ADR-{NNN}-{short-title}.md`
-- Template: `templates/adr-template.md`
-- Numbering: sequential, zero-padded to 3 digits (e.g. `ADR-001`, `ADR-002`)
-
-An ADR is needed when:
-- A technology or library is being adopted or replaced
-- A non-obvious architectural pattern is chosen
-- A decision will be hard to reverse later
-- There is disagreement or uncertainty about the approach
-
----
-
-## Step 3 — Implement
-
-- Source code goes in `src/`
-- Follow the conventions in `.claude/conventions.md`
-- Reference the spec while implementing — do not add scope that is not in the spec
-- If the implementation diverges from the spec, update the spec first and note why
-
----
-
-## Step 4 — Write Tests
-
-- Tests go in `tests/`
-- Use `templates/test-template.md` as the base for test documentation
-- Cover: happy path, edge cases listed in the spec, and failure scenarios
-
----
-
-## Step 5 — Update Traceability
-
-After implementation and tests, update the traceability document.
-
-- Location: `docs/traceability/traceability.md`
-- Template: `templates/traceability-template.md`
-- Link: feature spec → ADR (if any) → source files → test files
-
----
-
-## Step 6 — Open a PR
-
-- Use `templates/pr-template.md` as the base
-- The PR description must reference: the spec, the ADR (if any), and the traceability entry
-- `.github/PULL_REQUEST_TEMPLATE.md` pre-fills this on GitHub
-
----
-
-## Summary Table
-
-| Step | Output file | Location |
-|------|-------------|----------|
-| Spec | `spec.md` | `specs/features/{feature-name}/` |
-| ADR | `ADR-NNN-title.md` | `docs/adr/` |
-| Code | source files | `src/` |
-| Tests | test files | `tests/` |
-| Traceability | `traceability.md` | `docs/traceability/` |
-| PR | pull request description | GitHub / `.github/` |
+- Containerize only when the project type fits (SaaS/API/web/worker → yes;
+  CLI/desktop/library → no). The `dockerize` skill has the full decision guide and
+  applies the templates in `templates/docker/`.
 
 ---
 
 ## Rules
 
-- Never skip the spec step, even for small changes
-- Never merge without tests
-- ADRs are never deleted — if a decision is reversed, create a new ADR that supersedes the old one
-- The traceability document is always up to date before a PR is merged
+- Match process to change size — don't over-document a one-liner, don't under-document a
+  feature.
+- Never merge a feature without tests.
+- ADRs are never deleted — supersede them (see the `adr` skill).
+- Traceability is current before a feature PR merges.
+- `CHANGELOG.md` gets a dated entry for **every** change.

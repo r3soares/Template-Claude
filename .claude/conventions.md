@@ -1,6 +1,7 @@
 # Conventions
 
-This file defines naming, formatting, and organizational rules. Claude must follow these in every file it creates or edits.
+Naming, formatting, and organizational rules. Read on demand (not auto-loaded); the
+skills link here. Claude must follow these in every file it creates or edits.
 
 ---
 
@@ -39,6 +40,18 @@ This file defines naming, formatting, and organizational rules. Claude must foll
 - Sequential, starting at `001`
 - Never reuse a number, even if an ADR is superseded
 - When superseding, add a note to the old ADR and create a new one
+
+---
+
+## Branch Naming
+
+Work on a branch, never directly on `master`/`main` (the `git-guard` hook warns you).
+
+| Pattern | Example |
+|---------|---------|
+| `<type>/<short-name>` | `feat/user-auth`, `fix/expired-token`, `docs/adr-001` |
+
+Use the same `type` values as commits (below).
 
 ---
 

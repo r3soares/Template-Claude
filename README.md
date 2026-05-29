@@ -45,12 +45,12 @@ cd <project-folder>
 
 ```
 .
-├── .claude/        # Claude instructions for this project
-├── .github/        # GitHub templates and workflows
+├── .claude/        # Claude config: skills (on-demand procedures), hooks, settings, reference docs
+├── .github/        # GitHub PR template and CI workflows
 ├── docs/           # Documentation (ADRs, architecture, traceability)
 ├── specs/          # Feature specifications
 ├── src/            # Source code
-├── templates/      # File templates
+├── templates/      # File + Docker templates
 └── tests/          # Tests
 ```
 
@@ -60,15 +60,14 @@ See `.claude/project.md` for a detailed breakdown.
 
 ## Development Workflow
 
-See `.claude/workflow.md` for the full development lifecycle.
+See `.claude/workflow.md` for the full lifecycle. The process scales with change size:
 
-Quick summary:
-1. Write a feature spec in `specs/features/`
-2. Record architecture decisions in `docs/adr/` (if needed)
-3. Implement in `src/`
-4. Write tests in `tests/`
-5. Update traceability in `docs/traceability/`
-6. Open a PR
+- **Small fix** → code → conventional commit → dated `CHANGELOG.md` entry → PR.
+- **Feature** → spec → ADR (if needed) → implement → tests → traceability → PR.
+
+Specialized steps are handled by Claude **skills** (`.claude/skills/`) that load only
+when relevant — `feature-spec`, `adr`, `test-plan`, `traceability`, `open-pr`,
+`dockerize`, `setup-ci`.
 
 ---
 

@@ -1,0 +1,35 @@
+# Stack-agnostic Compose template for local development.
+# Keep only the services the project actually needs locally. A solo-dev project
+# often needs just `app` plus maybe one datastore — don't over-orchestrate.
+
+services:
+  app:
+    build: .
+    # ports:
+    #   - "8080:8080"        # host:container — match the EXPOSE in the Dockerfile
+    environment:
+      # Configuration via env vars. Reference a gitignored .env for secrets:
+      # - DATABASE_URL=${DATABASE_URL}
+      []
+    # env_file:
+    #   - .env
+    # depends_on:
+    #   - db
+    # volumes:
+    #   - .:/app            # live-reload during dev (remove for prod-like runs)
+    restart: unless-stopped
+
+  # ----- Optional datastore (uncomment if the project needs one locally) -----
+  # db:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #   volumes:
+  #     - db-data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+# volumes:
+#   db-data:

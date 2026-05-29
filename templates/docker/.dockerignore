@@ -1,0 +1,34 @@
+# Keep the build context small and secrets out of the image.
+# Add stack-specific build output and dependency dirs.
+
+.git
+.gitignore
+.github
+.claude
+.editorconfig
+
+# Docs and specs — not needed at runtime
+docs
+specs
+templates
+*.md
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies & build output (uncomment what applies to your stack)
+# node_modules
+# dist
+# build
+# target
+# __pycache__
+# .venv
+# vendor
+
+# Local / editor / OS noise
+.vscode
+.idea
+.DS_Store
+*.log

@@ -1,60 +1,71 @@
 # Claude Instructions
 
-This file is the entry point for Claude when working on this project.
-Read the files below **in order** before starting any task.
+Entry point for Claude on this project. This file is intentionally small — it is
+loaded into context every session. Specialized procedures live in **skills**
+(`.claude/skills/`), which load only when a task triggers them. Reference docs
+(`.claude/project.md`, `.claude/workflow.md`, `.claude/conventions.md`) are read
+**on demand**, not eagerly.
 
-## Required Reading (in order)
-
-1. `.claude/project.md` — project structure and purpose of each folder
-2. `.claude/workflow.md` — development lifecycle: spec → ADR → impl → test → PR
-3. `.claude/conventions.md` — naming, commits, status tags, and language rules
-
----
-
-## Behavior Rules
-
-These rules apply in every session, every task, without exception.
-
-### Before Starting Any Task
-
-- Always read `.claude/project.md`, `.claude/workflow.md`, and `.claude/conventions.md` first
-- If the task involves a feature, check whether a spec already exists in `specs/features/`
-- If no spec exists, write one before doing anything else — even for small changes
-- If the task requires a significant technical decision, create an ADR before implementing
-
-### While Working
-
-- Never add scope that is not described in the spec
-- If the implementation needs to diverge from the spec, update the spec first and explain why
-- Use the templates in `templates/` whenever creating a new artifact
-- Follow naming conventions from `.claude/conventions.md` exactly
-- All files, commits, and documentation must be in English
-
-### Before Considering a Task Done
-
-- Tests are written and cover: happy path, edge cases from spec, failure scenarios
-- Traceability matrix in `docs/traceability/traceability.md` is updated
-- Status tags on spec and ADR files are updated to reflect current state
-- CHANGELOG.md is updated if the change is user-facing
-
-### When in Doubt
-
-- Ask before making architectural decisions
-- Ask before creating files or folders not described in `.claude/project.md`
-- Do not assume — if something is ambiguous in the spec, flag it as an open question
+> Replace this line with the project identity once the template is in use.
 
 ---
 
-## Quick Reference
+## Core Principles
 
-| I need to... | Go to |
-|--------------|-------|
-| Understand the project structure | `.claude/project.md` |
-| Know the development flow | `.claude/workflow.md` |
-| Check naming or commit rules | `.claude/conventions.md` |
-| Create a feature spec | `templates/feature-template.md` → `specs/features/{name}/spec.md` |
-| Record an architecture decision | `templates/adr-template.md` → `docs/adr/ADR-NNN-title.md` |
-| Document architecture | `templates/architecture-template.md` → `docs/architecture/` |
-| Write a test plan | `templates/test-template.md` → `tests/` |
-| Update traceability | `docs/traceability/traceability.md` |
-| Open a PR | `templates/pr-template.md` |
+These hold in every session, without exception.
+
+- **Solo dev → simplicity.** Favor the smallest change that solves the problem. Do not
+  add scaffolding, abstraction, or process the task does not need.
+- **Process scales by size** (see decision rule below). Don't impose feature-level
+  ceremony on a one-line fix.
+- **English everywhere** — code, comments, docs, and commit messages.
+- **Specs are the source of truth for features.** When code and spec disagree, fix the
+  spec first, then the code.
+- **Every change updates `CHANGELOG.md`** with a dated entry — even small ones. This is
+  the lightweight history that is always current.
+
+---
+
+## Decision Rule: how much process?
+
+| Change | What to do |
+|--------|------------|
+| **Small** (bug fix, copy tweak, config, refactor with no behavior change) | Code → commit → dated `CHANGELOG.md` entry. No spec, no ADR. |
+| **Feature / significant change** (new behavior, new surface, user-facing) | Full flow via skills: spec → ADR (if a real decision) → impl → tests → traceability → PR. |
+| **Significant technical decision** (library, data model, pattern hard to reverse) | Record an ADR before implementing (use the `adr` skill). |
+
+When unsure which tier applies, ask before assuming.
+
+---
+
+## Which skill, when
+
+Invoke these skills (don't reinvent their steps inline):
+
+| When you need to… | Skill |
+|-------------------|-------|
+| Start a feature / write a spec | `feature-spec` |
+| Record an architecture decision | `adr` |
+| Plan or document tests | `test-plan` |
+| Update the traceability matrix | `traceability` |
+| Commit + open a PR | `open-pr` |
+| Containerize the project (when it fits) | `dockerize` |
+| Set up CI | `setup-ci` |
+
+---
+
+## Reference docs (read on demand)
+
+| To understand… | Read |
+|----------------|------|
+| Folder structure & purpose | `.claude/project.md` |
+| The development lifecycle | `.claude/workflow.md` |
+| Naming, commits, status tags | `.claude/conventions.md` |
+
+---
+
+## When in Doubt
+
+- Ask before architectural decisions or before creating files/folders not described in
+  `.claude/project.md`.
+- Don't assume — if a spec is ambiguous, flag it as an open question instead of guessing.

@@ -1,6 +1,7 @@
 # Using This Template
 
-Step-by-step checklist for starting a new project from this template.
+Step-by-step checklist for starting a new project from this template. Delete this file
+from the new project once you're done.
 
 ---
 
@@ -9,11 +10,6 @@ Step-by-step checklist for starting a new project from this template.
 ```bash
 cp -r /path/to/Template /path/to/NewProject
 cd /path/to/NewProject
-```
-
-Or on Windows:
-```
-xcopy /E /I D:\Projetos\Template D:\Projetos\NewProjectName
 ```
 
 ---
@@ -32,38 +28,47 @@ git commit -m "chore: initial project structure from template"
 
 | File | What to update |
 |------|---------------|
-| `README.md` | Project name, description, stack-specific setup instructions |
-| `CLAUDE.md` | No changes needed unless you want to add project-specific rules |
-| `.claude/project.md` | Project name, actual stack details, any folder structure changes |
-| `CHANGELOG.md` | Replace placeholder with actual project start date |
+| `CLAUDE.md` | Replace the project-identity placeholder line. Add project-specific rules only if needed. |
+| `README.md` | Project name, description, stack-specific setup/run/test commands |
+| `.claude/project.md` | Actual stack details and any structure changes |
+| `CHANGELOG.md` | Start fresh; the first entry is your project's start |
 
 ---
 
 ## 4. Clean Up Placeholder Content
 
-- Remove example rows from `docs/traceability/traceability.md`
+- Remove the example row from `docs/traceability/traceability.md`
 - Remove placeholder comments from `README.md`
-- Delete `SETUP.md` from the new project (this file is for template use only)
+- Delete `SETUP.md` (template-only)
 
 ---
 
-## 5. Configure Stack-Specific Tooling
+## 5. Decide on Docker and CI
 
-- Update `.gitignore` — uncomment the relevant stack section at the bottom
-- Update `.editorconfig` if your stack has different indentation conventions
-- Add any CI/CD workflow files to `.github/workflows/`
+- **Docker**: use the `dockerize` skill — it has a decision guide. SaaS/API/web/worker →
+  yes; CLI/desktop/library → no. If yes, it applies `templates/docker/`.
+- **CI**: fill in `.github/workflows/ci.yml` with the `setup-ci` skill (runtime, install,
+  lint, test for your stack).
 
 ---
 
-## 6. Start Development
+## 6. Configure Stack Tooling
 
-Follow the workflow in `.claude/workflow.md`. The first step is always a feature spec:
+- Update `.gitignore` — uncomment the relevant stack section
+- Update `.editorconfig` if your stack differs
+- (Optional) Enable a format-on-edit hook — see `.claude/hooks/README.md`
 
-```
-specs/features/{feature-name}/spec.md
-```
+---
 
-Use `templates/feature-template.md` as the base.
+## 7. Start Development
+
+Process scales by change size (see `.claude/workflow.md`):
+
+- **Small fix** → code → conventional commit → dated `CHANGELOG.md` entry → PR.
+- **Feature** → start with the `feature-spec` skill: `specs/features/{name}/spec.md`.
+
+Claude loads the right skill when the task calls for it — you don't need to read all the
+docs up front.
 
 ---
 
@@ -71,10 +76,13 @@ Use `templates/feature-template.md` as the base.
 
 - [ ] Template copied to new project folder
 - [ ] Git initialized and first commit made
+- [ ] `CLAUDE.md` project identity filled in
 - [ ] `README.md` updated with project details
 - [ ] `.claude/project.md` updated with stack details
-- [ ] `CHANGELOG.md` placeholder updated
-- [ ] Traceability matrix example rows removed
+- [ ] `CHANGELOG.md` reset
+- [ ] Traceability example row removed
+- [ ] Docker decision made (`dockerize` skill if applicable)
+- [ ] CI workflow filled in (`setup-ci` skill)
 - [ ] `.gitignore` stack section uncommented
 - [ ] `SETUP.md` deleted from new project
-- [ ] First feature spec created in `specs/features/`
+- [ ] First feature spec created (or first small fix shipped)

@@ -1,0 +1,36 @@
+# Stack-agnostic CI. Lint + test on every push and PR to the default branch.
+# Fill in the stack-specific steps — see the `setup-ci` skill. The commands here
+# should match what you run locally, so green local == green CI.
+
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1) Set up the runtime (uncomment and pick one):
+      # - uses: actions/setup-node@v4
+      #   with: { node-version: '20', cache: 'npm' }
+      # - uses: actions/setup-python@v5
+      #   with: { python-version: '3.12', cache: 'pip' }
+      # - uses: actions/setup-go@v5
+      #   with: { go-version: '1.22', cache: true }
+
+      # 2) Install dependencies:
+      # - run: <install command>     # e.g. npm ci | pip install -r requirements.txt | go mod download
+
+      # 3) Lint:
+      # - run: <lint command>        # e.g. npm run lint | ruff check . | golangci-lint run
+
+      # 4) Test:
+      # - run: <test command>        # e.g. npm test | pytest | go test ./...
+
+      - run: echo "Configure CI steps — see the setup-ci skill."
