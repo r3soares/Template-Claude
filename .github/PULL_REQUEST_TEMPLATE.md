@@ -17,9 +17,8 @@
 
 ## Related
 
-- Feature spec: <!-- link to specs/features/{name}/spec.md -->
+- Feature spec: <!-- link to specs/features/{name}/spec.md or N/A -->
 - ADR: <!-- link to docs/adr/ADR-NNN.md or N/A -->
-- Traceability: <!-- link to docs/traceability/traceability.md -->
 - Issue/ticket: <!-- link or N/A -->
 
 ---
@@ -42,9 +41,8 @@ Steps to verify this PR works as expected:
 
 ## Checklist
 
-- [ ] Spec is written and accepted
+- [ ] Spec is accepted, and its *Related* section points at the source/test files (features only)
 - [ ] Code follows conventions in `.claude/conventions.md`
 - [ ] Tests are written and passing
-- [ ] Traceability matrix is updated
 - [ ] No unintended scope added beyond the spec
-- [ ] CHANGELOG.md updated (if user-facing change)
+- [ ] CHANGELOG.md updated
