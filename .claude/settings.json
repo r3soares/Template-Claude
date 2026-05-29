@@ -1,8 +1,23 @@
 {
   "permissions": {
     "allow": [
-      "Edit(/.claude/**)",
-      "Bash(./**)"
+      "Edit(/**)",
+      "Write(/**)",
+      "Bash(./**)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)"
     ]
   },
   "hooks": {

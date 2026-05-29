@@ -56,13 +56,12 @@ Any relevant technical constraints, dependencies, or considerations the implemen
 
 ## Related
 
+This section is the feature's index — keep it current as you implement.
+
 - ADR: <!-- link to ADR if a decision was required -->
 - Spec: <!-- link to related specs if any -->
+- Source files: <!-- src/... paths that implement this feature -->
+- Tests: <!-- tests/... paths that cover this feature -->
 
----
-
-## History
-
-| Date | Author | Change |
-|------|--------|--------|
-| YYYY-MM-DD | <!-- author --> | Created |
+<!-- The spec describes the present desired state. "What changed" is answered by git
+     (e.g. `git log -p -- <this file>`), not a hand-maintained history table. -->

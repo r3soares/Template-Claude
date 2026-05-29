@@ -37,7 +37,6 @@ git commit -m "chore: initial project structure from template"
 
 ## 4. Clean Up Placeholder Content
 
-- Remove the example row from `docs/traceability/traceability.md`
 - Remove placeholder comments from `README.md`
 - Delete `SETUP.md` (template-only)
 
@@ -80,7 +79,6 @@ docs up front.
 - [ ] `README.md` updated with project details
 - [ ] `.claude/project.md` updated with stack details
 - [ ] `CHANGELOG.md` reset
-- [ ] Traceability example row removed
 - [ ] Docker decision made (`dockerize` skill if applicable)
 - [ ] CI workflow filled in (`setup-ci` skill)
 - [ ] `.gitignore` stack section uncommented

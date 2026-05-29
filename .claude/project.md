@@ -23,10 +23,10 @@ scales with the size of the change. Copy it, fill in the placeholders, and start
 ├── .github/
 │   ├── PULL_REQUEST_TEMPLATE.md  # PR description template for GitHub
 │   └── workflows/        # CI/CD — ci.yml (stack-agnostic, fill per stack)
-├── docs/                 # Documentation of what IS (current truth)
+├── docs/                 # Documentation of what IS now (git holds the history)
 │   ├── adr/              # Architecture Decision Records — one file per decision
 │   ├── architecture/     # System/component diagrams and architecture docs
-│   └── traceability/     # Traceability matrix linking requirements to impl
+│   └── traceability/     # OPTIONAL — formal matrix, compliance projects only
 ├── specs/                # Specifications of what SHOULD BE
 │   └── features/         # One folder per feature, containing spec.md
 ├── src/                  # Source code (stack-specific structure goes here)
@@ -41,8 +41,9 @@ scales with the size of the change. Copy it, fill in the placeholders, and start
 ## Skills
 
 Procedures load only when a task triggers them (progressive disclosure). See each
-`SKILL.md` for details: `feature-spec`, `adr`, `test-plan`, `traceability`, `open-pr`,
-`dockerize`, `setup-ci`. `CLAUDE.md` has the "which skill, when" table.
+`SKILL.md` for details: `feature-spec`, `adr`, `test-plan`, `open-pr`, `dockerize`,
+`setup-ci`, and `traceability` (optional — compliance only). `CLAUDE.md` has the
+"which skill, when" table.
 
 ## Key Distinctions
 

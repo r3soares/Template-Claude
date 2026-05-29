@@ -47,7 +47,7 @@ cd <project-folder>
 .
 ├── .claude/        # Claude config: skills (on-demand procedures), hooks, settings, reference docs
 ├── .github/        # GitHub PR template and CI workflows
-├── docs/           # Documentation (ADRs, architecture, traceability)
+├── docs/           # Documentation (ADRs, architecture)
 ├── specs/          # Feature specifications
 ├── src/            # Source code
 ├── templates/      # File + Docker templates
@@ -63,11 +63,11 @@ See `.claude/project.md` for a detailed breakdown.
 See `.claude/workflow.md` for the full lifecycle. The process scales with change size:
 
 - **Small fix** → code → conventional commit → dated `CHANGELOG.md` entry → PR.
-- **Feature** → spec → ADR (if needed) → implement → tests → traceability → PR.
+- **Feature** → spec → ADR (if needed) → implement → tests → PR.
 
 Specialized steps are handled by Claude **skills** (`.claude/skills/`) that load only
-when relevant — `feature-spec`, `adr`, `test-plan`, `traceability`, `open-pr`,
-`dockerize`, `setup-ci`.
+when relevant — `feature-spec`, `adr`, `test-plan`, `open-pr`, `dockerize`, `setup-ci`
+(plus an optional `traceability` skill for compliance projects).
 
 ---
 
@@ -78,7 +78,6 @@ when relevant — `feature-spec`, `adr`, `test-plan`, `traceability`, `open-pr`,
 | Architecture | `docs/architecture/` |
 | Decisions (ADR) | `docs/adr/` |
 | Feature specs | `specs/features/` |
-| Traceability | `docs/traceability/traceability.md` |
 | Changelog | `CHANGELOG.md` |
 
 ---

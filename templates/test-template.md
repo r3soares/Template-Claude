@@ -60,10 +60,6 @@ Status legend: ⬜ Pending · ✅ Passing · ❌ Failing · ⏭ Skipped
 
 Any known limitations, environment requirements, or setup needed to run the tests.
 
----
-
-## History
-
-| Date | Author | Change |
-|------|--------|--------|
-| YYYY-MM-DD | <!-- author --> | Created |
+<!-- Optional document — see the test-plan skill. The source of truth for pass/fail is
+     the test runner, not this file. Use it only to reason through coverage on a
+     complex feature. -->

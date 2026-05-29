@@ -1,29 +1,28 @@
 ---
 name: traceability
-description: Update the traceability matrix that links each feature to its spec, ADR, source files, and tests. Use after implementing/testing a feature and before opening a PR for a significant change.
+description: Maintain a formal traceability matrix — ONLY for projects that require it (audited, regulated, compliance). For typical solo-dev projects this is not used; the feature spec's Related section already links source and tests. Use only when the user explicitly asks for a traceability matrix or works under compliance.
 ---
 
-# Traceability
+# Traceability (optional / compliance)
 
-Keep `docs/traceability/traceability.md` current so every feature traces from spec to
-tests. This is part of the full feature flow — small fixes don't need a row.
+Most projects do **not** need this. By default, each feature's links to its source and
+test files live in the *Related* section of its spec (`templates/feature-template.md`),
+kept current where the work happens — no separate, drift-prone file.
 
-## Steps
+Use this skill only when the project genuinely requires a formal, central traceability
+matrix (audited / regulated / compliance contexts), or when the user asks for one.
 
-1. **Open** `docs/traceability/traceability.md` (its shape comes from
-   `templates/traceability-template.md`).
-2. **Add or update the feature's row** with a sequential ID (`F-001`, `F-002`, …):
-   - Feature name
-   - Spec link (`specs/features/{name}/spec.md`)
-   - ADR link, or `—` if none
-   - Source files touched (`src/...`)
-   - Test files (`tests/...`)
-   - Status (use the legend in the file)
-3. **Set the status** to reflect the real end-to-end state: 🔵 Spec → 🟡 In Progress →
-   🟠 Testing → 🟢 Done. Use 🔴 Blocked or ⚫ Cancelled when applicable.
-4. **Update the History table** with a dated row.
+## Steps (when it applies)
+
+1. **Create** `docs/traceability/traceability.md` from `templates/traceability-template.md`
+   if it doesn't exist.
+2. **Add or update the feature's row** with a sequential ID (`F-001`, …):
+   feature name · spec link · ADR link (or `—`) · source files · test files · status.
+3. **Set the status** from the legend (🔵 Spec → 🟡 In Progress → 🟠 Testing → 🟢 Done;
+   🔴 Blocked, ⚫ Cancelled).
+4. Keep the matrix current before merging a feature PR.
 
 ## Rule
 
-The matrix must be current before a feature PR is merged. If a feature is descoped,
-mark it ⚫ Cancelled rather than deleting the row.
+If you're maintaining this matrix, the feature's spec *Related* section and this matrix
+must not disagree. When in doubt, the spec is the source of truth.

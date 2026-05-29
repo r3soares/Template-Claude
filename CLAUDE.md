@@ -23,6 +23,10 @@ These hold in every session, without exception.
   spec first, then the code.
 - **Every change updates `CHANGELOG.md`** with a dated entry — even small ones. This is
   the lightweight history that is always current.
+- **Docs describe the present, git records the past.** Don't keep hand-maintained
+  history/edit logs inside files; `git log` answers "what changed", on demand.
+- **Keep this file lean.** `CLAUDE.md` is paid in every session — put detail in skills or
+  reference docs, not here. If a rule isn't always-relevant, it doesn't belong in `CLAUDE.md`.
 
 ---
 
@@ -31,7 +35,7 @@ These hold in every session, without exception.
 | Change | What to do |
 |--------|------------|
 | **Small** (bug fix, copy tweak, config, refactor with no behavior change) | Code → commit → dated `CHANGELOG.md` entry. No spec, no ADR. |
-| **Feature / significant change** (new behavior, new surface, user-facing) | Full flow via skills: spec → ADR (if a real decision) → impl → tests → traceability → PR. |
+| **Feature / significant change** (new behavior, new surface, user-facing) | Full flow via skills: spec → ADR (if a real decision) → impl → tests → PR. |
 | **Significant technical decision** (library, data model, pattern hard to reverse) | Record an ADR before implementing (use the `adr` skill). |
 
 When unsure which tier applies, ask before assuming.
@@ -46,9 +50,9 @@ Invoke these skills (don't reinvent their steps inline):
 |-------------------|-------|
 | Start a feature / write a spec | `feature-spec` |
 | Record an architecture decision | `adr` |
-| Plan or document tests | `test-plan` |
-| Update the traceability matrix | `traceability` |
+| Cover and write tests | `test-plan` |
 | Commit + open a PR | `open-pr` |
+| Formal traceability matrix (compliance only) | `traceability` |
 | Containerize the project (when it fits) | `dockerize` |
 | Set up CI | `setup-ci` |
 

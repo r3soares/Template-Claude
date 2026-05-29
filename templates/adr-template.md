@@ -70,10 +70,5 @@ What was decided? State it clearly and directly.
 - Feature spec: <!-- link -->
 - ADR: <!-- link to related ADRs -->
 
----
-
-## History
-
-| Date | Author | Change |
-|------|--------|--------|
-| YYYY-MM-DD | <!-- author --> | Created |
+<!-- An ADR records one decision at one point in time. Its history is the supersede
+     chain (Status + Supersedes / Superseded by above), not an edit log. -->

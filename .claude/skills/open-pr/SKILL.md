@@ -40,20 +40,21 @@ git push -u origin HEAD
 gh pr create --fill   # then edit the body to match the template
 ```
 
-The PR body must link, when they exist: the **spec**, the **ADR**, and the
-**traceability** entry. For a small fix, those are `N/A` — say so explicitly.
+The PR body must link, when they exist: the **spec** and the **ADR**. For a small fix,
+those are `N/A` — say so explicitly.
 
 ## Pre-PR checklist (full features)
 
-- [ ] Spec is `[ACCEPTED]`
+- [ ] Spec is `[ACCEPTED]`, and its *Related* section points at the source/test files
 - [ ] Tests written and passing (see `test-plan`)
-- [ ] Traceability matrix updated (see `traceability`)
 - [ ] No scope added beyond the spec
 - [ ] `CHANGELOG.md` updated
 
+(A formal traceability matrix is optional — compliance projects only; see `traceability`.)
+
 ## For small fixes
 
-Skip spec/ADR/traceability. Still: branch, conventional commit, `CHANGELOG.md` entry, PR.
+Skip spec/ADR. Still: branch, conventional commit, `CHANGELOG.md` entry, PR.
 
 ## Confirm before pushing
 

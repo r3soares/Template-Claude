@@ -7,6 +7,10 @@ history**: every change — feature or small fix — adds a dated entry under
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).  
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+**Keep it lean:** always append at the top (under `[Unreleased]`), and read only
+`[Unreleased]` + the latest released version day-to-day. When the file gets long, move
+older released sections to `docs/CHANGELOG-ARCHIVE.md` so the working file stays small.
+
 ---
 
 ## [Unreleased]

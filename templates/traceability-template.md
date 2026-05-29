@@ -1,6 +1,9 @@
 # Traceability Matrix
 
-> Links every feature requirement to its implementation and tests. Updated before every PR merge.
+> **Optional — for projects that require formal traceability** (audited / regulated /
+> compliance contexts). For a typical solo-dev project, skip this file: the spec's
+> *Related* section already links each feature to its source and test files, kept current
+> where the work happens. See the `traceability` skill.
 
 ---
 
@@ -29,11 +32,3 @@
 | 🟢 Done | Implemented, tested, merged |
 | 🔴 Blocked | Blocked by dependency or open question |
 | ⚫ Cancelled | Descoped |
-
----
-
-## History
-
-| Date | Author | Change |
-|------|--------|--------|
-| YYYY-MM-DD | <!-- author --> | Created |

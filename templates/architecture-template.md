@@ -66,10 +66,4 @@ List the architectural decisions that shaped this design. Link to ADRs where app
 - [ ] Question 1
 - [ ] Question 2
 
----
-
-## History
-
-| Date | Author | Change |
-|------|--------|--------|
-| YYYY-MM-DD | <!-- author --> | Created |
+<!-- This document describes the architecture as it is now. Its evolution is in git. -->

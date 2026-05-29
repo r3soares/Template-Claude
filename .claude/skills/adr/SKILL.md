@@ -26,7 +26,7 @@ If none of these apply, skip the ADR.
 3. **Fill in**: Context (forces at play, options considered) → Decision (clear and
    direct) → Options Considered (pros/cons) → Consequences (positive, trade-offs, risks).
 4. **Status**: `[DRAFT]` → `[REVIEW]` → `[ACCEPTED]`. Implement only after `[ACCEPTED]`.
-5. **History table**: add a dated row for each edit.
+   An ADR's history is the supersede chain below, not an edit log — git tracks edits.
 
 ## Superseding a decision
 

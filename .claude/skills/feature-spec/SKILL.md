@@ -18,7 +18,9 @@ Small fixes (see the decision rule in `CLAUDE.md`) skip this entirely.
    Edge Cases → Technical Notes → Open Questions.
 4. **Status tag** in the title: start `[DRAFT]`, move to `[REVIEW]` when ready, then
    `[ACCEPTED]` once approved. Do not implement before `[ACCEPTED]`.
-5. **History table**: add a dated row (`YYYY-MM-DD`) for every edit, including creation.
+5. **Related section is the feature index**: as you implement, fill in the Source files
+   and Tests paths there. The spec describes the *present* desired state — "what changed"
+   is answered by git (`git log -p -- <spec>`), not a hand-maintained history table.
 6. **Open Questions**: if anything in the request is ambiguous, list it here and surface
    it to the user rather than guessing.
 
@@ -32,5 +34,6 @@ Small fixes (see the decision rule in `CLAUDE.md`) skip this entirely.
 
 ## Next steps after the spec is accepted
 
-Implement in `src/` → use `test-plan` for tests → `traceability` to link artifacts →
-`open-pr` to ship. Add a dated `CHANGELOG.md` entry.
+Implement in `src/` → use `test-plan` to cover and write real tests → keep the spec's
+*Related* section pointing at the source/test files → `open-pr` to ship. Add a dated
+`CHANGELOG.md` entry. (A formal `traceability` matrix is optional — compliance only.)
