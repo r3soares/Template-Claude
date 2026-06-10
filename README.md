@@ -62,11 +62,11 @@ See `.claude/project.md` for a detailed breakdown.
 
 See `.claude/workflow.md` for the full lifecycle. The process scales with change size:
 
-- **Small fix** → code → conventional commit → dated `CHANGELOG.md` entry → PR.
-- **Feature** → spec → ADR (if needed) → implement → tests → PR.
+- **Small fix** → code → conventional commit → dated `CHANGELOG.md` entry → tests → merge to master.
+- **Feature** → spec → ADR (if needed) → implement → tests → merge to master.
 
 Specialized steps are handled by Claude **skills** (`.claude/skills/`) that load only
-when relevant — `feature-spec`, `adr`, `test-plan`, `open-pr`, `dockerize`, `setup-ci`
+when relevant — `feature-spec`, `adr`, `test-plan`, `ship`, `dockerize`, `setup-ci`
 (plus an optional `traceability` skill for compliance projects).
 
 ---
@@ -102,11 +102,11 @@ when you understand what Claude does on its own versus what you decide.
 
 | You want… | Say something like… | What happens |
 |-----------|---------------------|--------------|
-| A feature | "New feature: … — write the spec first" | `feature-spec` → you approve → implement → tests → PR |
+| A feature | "New feature: … — write the spec first" | `feature-spec` → you approve → implement → tests → merge to master |
 | A decision | "Record an ADR for choosing X over Y" | `adr` (use for libraries, data models, hard-to-reverse choices) |
-| A small fix | "Fix … — this is a small fix" | code → conventional commit → CHANGELOG → PR |
+| A small fix | "Fix … — this is a small fix" | code → conventional commit → CHANGELOG → tests → merge to master |
 | Tests | "Cover feature X with tests" | real tests in `tests/` derived from the spec |
-| Commit + PR | "Open the PR" | `open-pr`: branch → commit → CHANGELOG → PR (confirms before push) |
+| Commit + merge | "Ship this" | `ship`: branch → commit → CHANGELOG → review → tests → merge (push optional) |
 | Docker / CI | "Containerize this" / "Set up CI" | `dockerize` (decision guide first) / `setup-ci` |
 
 ### Prompt tips

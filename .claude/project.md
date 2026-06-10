@@ -41,7 +41,7 @@ scales with the size of the change. Copy it, fill in the placeholders, and start
 ## Skills
 
 Procedures load only when a task triggers them (progressive disclosure). See each
-`SKILL.md` for details: `feature-spec`, `adr`, `test-plan`, `open-pr`, `dockerize`,
+`SKILL.md` for details: `feature-spec`, `adr`, `test-plan`, `ship`, `dockerize`,
 `setup-ci`, and `traceability` (optional — compliance only). `CLAUDE.md` has the
 "which skill, when" table.
 

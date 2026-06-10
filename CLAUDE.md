@@ -34,8 +34,8 @@ These hold in every session, without exception.
 
 | Change | What to do |
 |--------|------------|
-| **Small** (bug fix, copy tweak, config, refactor with no behavior change) | Code → commit → dated `CHANGELOG.md` entry. No spec, no ADR. |
-| **Feature / significant change** (new behavior, new surface, user-facing) | Full flow via skills: spec → ADR (if a real decision) → impl → tests → PR. |
+| **Small** (bug fix, copy tweak, config, refactor with no behavior change) | Code → commit → dated `CHANGELOG.md` entry → merge to master. No spec, no ADR. |
+| **Feature / significant change** (new behavior, new surface, user-facing) | Full flow via skills: spec → ADR (if a real decision) → impl → tests → merge to master. |
 | **Significant technical decision** (library, data model, pattern hard to reverse) | Record an ADR before implementing (use the `adr` skill). |
 
 When unsure which tier applies, ask before assuming.
@@ -51,7 +51,7 @@ Invoke these skills (don't reinvent their steps inline):
 | Start a feature / write a spec | `feature-spec` |
 | Record an architecture decision | `adr` |
 | Cover and write tests | `test-plan` |
-| Commit + open a PR | `open-pr` |
+| Branch, commit, merge to master (push optional) | `ship` |
 | Formal traceability matrix (compliance only) | `traceability` |
 | Containerize the project (when it fits) | `dockerize` |
 | Set up CI | `setup-ci` |

@@ -9,8 +9,8 @@ This is a solo-dev template: don't impose feature ceremony on a small change.
 
 | Tier | What it is | Flow |
 |------|-----------|------|
-| **Small change** | Bug fix, copy tweak, config, refactor with no behavior change | Code → commit → dated `CHANGELOG.md` entry → PR. No spec, no ADR. |
-| **Feature / significant change** | New behavior or user-facing surface | Spec → ADR (if needed) → impl → tests → PR. |
+| **Small change** | Bug fix, copy tweak, config, refactor with no behavior change | Code → commit → dated `CHANGELOG.md` entry → tests → merge to master. No spec, no ADR. |
+| **Feature / significant change** | New behavior or user-facing surface | Spec → ADR (if needed) → impl → tests → merge to master. |
 
 When unsure which tier applies, ask before assuming.
 
@@ -30,7 +30,7 @@ Each step is driven by a skill.
 | 2. ADR (if a real decision) | `adr` | `ADR-NNN-title.md` | `docs/adr/` |
 | 3. Implement | — | source files | `src/` |
 | 4. Tests | `test-plan` | test files | `tests/` |
-| 5. PR | `open-pr` | branch + commit + PR | Git / GitHub |
+| 5. Merge | `ship` | branch + commit + tests + merge | Git |
 
 ### Step notes
 
@@ -41,7 +41,9 @@ Each step is driven by a skill.
 3. **Implement** in `src/`, following `conventions.md`. No scope beyond the spec.
 4. **Tests** cover happy path, the spec's edge cases, and failure scenarios — real tests
    in `tests/`, not a document.
-5. **PR** uses Conventional Commits and links the spec/ADR (or `N/A`).
+5. **Merge** requires tests to pass. The `ship` skill runs the suite before merging;
+   if anything fails, the merge is blocked until fixed. Uses Conventional Commits and
+   links the spec/ADR (or `N/A`) in the commit message body when relevant.
 
 The spec's *Related* section is the feature index — point it at the source and test
 files as you go. A formal traceability matrix (the `traceability` skill) is **optional**,
@@ -54,7 +56,8 @@ for audited/compliance projects only; a typical solo-dev project doesn't need it
 - Work on branches (`feat/…`, `fix/…`, `docs/…`), not directly on `master`/`main`.
   The `git-guard` hook warns if you forget.
 - Conventional Commits — see `conventions.md`.
-- The `open-pr` skill handles branch → commit → PR for both tiers.
+- The `ship` skill handles branch → commit → review → tests → merge to master for both tiers.
+  Push to origin is optional and always requires explicit confirmation.
 
 ## CI/CD
 
@@ -85,6 +88,9 @@ for audited/compliance projects only; a typical solo-dev project doesn't need it
 - Match process to change size — don't over-document a one-liner, don't under-document a
   feature.
 - Never merge a feature without tests.
+- **Master only receives stable commits**: tests must pass before any merge.
+- **Keep commits focused**: one concern per commit — do not mix feature, refactor, and
+  bug fix in the same commit. If the diff spans independent activities, split it.
 - ADRs are never deleted — supersede them (see the `adr` skill).
 - `CHANGELOG.md` gets a dated entry for **every** change.
 - No hand-maintained history tables inside docs — git records the past.

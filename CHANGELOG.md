@@ -17,6 +17,7 @@ older released sections to `docs/CHANGELOG-ARCHIVE.md` so the working file stays
 
 ### Added
 ### Changed
+- **2026-06-10** Workflow updated: replaced GitHub PR step with branch → review → tests → merge to master flow. Push to origin is now optional and requires explicit confirmation. Added commit hygiene rules (one concern per commit, descriptive messages). Master branch only receives commits after tests pass.
 ### Fixed
 ### Removed
 
