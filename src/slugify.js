@@ -7,7 +7,7 @@ function slugify(text, { maxLength = 60 } = {}) {
     .normalize('NFKD')
     .replace(/[̀-ͯ]/g, '') // strip accents
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/[^a-z0-9]+/g, '_')
     .replace(/^-+|-+$/g, '')
     .slice(0, maxLength)
     .replace(/-+$/, '');
