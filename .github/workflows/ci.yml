@@ -30,6 +30,15 @@ jobs:
       VERIFY_STRICT: ${{ vars.VERIFY_STRICT || '0' }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # full history, so gitleaks scans every commit of the PR
+
+      # Stack-agnostic checks used by `template_lint` (gitleaks, actionlint,
+      # hadolint) at the versions pinned in scripts/install-tools.
+      - name: Install quality tools
+        run: |
+          ./scripts/install-tools
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       # Runtime setup for your stack (uncomment one). Install deps here or inside
       # the stage commands in scripts/verify — but not in both places.

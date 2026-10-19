@@ -1,0 +1,30 @@
+# Audit — scheduled dependency vulnerability scan (`./scripts/verify audit`).
+# Kept out of the PR gate on purpose: a newly published CVE should not block an
+# unrelated PR. A failure here means "upgrade a dependency" — fix it on a branch.
+
+name: Audit
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'   # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERIFY_STRICT: '1'   # the scanner must actually run
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install osv-scanner
+        run: |
+          ./scripts/install-tools osv-scanner
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Audit dependencies
+        run: ./scripts/verify audit
