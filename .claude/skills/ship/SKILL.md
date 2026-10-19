@@ -1,96 +1,107 @@
 ---
 name: ship
-description: Branch, commit with Conventional Commits, await dev review, and merge to master. Use when the user asks to commit, ship, or merge a change. Push to origin is optional.
+description: Branch, commit with Conventional Commits, verify, await dev review, and integrate into master — locally (no GitHub remote) or through a pull request gated by CI (GitHub remote). Use when the user asks to commit, ship, or merge a change.
 ---
 
 # Ship a Change
 
-Branch → commit → review → tests → merge to master. Works for both tiers — only the
-linked artifacts differ. Push to origin is always optional.
+Branch → commit → CHANGELOG → verify → review → integrate. Works for both tiers — only
+the linked artifacts differ. Integration has two modes (ADR-002):
+
+| Mode | When | Gate before master |
+|------|------|--------------------|
+| **Local** | No GitHub remote, or the developer asks for local | `./scripts/verify full` |
+| **GitHub** | `origin` is on GitHub and `gh auth status` succeeds | Same, **plus** CI `verify` as a required check on a PR |
 
 ## 1. Branch
 
-Never commit feature work directly to `master`/`main`. Create a branch named for the
-change: `feat/short-name`, `fix/short-name`, `docs/short-name`, etc.
+Never commit work directly to `master`/`main`. Name the branch for the change:
+`feat/short-name`, `fix/short-name`, `docs/short-name`, etc.
 
 ```bash
 git switch -c feat/short-name
 ```
 
-(The `git-guard` hook warns if you try to commit on master/main.)
-
 ## 2. Commit — Conventional Commits
 
 Format: `<type>(<scope>): <short description>`. Types: `feat`, `fix`, `docs`, `test`,
-`refactor`, `chore`. See `.claude/conventions.md` for the full spec and examples.
-
-Commit only what the user asked to commit. Keep commits focused.
+`refactor`, `chore`. See `.claude/conventions.md`. Commit only what the user asked to
+commit; one concern per commit (see *Commit hygiene*).
 
 ## 3. CHANGELOG
 
 Add a dated entry under `[Unreleased]` in `CHANGELOG.md` — **always**, including for
-small fixes. This is the lightweight history.
+small fixes.
 
-## 4. Await dev review
+## 4. Verify
 
-Show the diff summary so the developer can inspect what will be merged:
+```bash
+./scripts/verify full
+```
+
+If it fails, follow the `verify` skill (diagnose → fix → re-run, bounded). Do not move
+on with a red result; if you hit the bound, stop and give the escalation report.
+
+## 5. Await dev review
+
+Show what will be integrated, plus the verify summary:
 
 ```bash
 git diff master...HEAD --stat
 git log master..HEAD --oneline
 ```
 
-Wait for explicit confirmation before proceeding. Do not merge without it.
+Wait for explicit confirmation before integrating.
 
-## 5. Run tests
-
-Before merging, run the project's test suite. If any test fails, **stop**: report the
-failures and wait for the developer to fix them. Master only receives stable commits.
-
-```bash
-# run whatever the project's test command is (npm test, pytest, go test ./..., etc.)
-```
-
-## 6. Merge to master
+## 6a. Integrate — Local mode
 
 ```bash
 git switch master
 git merge --no-ff <branch>
+git branch -d <branch>
 ```
 
-`--no-ff` keeps branch history visible in `git log`. After merging you may delete the
-feature branch: `git branch -d <branch>`.
+`--no-ff` keeps the branch visible in history. Pushing master afterwards is optional
+and needs explicit confirmation (and fails if the repo has the GitHub ruleset — use
+GitHub mode there).
 
-## 7. Push to origin (optional)
+## 6b. Integrate — GitHub mode
 
-Confirm with the developer before pushing:
+Pushing is outward-facing: **confirm with the developer first.**
 
 ```bash
-git push
+git push -u origin <branch>
+gh pr create --title "<type>(<scope>): <description>" --body-file <body.md>
+                                             # body = .github/PULL_REQUEST_TEMPLATE.md, filled in
+gh pr merge --auto --merge --delete-branch   # merges once required checks pass
+gh pr checks --watch                         # wait for CI
 ```
 
-Do **not** push unless the developer explicitly says to.
+- `--merge` makes a merge commit, the equivalent of `--no-ff`.
+- **CI fails** → `gh run view <run-id> --log-failed`, fix on the branch (the `verify`
+  skill), commit, `git push`. Auto-merge stays armed. Same 3-attempt bound, then
+  escalate.
+- **Auto-merge unavailable** (not enabled on the repo, or no ruleset): wait for
+  `gh pr checks --watch` to pass, then `gh pr merge --merge --delete-branch`.
+- **After the merge**: `git switch master && git pull --ff-only`.
+- Never `--admin`, never force-push master (the `git-guard` hook blocks both).
 
 ---
 
 ## Commit hygiene
 
-- **One concern per commit.** Do not mix a new feature, a refactor, and a bug fix in
-  the same commit. If the diff spans independent activities, split into focused commits.
-- **Descriptive messages.** The `<short description>` must be clear about *what* was
-  done: `feat(auth): add JWT expiry check` not `feat(auth): update auth`.
-
----
+- **One concern per commit.** Do not mix a feature, a refactor, and a bug fix. If the
+  diff spans independent activities, split it into focused commits.
+- **Descriptive messages.** `feat(auth): add JWT expiry check`, not `feat(auth): update auth`.
 
 ## Pre-merge checklist (full features)
 
 - [ ] Spec is `[ACCEPTED]`, and its *Related* section points at the source/test files
-- [ ] Tests written and passing
+- [ ] Tests cover the spec (the `test-plan` skill) and `./scripts/verify full` is green
 - [ ] No scope added beyond the spec
 - [ ] `CHANGELOG.md` updated
 
-(A formal traceability matrix is optional — compliance projects only; see `traceability`.)
-
 ## For small fixes
 
-Skip spec/ADR. Still: branch, conventional commit, `CHANGELOG.md` entry, tests, merge.
+Skip spec/ADR. Still: branch, a regression test for a bug, conventional commit,
+`CHANGELOG.md` entry, verify, integrate.
