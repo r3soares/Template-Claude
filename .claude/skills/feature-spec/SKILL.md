@@ -27,13 +27,14 @@ Small fixes (see the decision rule in `CLAUDE.md`) skip this entirely.
 ## Rules
 
 - Never add scope not described in the spec. If implementation must diverge, update the
-  spec first and note why in History.
+  spec first and explain why in the commit message (git keeps the history).
 - If the feature needs a hard-to-reverse technical decision, use the `adr` skill before
   implementing.
 - All content in English.
 
 ## Next steps after the spec is accepted
 
-Implement in `src/` → use `test-plan` to cover and write real tests → keep the spec's
+Implement in `src/` (design for testability) → use `test-plan` to cover and write real
+tests → `./scripts/verify full` green (the `verify` skill) → keep the spec's
 *Related* section pointing at the source/test files → `ship` to merge. Add a dated
 `CHANGELOG.md` entry. (A formal `traceability` matrix is optional — compliance only.)
