@@ -29,7 +29,12 @@ cd "$(dirname "$0")/.." || exit 1
 # the `shellcheck` binary is available (GitHub's ubuntu runners have it). Keep it,
 # extend it (`... && <your linter>`), or replace it with your stack's linter.
 default_lint=""
-command -v shellcheck >/dev/null 2>&1 && default_lint="shellcheck scripts/verify .claude/hooks/*.sh"
+lint_skip_reason="not configured"
+if command -v shellcheck >/dev/null 2>&1; then
+  default_lint="shellcheck scripts/verify .claude/hooks/*.sh"
+else
+  lint_skip_reason="shellcheck not installed; CI runs it"
+fi
 
 LINT_CMD="${VERIFY_LINT_CMD-$default_lint}"
 TEST_CMD="${VERIFY_TEST_CMD-}"
@@ -76,12 +81,14 @@ for stage in "${stages[@]}"; do
   esac
 
   if [ -z "$cmd" ]; then
+    reason="not configured"
+    [ "$stage" = lint ] && [ -z "${VERIFY_LINT_CMD+set}" ] && reason="$lint_skip_reason"
     if [ "$strict" = "1" ]; then
-      summary+=("FAIL     $stage (not configured; VERIFY_STRICT=1)")
+      summary+=("FAIL     $stage ($reason; VERIFY_STRICT=1)")
       failed="$stage"
       break
     fi
-    summary+=("SKIPPED  $stage (not configured)")
+    summary+=("SKIPPED  $stage ($reason)")
     continue
   fi
 
