@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# verify — the single entry point for every quality check in this project.
+#
+# Claude, the Stop hook, the `ship` skill and CI all run THIS script, so local
+# green == CI green. Configure the stage commands below for your stack (the
+# `setup-ci` skill walks through it); never duplicate them elsewhere.
+#
+# Usage: ./scripts/verify [fast|full]      (default: full)
+#   fast  lint + test                 — quick feedback (the Stop hook)
+#   full  lint + test + integration   — before merging (`ship`) and in CI
+#
+# Environment:
+#   VERIFY_LINT_CMD / VERIFY_TEST_CMD / VERIFY_INTEGRATION_CMD  override a stage
+#   VERIFY_STRICT=1        a SKIPPED (unconfigured) stage fails instead of passing;
+#                          set it in CI once the project is configured
+#   VERIFY_COMPOSE_FILE    compose file used by `with_compose` (default: docker-compose.yml)
+
+set -uo pipefail
+
+cd "$(dirname "$0")/.." || exit 1
+
+# ----- Stage commands — fill these in for your stack ------------------------
+# Leave a stage empty ("") to skip it. Examples:
+#   LINT_CMD:        npm run lint && npx tsc --noEmit | ruff check . && mypy . | golangci-lint run
+#   TEST_CMD:        npm test | pytest -q tests/unit | go test ./...
+#   INTEGRATION_CMD: with_compose pytest -q tests/integration
+
+# Template default: lint the repo's own shell scripts (hooks + this script) when
+# the `shellcheck` binary is available (GitHub's ubuntu runners have it). Keep it,
+# extend it (`... && <your linter>`), or replace it with your stack's linter.
+default_lint=""
+command -v shellcheck >/dev/null 2>&1 && default_lint="shellcheck scripts/verify .claude/hooks/*.sh"
+
+LINT_CMD="${VERIFY_LINT_CMD-$default_lint}"
+TEST_CMD="${VERIFY_TEST_CMD-}"
+INTEGRATION_CMD="${VERIFY_INTEGRATION_CMD-}"
+
+# ----- Helpers ---------------------------------------------------------------
+
+# with_compose <cmd...> — bring up the compose services, wait for their
+# healthchecks, run <cmd>, and always tear everything down (volumes included).
+with_compose() {
+  local file="${VERIFY_COMPOSE_FILE:-docker-compose.yml}"
+  local status
+  docker compose -f "$file" up -d --wait || {
+    docker compose -f "$file" logs --tail=50
+    docker compose -f "$file" down -v >/dev/null 2>&1
+    return 1
+  }
+  "$@"
+  status=$?
+  [ "$status" -ne 0 ] && docker compose -f "$file" logs --tail=50
+  docker compose -f "$file" down -v >/dev/null 2>&1
+  return "$status"
+}
+
+# ----- Runner ----------------------------------------------------------------
+
+mode="${1:-full}"
+strict="${VERIFY_STRICT:-0}"
+case "$mode" in
+  fast) stages=(lint test) ;;
+  full) stages=(lint test integration) ;;
+  -h|--help) sed -n '2,16p' "$0"; exit 0 ;;
+  *) echo "verify: unknown mode '$mode' (use fast|full)" >&2; exit 64 ;;
+esac
+
+summary=()
+failed=""
+
+for stage in "${stages[@]}"; do
+  case "$stage" in
+    lint)        cmd="$LINT_CMD" ;;
+    test)        cmd="$TEST_CMD" ;;
+    integration) cmd="$INTEGRATION_CMD" ;;
+  esac
+
+  if [ -z "$cmd" ]; then
+    if [ "$strict" = "1" ]; then
+      summary+=("FAIL     $stage (not configured; VERIFY_STRICT=1)")
+      failed="$stage"
+      break
+    fi
+    summary+=("SKIPPED  $stage (not configured)")
+    continue
+  fi
+
+  echo "==> [$stage] $cmd"
+  start=$SECONDS
+  if eval "$cmd"; then
+    summary+=("PASS     $stage ($((SECONDS - start))s)")
+  else
+    summary+=("FAIL     $stage ($((SECONDS - start))s)")
+    failed="$stage"
+    break  # stop at the first failure — fix it before running later stages
+  fi
+done
+
+echo
+echo "verify $mode summary:"
+printf '  %s\n' "${summary[@]}"
+
+if [ -n "$failed" ]; then
+  echo "verify: FAILED at stage '$failed'" >&2
+  exit 1
+fi
+echo "verify: OK"
