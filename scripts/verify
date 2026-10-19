@@ -32,9 +32,10 @@ strict="${VERIFY_STRICT:-0}"
 #   TEST_CMD:        npm test | pytest -q tests/unit | go test ./...
 #   INTEGRATION_CMD: with_compose pytest -q tests/integration
 
-LINT_CMD="${VERIFY_LINT_CMD-template_lint}"
-TEST_CMD="${VERIFY_TEST_CMD-}"
-INTEGRATION_CMD="${VERIFY_INTEGRATION_CMD-}"
+export PYTHONPATH=src
+LINT_CMD="${VERIFY_LINT_CMD-template_lint && python3 -m compileall -q src tests}"
+TEST_CMD="${VERIFY_TEST_CMD-python3 -m unittest discover -s tests/unit -t tests/unit}"
+INTEGRATION_CMD="${VERIFY_INTEGRATION_CMD-with_compose python3 -m unittest discover -s tests/integration -t tests/integration}"
 AUDIT_CMD="${VERIFY_AUDIT_CMD-template_audit}"
 
 # ----- Template checks (stack-agnostic) --------------------------------------

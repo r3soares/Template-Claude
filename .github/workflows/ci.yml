@@ -27,7 +27,7 @@ jobs:
     env:
       # Set the repo variable VERIFY_STRICT=1 once stages are configured, so an
       # unconfigured stage fails instead of silently passing.
-      VERIFY_STRICT: ${{ vars.VERIFY_STRICT || '0' }}
+      VERIFY_STRICT: '1'   # test project: fully configured
     steps:
       - uses: actions/checkout@v5
         with:
