@@ -18,21 +18,26 @@ scales with the size of the change. Copy it, fill in the placeholders, and start
 │   ├── workflow.md       # The development lifecycle (tiered by change size)
 │   ├── conventions.md    # Naming, commits, status tags, language rules
 │   ├── settings.json     # Harness config: hooks, permissions
-│   ├── hooks/            # Deterministic guardrails (e.g. git-guard) + README
+│   ├── hooks/            # Deterministic guardrails: git-guard, verify-on-stop + README
 │   └── skills/           # On-demand procedures (one folder per skill, SKILL.md)
 ├── .github/
 │   ├── PULL_REQUEST_TEMPLATE.md  # PR description template for GitHub
-│   └── workflows/        # CI/CD — ci.yml (stack-agnostic, fill per stack)
+│   ├── dependabot.yml    # Keeps GitHub Actions (and your ecosystem) current
+│   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml weekly CVE scan
 ├── docs/                 # Documentation of what IS now (git holds the history)
-│   ├── adr/              # Architecture Decision Records — one file per decision
+│   ├── adr/              # Architecture Decision Records (ADR-001/002: quality gates)
 │   ├── architecture/     # System/component diagrams and architecture docs
 │   └── traceability/     # OPTIONAL — formal matrix, compliance projects only
 ├── specs/                # Specifications of what SHOULD BE
 │   └── features/         # One folder per feature, containing spec.md
+├── scripts/
+│   ├── verify            # Single entry point for lint/test/integration/audit (ADR-001)
+│   └── install-tools     # Pinned, checksum-verified install of gitleaks/actionlint/hadolint/osv-scanner
 ├── src/                  # Source code (stack-specific structure goes here)
 ├── templates/            # Reusable file templates
-│   ├── *-template.md     # Spec, ADR, test, PR, architecture, traceability
-│   └── docker/           # Dockerfile, docker-compose.yml, .dockerignore
+│   ├── *-template.md     # Spec, ADR, test, architecture, traceability
+│   ├── docker/           # Dockerfile, docker-compose.yml, .dockerignore
+│   └── github/           # branch-ruleset.json (default-branch protection)
 ├── tests/                # Tests (unit, integration, e2e)
 ├── CHANGELOG.md          # Lightweight history — a dated entry for every change
 └── README.md             # Project entry point — setup, purpose, links
@@ -41,8 +46,8 @@ scales with the size of the change. Copy it, fill in the placeholders, and start
 ## Skills
 
 Procedures load only when a task triggers them (progressive disclosure). See each
-`SKILL.md` for details: `feature-spec`, `adr`, `test-plan`, `ship`, `dockerize`,
-`setup-ci`, and `traceability` (optional — compliance only). `CLAUDE.md` has the
+`SKILL.md` for details: `feature-spec`, `adr`, `test-plan`, `verify`, `ship`,
+`dockerize`, `setup-ci`, and `traceability` (optional — compliance only). `CLAUDE.md` has the
 "which skill, when" table.
 
 ## Key Distinctions
@@ -54,9 +59,11 @@ Procedures load only when a task triggers them (progressive disclosure). See eac
 | `docs/adr/` | Why a decision was made | When a significant decision is taken |
 | `templates/` | Blank models for new files | When a new document type is needed |
 | `.claude/skills/` | How to perform a procedure | When the workflow changes |
+| `scripts/verify` | The commands that define "passing" | When the stack's checks change |
 
 ## When Starting a New Project from This Template
 
 Follow `SETUP.md`. In short: copy the folder, fill in `README.md` and the project
-identity in `CLAUDE.md`, reset `CHANGELOG.md`, decide on Docker/CI, and begin with a
+identity in `CLAUDE.md`, reset `CHANGELOG.md`, configure `scripts/verify` and CI
+(`setup-ci`), decide on Docker, and begin with a
 feature spec (the `feature-spec` skill) before writing code.

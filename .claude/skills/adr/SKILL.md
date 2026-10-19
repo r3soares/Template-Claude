@@ -37,4 +37,5 @@ Never delete or rewrite an accepted ADR. To reverse one:
 
 ## Link it
 
-Reference the ADR from the related feature spec and from the `traceability` matrix.
+Reference the ADR from the related feature spec (and from the `traceability` matrix, if
+the project uses one).

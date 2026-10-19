@@ -19,6 +19,9 @@ These hold in every session, without exception.
 - **Process scales by size** (see decision rule below). Don't impose feature-level
   ceremony on a one-line fix.
 - **English everywhere** — code, comments, docs, and commit messages.
+- **Done means verified.** A change is done only when `./scripts/verify` passes — show
+  the result, don't assume it. On failure, find the root cause and fix it (the `verify`
+  skill) before asking the developer; never skip or weaken tests to get green.
 - **Specs are the source of truth for features.** When code and spec disagree, fix the
   spec first, then the code.
 - **Every change updates `CHANGELOG.md`** with a dated entry — even small ones. This is
@@ -34,8 +37,8 @@ These hold in every session, without exception.
 
 | Change | What to do |
 |--------|------------|
-| **Small** (bug fix, copy tweak, config, refactor with no behavior change) | Code → commit → dated `CHANGELOG.md` entry → merge to master. No spec, no ADR. |
-| **Feature / significant change** (new behavior, new surface, user-facing) | Full flow via skills: spec → ADR (if a real decision) → impl → tests → merge to master. |
+| **Small** (bug fix, copy tweak, config, refactor with no behavior change) | Code (+ regression test for a bug) → verify → commit → dated `CHANGELOG.md` entry → merge. No spec, no ADR. |
+| **Feature / significant change** (new behavior, new surface, user-facing) | Full flow via skills: spec → ADR (if a real decision) → impl → tests → verify → merge. |
 | **Significant technical decision** (library, data model, pattern hard to reverse) | Record an ADR before implementing (use the `adr` skill). |
 
 When unsure which tier applies, ask before assuming.
@@ -50,11 +53,12 @@ Invoke these skills (don't reinvent their steps inline):
 |-------------------|-------|
 | Start a feature / write a spec | `feature-spec` |
 | Record an architecture decision | `adr` |
-| Cover and write tests | `test-plan` |
+| Cover and write tests, design for testability | `test-plan` |
+| Validate a change, fix failing checks/CI | `verify` |
 | Branch, commit, merge to master (push optional) | `ship` |
 | Formal traceability matrix (compliance only) | `traceability` |
 | Containerize the project (when it fits) | `dockerize` |
-| Set up CI | `setup-ci` |
+| Set up CI, verify stages, branch protection | `setup-ci` |
 
 ---
 

@@ -1,6 +1,9 @@
-# Stack-agnostic CI. Lint + test on every push and PR to the default branch.
-# Fill in the stack-specific steps — see the `setup-ci` skill. The commands here
-# should match what you run locally, so green local == green CI.
+# CI — the independent quality gate. It runs the SAME entry point as local work
+# (`scripts/verify`), so green local == green CI. Stage commands live in
+# `scripts/verify`, never here. See the `setup-ci` skill and ADR-001/ADR-002.
+#
+# The job name `verify` is the required status check in the branch ruleset
+# (`templates/github/branch-ruleset.json`) — keep it stable.
 
 name: CI
 
@@ -8,29 +11,45 @@ on:
   push:
     branches: [master, main]
   pull_request:
-    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  lint-and-test:
-    runs-on: ubuntu-latest
+  verify:
+    runs-on: ubuntu-latest   # has Docker + Compose for the integration stage
+    timeout-minutes: 20
+    env:
+      # Set the repo variable VERIFY_STRICT=1 once stages are configured, so an
+      # unconfigured stage fails instead of silently passing.
+      VERIFY_STRICT: ${{ vars.VERIFY_STRICT || '0' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # full history, so gitleaks scans every commit of the PR
 
-      # 1) Set up the runtime (uncomment and pick one):
-      # - uses: actions/setup-node@v4
-      #   with: { node-version: '20', cache: 'npm' }
-      # - uses: actions/setup-python@v5
+      # Stack-agnostic checks used by `template_lint` (gitleaks, actionlint,
+      # hadolint) at the versions pinned in scripts/install-tools.
+      - name: Install quality tools
+        run: |
+          ./scripts/install-tools
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Runtime setup for your stack (uncomment one). Install deps here or inside
+      # the stage commands in scripts/verify — but not in both places.
+      # - uses: actions/setup-node@v5
+      #   with: { node-version-file: '.nvmrc', cache: 'npm' }
+      # - run: npm ci
+      # - uses: actions/setup-python@v6
       #   with: { python-version: '3.12', cache: 'pip' }
-      # - uses: actions/setup-go@v5
-      #   with: { go-version: '1.22', cache: true }
+      # - run: pip install -r requirements.txt
+      # - uses: actions/setup-go@v6
+      #   with: { go-version-file: 'go.mod' }
 
-      # 2) Install dependencies:
-      # - run: <install command>     # e.g. npm ci | pip install -r requirements.txt | go mod download
-
-      # 3) Lint:
-      # - run: <lint command>        # e.g. npm run lint | ruff check . | golangci-lint run
-
-      # 4) Test:
-      # - run: <test command>        # e.g. npm test | pytest | go test ./...
-
-      - run: echo "Configure CI steps — see the setup-ci skill."
+      - name: Verify (lint, test, integration)
+        run: ./scripts/verify full

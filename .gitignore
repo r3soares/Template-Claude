@@ -104,3 +104,6 @@ temp/
 # Go
 # *.exe
 # *.test
+
+# Claude hook state (verify-on-stop attempt counters)
+.claude/.state/

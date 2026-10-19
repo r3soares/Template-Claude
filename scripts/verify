@@ -1,0 +1,183 @@
+#!/usr/bin/env bash
+# verify — the single entry point for every quality check in this project.
+#
+# Claude, the Stop hook, the `ship` skill and CI all run THIS script, so local
+# green == CI green. Configure the stage commands below for your stack (the
+# `setup-ci` skill walks through it); never duplicate them elsewhere.
+#
+# Usage: ./scripts/verify [fast|full|audit]      (default: full)
+#   fast   lint + test                 — quick feedback (the Stop hook)
+#   full   lint + test + integration   — before merging (`ship`) and in CI
+#   audit  dependency vulnerability scan (network) — scheduled CI job
+#
+# Environment:
+#   VERIFY_LINT_CMD / VERIFY_TEST_CMD / VERIFY_INTEGRATION_CMD / VERIFY_AUDIT_CMD
+#                          override a stage ("" disables it)
+#   VERIFY_STRICT=1        a skipped stage or a missing tool fails instead of passing;
+#                          set it in CI once the project is configured
+#   VERIFY_COMPOSE_FILE    compose file used by `with_compose` (default: docker-compose.yml)
+
+set -uo pipefail
+
+cd "$(dirname "$0")/.." || exit 1
+strict="${VERIFY_STRICT:-0}"
+
+# ----- Stage commands — fill these in for your stack ------------------------
+# Leave a stage empty ("") while it is still to be configured; set it to "n/a"
+# when it does not apply (e.g. no integration tests in a library) — "n/a" passes
+# under VERIFY_STRICT=1, an empty stage does not. Keep `template_lint` and chain your
+# linter after it. Examples:
+#   LINT_CMD:        template_lint && npm run lint && npx tsc --noEmit
+#                    template_lint && ruff check . && ruff format --check . && mypy .
+#   TEST_CMD:        npm test | pytest -q tests/unit | go test ./...
+#   INTEGRATION_CMD: with_compose pytest -q tests/integration
+
+LINT_CMD="${VERIFY_LINT_CMD-template_lint}"
+TEST_CMD="${VERIFY_TEST_CMD-}"
+INTEGRATION_CMD="${VERIFY_INTEGRATION_CMD-}"
+AUDIT_CMD="${VERIFY_AUDIT_CMD-template_audit}"
+
+# ----- Template checks (stack-agnostic) --------------------------------------
+# Each check runs only when the files it covers exist. A missing tool is noted
+# in the summary (and fails under VERIFY_STRICT=1). CI installs the tools with
+# ./scripts/install-tools; do the same locally to run them.
+
+stage_note=""   # extra text a stage can add to its summary line
+tools_ran=0     # template tools actually executed in the current stage
+
+# tool_check <tool> <cmd...> — run <cmd> if <tool> is installed, else note the skip.
+tool_check() {
+  local tool="$1"; shift
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    stage_note="${stage_note:+$stage_note, }$tool not installed"
+    if [ "$strict" = "1" ]; then
+      echo "  $tool: not installed (VERIFY_STRICT=1) — run ./scripts/install-tools" >&2
+      return 1
+    fi
+    return 0
+  fi
+  echo "  - $tool"
+  tools_ran=$((tools_ran + 1))
+  "$@"
+}
+
+# scan_secrets — committed history + changed/untracked files. Gitignored files
+# (e.g. a local .env) are excluded, so only what could be committed is scanned.
+scan_secrets() {
+  local work status
+  gitleaks git --no-banner --redact --log-level warn . || return 1
+  work="$(mktemp -d)"
+  git ls-files -z -mo --exclude-standard |
+    while IFS= read -r -d '' f; do [ -f "$f" ] && printf '%s\0' "$f"; done |
+    tar --null -T - -cf - | tar -xf - -C "$work"
+  gitleaks dir "$work" --no-banner --redact --log-level warn
+  status=$?
+  rm -rf "$work"
+  return "$status"
+}
+
+template_lint() {
+  local status=0 f shell_files=() dockerfiles=()
+  while IFS= read -r f; do shell_files+=("$f"); done < <(
+    git ls-files -co --exclude-standard -- '*.sh' scripts/verify scripts/install-tools)
+  while IFS= read -r f; do dockerfiles+=("$f"); done < <(
+    git ls-files -co --exclude-standard -- '*Dockerfile' '*Dockerfile.*' ':(exclude)templates/')
+
+  if [ ${#shell_files[@]} -gt 0 ]; then
+    tool_check shellcheck shellcheck "${shell_files[@]}" || status=1
+  fi
+  if [ -d .github/workflows ]; then
+    tool_check actionlint actionlint || status=1
+  fi
+  if [ ${#dockerfiles[@]} -gt 0 ]; then
+    tool_check hadolint hadolint --failure-threshold warning "${dockerfiles[@]}" || status=1
+  fi
+  tool_check gitleaks scan_secrets || status=1
+  return "$status"
+}
+
+template_audit() {
+  tool_check osv-scanner osv-scanner scan source -r --allow-no-lockfiles .
+}
+
+# ----- Helpers ---------------------------------------------------------------
+
+# with_compose <cmd...> — (re)build and bring up the compose services, wait for
+# their healthchecks, run <cmd>, and always tear everything down (volumes
+# included). `--build` matters: without it a cached image runs stale code.
+with_compose() {
+  local file="${VERIFY_COMPOSE_FILE:-docker-compose.yml}"
+  local status
+  docker compose -f "$file" up -d --wait --build --quiet-pull || {
+    docker compose -f "$file" logs --tail=50
+    docker compose -f "$file" down -v >/dev/null 2>&1
+    return 1
+  }
+  "$@"
+  status=$?
+  [ "$status" -ne 0 ] && docker compose -f "$file" logs --tail=50
+  docker compose -f "$file" down -v >/dev/null 2>&1
+  return "$status"
+}
+
+# ----- Runner ----------------------------------------------------------------
+
+mode="${1:-full}"
+case "$mode" in
+  fast)  stages=(lint test) ;;
+  full)  stages=(lint test integration) ;;
+  audit) stages=(audit) ;;
+  -h|--help) sed -n '2,19p' "$0"; exit 0 ;;
+  *) echo "verify: unknown mode '$mode' (use fast|full|audit)" >&2; exit 64 ;;
+esac
+
+summary=()
+failed=""
+
+for stage in "${stages[@]}"; do
+  case "$stage" in
+    lint)        cmd="$LINT_CMD" ;;
+    test)        cmd="$TEST_CMD" ;;
+    integration) cmd="$INTEGRATION_CMD" ;;
+    audit)       cmd="$AUDIT_CMD" ;;
+  esac
+
+  if [ "$cmd" = "n/a" ]; then
+    summary+=("N/A      $stage (not applicable)")
+    continue
+  fi
+  if [ -z "$cmd" ]; then
+    if [ "$strict" = "1" ]; then
+      summary+=("FAIL     $stage (not configured; VERIFY_STRICT=1)")
+      failed="$stage"
+      break
+    fi
+    summary+=("SKIPPED  $stage (not configured)")
+    continue
+  fi
+
+  echo "==> [$stage] $cmd"
+  stage_note=""
+  tools_ran=0
+  start=$SECONDS
+  if eval "$cmd"; then
+    result="PASS"
+    # Only template checks configured and none of their tools installed: say so.
+    case "$cmd" in template_lint|template_audit) [ "$tools_ran" -eq 0 ] && result="SKIPPED" ;; esac
+  else
+    result="FAIL"
+    failed="$stage"
+  fi
+  summary+=("$(printf '%-8s' "$result") $stage ($((SECONDS - start))s${stage_note:+; $stage_note})")
+  [ -n "$failed" ] && break  # stop at the first failure — fix it before later stages
+done
+
+echo
+echo "verify $mode summary:"
+printf '  %s\n' "${summary[@]}"
+
+if [ -n "$failed" ]; then
+  echo "verify: FAILED at stage '$failed'" >&2
+  exit 1
+fi
+echo "verify: OK"

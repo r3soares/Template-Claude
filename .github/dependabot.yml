@@ -1,0 +1,8 @@
+# Keeps GitHub Actions versions current (stack-agnostic). Add your stack's
+# ecosystem (npm, pip, gomod, docker, …) as another entry when it applies.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

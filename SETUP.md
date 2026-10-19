@@ -42,12 +42,16 @@ git commit -m "chore: initial project structure from template"
 
 ---
 
-## 5. Decide on Docker and CI
+## 5. Decide on Docker, configure checks and CI
 
 - **Docker**: use the `dockerize` skill — it has a decision guide. SaaS/API/web/worker →
   yes; CLI/desktop/library → no. If yes, it applies `templates/docker/`.
-- **CI**: fill in `.github/workflows/ci.yml` with the `setup-ci` skill (runtime, install,
-  lint, test for your stack).
+- **Checks + CI**: use the `setup-ci` skill. It fills the stage commands in
+  `scripts/verify` (the only place they live), adds the runtime setup to
+  `.github/workflows/ci.yml`, sets `VERIFY_STRICT=1`, and — if the repo is on GitHub —
+  applies the branch ruleset and enables auto-merge (it asks first).
+- **ADRs**: keep `docs/adr/ADR-001` and `ADR-002` — they record why the quality gates
+  work this way. Your project's own decisions start at `ADR-003`.
 
 ---
 
@@ -56,6 +60,10 @@ git commit -m "chore: initial project structure from template"
 - Update `.gitignore` — uncomment the relevant stack section
 - Update `.editorconfig` if your stack differs
 - (Optional) Enable a format-on-edit hook — see `.claude/hooks/README.md`
+- (Recommended) Install the template's quality tools locally so the Stop hook runs the
+  same checks as CI: `./scripts/install-tools` (gitleaks, actionlint, hadolint) and
+  `shellcheck` via apt/brew. Missing tools are listed in the verify summary; CI installs
+  them regardless.
 
 ---
 
@@ -63,7 +71,8 @@ git commit -m "chore: initial project structure from template"
 
 Process scales by change size (see `.claude/workflow.md`):
 
-- **Small fix** → code → conventional commit → dated `CHANGELOG.md` entry → PR.
+- **Small fix** → code (+ regression test) → verify → conventional commit → dated
+  `CHANGELOG.md` entry → merge (the `ship` skill).
 - **Feature** → start with the `feature-spec` skill: `specs/features/{name}/spec.md`.
 
 Claude loads the right skill when the task calls for it — you don't need to read all the
@@ -80,7 +89,8 @@ docs up front.
 - [ ] `.claude/project.md` updated with stack details
 - [ ] `CHANGELOG.md` reset
 - [ ] Docker decision made (`dockerize` skill if applicable)
-- [ ] CI workflow filled in (`setup-ci` skill)
+- [ ] `scripts/verify` stages configured and `./scripts/verify` green (`setup-ci` skill)
+- [ ] CI runtime filled in, `VERIFY_STRICT=1` set, branch ruleset applied (GitHub only)
 - [ ] `.gitignore` stack section uncommented
 - [ ] `SETUP.md` deleted from new project
 - [ ] First feature spec created (or first small fix shipped)

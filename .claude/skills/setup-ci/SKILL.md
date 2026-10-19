@@ -1,34 +1,93 @@
 ---
 name: setup-ci
-description: Set up or adjust continuous integration (GitHub Actions). Use when the user asks to add CI, configure GitHub Actions, run tests/lint on push, or fill in the CI workflow for their stack.
+description: Set up or adjust the project's quality gates — the stage commands in scripts/verify, the GitHub Actions workflow that runs them, and GitHub branch protection (ruleset + auto-merge). Use when the user asks to add CI, configure GitHub Actions, run tests/lint on push, protect the main branch, or fill in verification for their stack.
 ---
 
-# Set up CI
+# Set up CI and quality gates
 
-Wire up a minimal, stack-agnostic CI pipeline that lints and tests on every push/PR.
-Keep it simple — a solo dev wants fast, useful signal, not a release pipeline.
+One entry point, three layers (ADR-001, ADR-002): the commands live **only** in
+`scripts/verify`; the Stop hook, `ship` and CI all call it. Never copy a lint/test
+command into `ci.yml` or a skill — that's how local and CI drift apart.
 
-## Steps
+## 1. Configure `scripts/verify`
 
-1. **Start from** `.github/workflows/ci.yml` (already in the template, commented with
-   placeholders). If it doesn't exist, create it from that shape.
-2. **Fill in the stack specifics** in the placeholder steps:
-   - Runtime setup (e.g. `actions/setup-node`, `setup-python`, `setup-go`, …).
-   - Dependency install command.
-   - Lint command.
-   - Test command.
-3. **Keep the triggers** to `push` and `pull_request` on the default branch. Don't add
-   deploy/release jobs unless the user asks.
-4. **Match the local commands** — CI should run the same lint/test commands the
-   developer runs locally, so green local == green CI.
-5. Add a dated `CHANGELOG.md` entry.
+Fill in the stage commands at the top of the file for the stack:
 
-## Optional
+| Stage | Purpose | Examples |
+|-------|---------|----------|
+| `LINT_CMD` | Static checks: lint, format check, type check | `template_lint && npm run lint && npx tsc --noEmit` · `template_lint && ruff check . && ruff format --check . && mypy .` · `template_lint && golangci-lint run` |
+| `TEST_CMD` | Unit tests — fast, no external services | `npm test` · `pytest -q tests/unit` · `go test ./...` |
+| `INTEGRATION_CMD` | Tests against real dependencies via Docker | `with_compose pytest -q tests/integration` |
 
-- If the project is containerized (`dockerize` skill), CI can build the image as a job.
-- Cache dependencies (`actions/cache` or the setup action's built-in cache) for speed.
+- A stage that doesn't apply (e.g. no integration tests in a library) is set to `"n/a"`,
+  not left empty — empty means "not configured yet" and fails under `VERIFY_STRICT=1`.
+- Keep `fast` (lint + test) quick — the Stop hook runs it after every turn with changes.
+  Slow suites belong in `integration`.
+- **Keep `template_lint` first in `LINT_CMD`** — the stack-agnostic checks, each run only
+  when its files exist: `shellcheck` (shell scripts), `actionlint` (workflows),
+  `hadolint` (Dockerfiles, outside `templates/`), `gitleaks` (secrets in history and in
+  changed/untracked files; gitignored files like `.env` are excluded). Missing tools are
+  listed in the summary; under `VERIFY_STRICT=1` they fail.
+- **Add the stack's quality tools** to `LINT_CMD`/`TEST_CMD` — formatter in *check*
+  mode, linter, type checker, and a coverage floor (e.g. `pytest --cov
+  --cov-fail-under=80`, `vitest --coverage`). The type checker and the coverage floor are
+  the highest-value additions for catching bugs early.
+- Tune instead of disabling: `.hadolint.yaml` for Dockerfile rules, `.gitleaksignore`
+  (fingerprints) or a `gitleaks:allow` comment for a reviewed false positive.
+- `with_compose` brings up `docker-compose.yml` (or `VERIFY_COMPOSE_FILE`), waits for
+  **healthchecks**, runs the command, and tears down volumes. Every service the tests
+  depend on needs a `healthcheck` (see `templates/docker/docker-compose.yml`). For a
+  test-only stack, use a separate `docker-compose.test.yml` with fixed test credentials.
+- Run `./scripts/verify full` locally until it is green.
 
-## Rule
+## 2. Wire the workflows
 
-CI must stay green. If a workflow change is significant (new gating, required checks),
-note the reasoning — an ADR only if it's hard to reverse.
+`.github/workflows/ci.yml` already installs the template tools (`scripts/install-tools`)
+and runs `./scripts/verify full`. Only add the runtime setup + dependency install for the
+stack (commented examples are in the file). Keep: the job name `verify` (it's the
+required check), `fetch-depth: 0` (gitleaks scans the PR's commits),
+`permissions: contents: read`, the timeout and the concurrency group. Don't add
+deploy/release jobs unless asked.
+
+`.github/workflows/audit.yml` runs `./scripts/verify audit` (osv-scanner over the
+project's lockfiles) weekly and on demand — deliberately **not** a PR gate, so a newly
+published CVE doesn't block unrelated work. It needs committed lockfiles to be useful.
+
+If the project has a dependency ecosystem, add it to `.github/dependabot.yml`. Tool
+versions in `scripts/install-tools` are pinned and bumped by hand (Dependabot can't
+see them).
+
+## 3. Turn on strict mode
+
+Once every stage the project needs is configured, set the repo variable so an empty
+stage fails CI instead of passing silently (confirm first — it changes repo settings):
+
+```bash
+gh variable set VERIFY_STRICT --body 1
+```
+
+## 4. Protect the default branch (GitHub remote only)
+
+Outward-facing and changes how the repo accepts work — **confirm with the developer
+before each command.**
+
+```bash
+gh repo edit --enable-auto-merge --delete-branch-on-merge
+gh api repos/{owner}/{repo}/rulesets --method POST --input templates/github/branch-ruleset.json
+```
+
+The ruleset requires a PR, requires the `verify` check (from GitHub Actions) on an
+up-to-date branch, and blocks force-push and deletion of the default branch. Zero
+approvals are required — a solo dev can't approve their own PR; CI is the gate.
+
+**Limitation:** rulesets on **private** repos require GitHub Pro/Team/Enterprise. On
+GitHub Free, private repos keep CI as a signal but not a hard gate — say so to the
+developer. Re-applying the ruleset creates a duplicate; update an existing one with
+`gh api repos/{owner}/{repo}/rulesets/<id> --method PUT --input …`.
+
+## 5. Validate
+
+- Push a branch and open a PR (the `ship` skill, GitHub mode); `gh pr checks --watch`
+  must show `verify` passing.
+- Add a dated `CHANGELOG.md` entry. A new gate or required check is significant —
+  record it with the `adr` skill if it departs from ADR-002.

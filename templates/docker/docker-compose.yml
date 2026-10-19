@@ -1,6 +1,9 @@
-# Stack-agnostic Compose template for local development.
+# Stack-agnostic Compose template for local development and integration tests.
 # Keep only the services the project actually needs locally. A solo-dev project
 # often needs just `app` plus maybe one datastore — don't over-orchestrate.
+#
+# Give every service a healthcheck: `scripts/verify` runs integration tests via
+# `with_compose`, which uses `docker compose up --wait` (waits for "healthy").
 
 services:
   app:
@@ -17,6 +20,10 @@ services:
     #   - db
     # volumes:
     #   - .:/app            # live-reload during dev (remove for prod-like runs)
+    # healthcheck:          # e.g. an HTTP health endpoint
+    #   test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+    #   interval: 5s
+    #   retries: 10
     restart: unless-stopped
 
   # ----- Optional datastore (uncomment if the project needs one locally) -----
@@ -30,6 +37,10 @@ services:
   #     - db-data:/var/lib/postgresql/data
   #   ports:
   #     - "5432:5432"
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+  #     interval: 2s
+  #     retries: 15
 
 # volumes:
 #   db-data:
