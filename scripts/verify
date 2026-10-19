@@ -32,9 +32,9 @@ strict="${VERIFY_STRICT:-0}"
 #   TEST_CMD:        npm test | pytest -q tests/unit | go test ./...
 #   INTEGRATION_CMD: with_compose pytest -q tests/integration
 
-LINT_CMD="${VERIFY_LINT_CMD-template_lint}"
-TEST_CMD="${VERIFY_TEST_CMD-}"
-INTEGRATION_CMD="${VERIFY_INTEGRATION_CMD-}"
+LINT_CMD="${VERIFY_LINT_CMD-template_lint && npm run --silent lint}"
+TEST_CMD="${VERIFY_TEST_CMD-npm test --silent}"
+INTEGRATION_CMD="${VERIFY_INTEGRATION_CMD-n/a}"   # library: no services to integrate
 AUDIT_CMD="${VERIFY_AUDIT_CMD-template_audit}"
 
 # ----- Template checks (stack-agnostic) --------------------------------------

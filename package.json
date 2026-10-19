@@ -1,0 +1,10 @@
+{
+  "name": "slugify-test-lib",
+  "version": "0.1.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "lint": "node --check src/slugify.js && node --check tests/unit/slugify.test.js",
+    "test": "node --test \"tests/unit/**/*.test.js\""
+  }
+}

@@ -27,7 +27,7 @@ jobs:
     env:
       # Set the repo variable VERIFY_STRICT=1 once stages are configured, so an
       # unconfigured stage fails instead of silently passing.
-      VERIFY_STRICT: ${{ vars.VERIFY_STRICT || '0' }}
+      VERIFY_STRICT: '1'   # test project: fully configured
     steps:
       - uses: actions/checkout@v5
         with:
@@ -42,9 +42,8 @@ jobs:
 
       # Runtime setup for your stack (uncomment one). Install deps here or inside
       # the stage commands in scripts/verify — but not in both places.
-      # - uses: actions/setup-node@v5
-      #   with: { node-version-file: '.nvmrc', cache: 'npm' }
-      # - run: npm ci
+      - uses: actions/setup-node@v5
+        with: { node-version-file: '.nvmrc' }
       # - uses: actions/setup-python@v6
       #   with: { python-version: '3.12', cache: 'pip' }
       # - run: pip install -r requirements.txt
