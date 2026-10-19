@@ -16,9 +16,10 @@ older released sections to `docs/CHANGELOG-ARCHIVE.md` so the working file stays
 ## [Unreleased]
 
 ### Added
+- **2026-10-19** `scripts/install-tools` — pinned, checksum-verified install of gitleaks, actionlint, hadolint and osv-scanner (Linux/macOS); weekly `audit.yml` workflow for dependency vulnerabilities.
 - **2026-10-19** Quality gates (ADR-001, ADR-002): `scripts/verify` as the single entry point for lint/test/integration (`fast`/`full`, `VERIFY_STRICT`, Docker `with_compose`); `verify-on-stop` Stop hook for a bounded agent self-correction loop; `verify` skill; branch ruleset template (`templates/github/branch-ruleset.json`); Dependabot for GitHub Actions; first ADRs in `docs/adr/`.
 ### Changed
-- **2026-10-19** `scripts/verify` states why a stage was skipped (e.g. `shellcheck not installed; CI runs it`) instead of a generic "not configured".
+- **2026-10-19** Lint stage starts with `template_lint`: stack-agnostic checks run when their files exist — shellcheck, actionlint, hadolint, gitleaks (history + changed/untracked files, gitignored excluded). Missing tools are listed in the summary (and fail under `VERIFY_STRICT=1`); a lint with no tool available shows as SKIPPED. New `verify audit` mode (osv-scanner). CI installs the tools and fetches full history. Template Dockerfile uses a numeric UID (hadolint DL3066).
 - **2026-10-19** CI runs `./scripts/verify full` as job `verify` (least-privilege permissions, timeout, concurrency, strict mode via repo variable). `ship` verifies before review and integrates locally (`--no-ff`) or, on GitHub, through a PR with auto-merge gated by CI. `git-guard` now blocks `--no-verify`, `--admin` PR merges and force-push to master/main (matched per command segment). `test-plan` covers design for testability, test layers, determinism and regression tests; `setup-ci` configures verify stages and branch protection; compose template gains healthchecks; `CLAUDE.md`, workflow, project, README and SETUP docs updated.
 - **2026-06-10** Workflow updated: replaced GitHub PR step with branch → review → tests → merge to master flow. Push to origin is now optional and requires explicit confirmation. Added commit hygiene rules (one concern per commit, descriptive messages). Master branch only receives commits after tests pass.
 ### Fixed

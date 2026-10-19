@@ -15,29 +15,45 @@ Fill in the stage commands at the top of the file for the stack:
 
 | Stage | Purpose | Examples |
 |-------|---------|----------|
-| `LINT_CMD` | Static checks: lint, format check, type check | `npm run lint && npx tsc --noEmit` · `ruff check . && ruff format --check . && mypy .` · `golangci-lint run` |
+| `LINT_CMD` | Static checks: lint, format check, type check | `template_lint && npm run lint && npx tsc --noEmit` · `template_lint && ruff check . && ruff format --check . && mypy .` · `template_lint && golangci-lint run` |
 | `TEST_CMD` | Unit tests — fast, no external services | `npm test` · `pytest -q tests/unit` · `go test ./...` |
 | `INTEGRATION_CMD` | Tests against real dependencies via Docker | `with_compose pytest -q tests/integration` |
 
 - Keep `fast` (lint + test) quick — the Stop hook runs it after every turn with changes.
   Slow suites belong in `integration`.
-- Keep the template's shellcheck lint (`default_lint`) by chaining:
-  `LINT_CMD="${default_lint:+$default_lint && }npm run lint"` (drop it if the project has
-  no shell scripts).
+- **Keep `template_lint` first in `LINT_CMD`** — the stack-agnostic checks, each run only
+  when its files exist: `shellcheck` (shell scripts), `actionlint` (workflows),
+  `hadolint` (Dockerfiles, outside `templates/`), `gitleaks` (secrets in history and in
+  changed/untracked files; gitignored files like `.env` are excluded). Missing tools are
+  listed in the summary; under `VERIFY_STRICT=1` they fail.
+- **Add the stack's quality tools** to `LINT_CMD`/`TEST_CMD` — formatter in *check*
+  mode, linter, type checker, and a coverage floor (e.g. `pytest --cov
+  --cov-fail-under=80`, `vitest --coverage`). The type checker and the coverage floor are
+  the highest-value additions for catching bugs early.
+- Tune instead of disabling: `.hadolint.yaml` for Dockerfile rules, `.gitleaksignore`
+  (fingerprints) or a `gitleaks:allow` comment for a reviewed false positive.
 - `with_compose` brings up `docker-compose.yml` (or `VERIFY_COMPOSE_FILE`), waits for
   **healthchecks**, runs the command, and tears down volumes. Every service the tests
   depend on needs a `healthcheck` (see `templates/docker/docker-compose.yml`). For a
   test-only stack, use a separate `docker-compose.test.yml` with fixed test credentials.
 - Run `./scripts/verify full` locally until it is green.
 
-## 2. Wire the workflow
+## 2. Wire the workflows
 
-`.github/workflows/ci.yml` already runs `./scripts/verify full`. Only add the runtime
-setup + dependency install for the stack (commented examples are in the file). Keep:
-the job name `verify` (it's the required check), `permissions: contents: read`, the
-timeout and the concurrency group. Don't add deploy/release jobs unless asked.
+`.github/workflows/ci.yml` already installs the template tools (`scripts/install-tools`)
+and runs `./scripts/verify full`. Only add the runtime setup + dependency install for the
+stack (commented examples are in the file). Keep: the job name `verify` (it's the
+required check), `fetch-depth: 0` (gitleaks scans the PR's commits),
+`permissions: contents: read`, the timeout and the concurrency group. Don't add
+deploy/release jobs unless asked.
 
-If the project has a dependency ecosystem, add it to `.github/dependabot.yml`.
+`.github/workflows/audit.yml` runs `./scripts/verify audit` (osv-scanner over the
+project's lockfiles) weekly and on demand — deliberately **not** a PR gate, so a newly
+published CVE doesn't block unrelated work. It needs committed lockfiles to be useful.
+
+If the project has a dependency ecosystem, add it to `.github/dependabot.yml`. Tool
+versions in `scripts/install-tools` are pinned and bumped by hand (Dependabot can't
+see them).
 
 ## 3. Turn on strict mode
 

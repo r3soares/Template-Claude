@@ -41,6 +41,17 @@ uses:
 ```bash
 ./scripts/verify fast   # lint + unit tests
 ./scripts/verify        # full: + integration tests (Docker)
+./scripts/verify audit  # dependency vulnerability scan (also weekly in CI)
+```
+
+Lint includes stack-agnostic checks — secrets (gitleaks), workflows (actionlint),
+Dockerfiles (hadolint), shell scripts (shellcheck) — that run when the tool is installed.
+CI always installs them; to run them locally too:
+
+```bash
+./scripts/install-tools                 # gitleaks, actionlint, hadolint → ~/.local/bin
+./scripts/install-tools osv-scanner     # for `verify audit`
+sudo apt install shellcheck             # or: brew install shellcheck
 ```
 
 ---

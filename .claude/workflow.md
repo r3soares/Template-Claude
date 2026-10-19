@@ -63,9 +63,11 @@ One entry point, `scripts/verify` (ADR-001), used by three layers (ADR-002):
 | 1. Agent | `verify fast` (lint + test) | Stop hook, end of every turn with changes | Claude finds and fixes its own failures (≤3 attempts, then reports) |
 | 2. Ship | `verify full` (+ integration via Docker) | Before review and merge | Local gate |
 | 3. GitHub | `verify full` in CI job `verify` | Every PR and push to master | Independent gate; required check via ruleset |
+| — Audit | `verify audit` (osv-scanner) | Weekly + on demand (`audit.yml`) | Known-vulnerable dependencies; not a PR gate |
 
-Stage commands live **only** in `scripts/verify` — CI, hooks and skills never repeat
-them. Configure them with the `setup-ci` skill. `git-guard` blocks bypasses
+Lint always starts with `template_lint` — secrets (gitleaks), workflows (actionlint),
+Dockerfiles (hadolint), shell (shellcheck) — then the stack's own tools. Stage commands
+live **only** in `scripts/verify` — CI, hooks and skills never repeat them. Configure them with the `setup-ci` skill. `git-guard` blocks bypasses
 (`--no-verify`, `--admin` merges, force-push to master).
 
 ## Git

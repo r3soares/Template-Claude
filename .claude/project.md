@@ -23,7 +23,7 @@ scales with the size of the change. Copy it, fill in the placeholders, and start
 ├── .github/
 │   ├── PULL_REQUEST_TEMPLATE.md  # PR description template for GitHub
 │   ├── dependabot.yml    # Keeps GitHub Actions (and your ecosystem) current
-│   └── workflows/        # CI — ci.yml runs scripts/verify (job `verify`)
+│   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml weekly CVE scan
 ├── docs/                 # Documentation of what IS now (git holds the history)
 │   ├── adr/              # Architecture Decision Records (ADR-001/002: quality gates)
 │   ├── architecture/     # System/component diagrams and architecture docs
@@ -31,7 +31,8 @@ scales with the size of the change. Copy it, fill in the placeholders, and start
 ├── specs/                # Specifications of what SHOULD BE
 │   └── features/         # One folder per feature, containing spec.md
 ├── scripts/
-│   └── verify            # Single entry point for lint/test/integration (ADR-001)
+│   ├── verify            # Single entry point for lint/test/integration/audit (ADR-001)
+│   └── install-tools     # Pinned, checksum-verified install of gitleaks/actionlint/hadolint/osv-scanner
 ├── src/                  # Source code (stack-specific structure goes here)
 ├── templates/            # Reusable file templates
 │   ├── *-template.md     # Spec, ADR, test, architecture, traceability

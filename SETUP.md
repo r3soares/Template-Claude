@@ -60,8 +60,10 @@ git commit -m "chore: initial project structure from template"
 - Update `.gitignore` — uncomment the relevant stack section
 - Update `.editorconfig` if your stack differs
 - (Optional) Enable a format-on-edit hook — see `.claude/hooks/README.md`
-- (Optional) Install `shellcheck` to lint the template's own scripts locally
-  (`scripts/verify` reports it as SKIPPED otherwise; CI runs it regardless)
+- (Recommended) Install the template's quality tools locally so the Stop hook runs the
+  same checks as CI: `./scripts/install-tools` (gitleaks, actionlint, hadolint) and
+  `shellcheck` via apt/brew. Missing tools are listed in the verify summary; CI installs
+  them regardless.
 
 ---
 

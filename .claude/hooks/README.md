@@ -26,8 +26,9 @@ changes, it runs `./scripts/verify fast`:
 - After **3** consecutive failures in a session it lets Claude stop, so Claude reports to
   you instead of looping. Counters live in `.claude/.state/` (gitignored).
 
-It is a no-op until `scripts/verify` has configured stages. Keep `fast` quick — it runs
-after every turn with changes. Disable for a session with `CLAUDE_VERIFY_ON_STOP=0`
+Out of the box it runs the template checks whose tools are installed (see
+`scripts/install-tools`) — about a second. Keep `fast` quick — it runs after every turn
+with changes. Disable for a session with `CLAUDE_VERIFY_ON_STOP=0`
 (e.g. `CLAUDE_VERIFY_ON_STOP=0 claude`). The hook timeout is 300s (`settings.json`).
 
 ## Optional: format-on-edit (disabled by default)

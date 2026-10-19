@@ -44,6 +44,10 @@ turn ends with changes; `ship` and CI run `full`.
 - **Flaky test** (passes on re-run with no change): re-run once to confirm, then report
   it as flaky — don't call it fixed. Fix the nondeterminism if it's in scope (see
   `test-plan`: time, randomness, ordering, sleeps).
+- **Secret found (gitleaks)**: never commit it. Move it to an env var / gitignored
+  `.env`, and tell the developer — if it was already committed or pushed, it must be
+  **rotated**, not just deleted. Only a reviewed false positive goes to
+  `.gitleaksignore`, and you say so.
 - **Environment failure** (missing tool, Docker down, network): not a code bug. Report
   what's missing; don't change code to work around it.
 - **CI fails but local passes**: `gh run view <run-id> --log-failed` (find the id with
