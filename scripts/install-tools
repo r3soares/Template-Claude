@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# install-tools — install the stack-agnostic quality tools `scripts/verify` uses,
+# at pinned versions, with SHA-256 verification against the release checksums.
+# Used by CI and optionally on a dev machine (Linux/macOS, x86_64/arm64).
+#
+# Usage: ./scripts/install-tools [gitleaks|actionlint|hadolint|osv-scanner ...]
+#        (default: gitleaks actionlint hadolint)
+#   TOOLS_BIN   install directory (default: ~/.local/bin) — must be on PATH
+#
+# ShellCheck is not installed here (no release checksums; it is preinstalled on
+# GitHub's ubuntu runners): use `apt install shellcheck` / `brew install shellcheck`.
+# To upgrade a tool, bump its version below.
+
+set -euo pipefail
+
+GITLEAKS_VERSION=8.30.1
+ACTIONLINT_VERSION=1.7.12
+HADOLINT_VERSION=2.15.1
+OSV_SCANNER_VERSION=2.6.0
+
+bin="${TOOLS_BIN:-$HOME/.local/bin}"
+mkdir -p "$bin"
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+case "$(uname -s)" in
+  Linux) os=linux ;;
+  Darwin) os=darwin ;;
+  *) echo "install-tools: unsupported OS $(uname -s)" >&2; exit 1 ;;
+esac
+case "$(uname -m)" in
+  x86_64|amd64) arch=amd64 ;;
+  aarch64|arm64) arch=arm64 ;;
+  *) echo "install-tools: unsupported arch $(uname -m)" >&2; exit 1 ;;
+esac
+
+sha256() { if command -v sha256sum >/dev/null; then sha256sum "$1"; else shasum -a 256 "$1"; fi | cut -d' ' -f1; }
+
+# fetch <url> <checksums-url> <asset-name> — download into $tmp/<asset> and verify.
+fetch() {
+  local url="$1" sums_url="$2" asset="$3" expected
+  curl -fsSL -o "$tmp/$asset" "$url"
+  curl -fsSL -o "$tmp/sums" "$sums_url"
+  expected="$(grep -E "[ *]${asset}\$" "$tmp/sums" | cut -d' ' -f1 || true)"
+  if [ -z "$expected" ] || [ "$(sha256 "$tmp/$asset")" != "$expected" ]; then
+    echo "install-tools: checksum mismatch for $asset" >&2
+    exit 1
+  fi
+}
+
+install_gitleaks() {
+  local a; a="gitleaks_${GITLEAKS_VERSION}_${os}_$([ "$arch" = amd64 ] && echo x64 || echo arm64).tar.gz"
+  local base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+  fetch "$base/$a" "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt" "$a"
+  tar -xzf "$tmp/$a" -C "$tmp" gitleaks && install -m 755 "$tmp/gitleaks" "$bin/gitleaks"
+}
+
+install_actionlint() {
+  local a="actionlint_${ACTIONLINT_VERSION}_${os}_${arch}.tar.gz"
+  local base="https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}"
+  fetch "$base/$a" "$base/actionlint_${ACTIONLINT_VERSION}_checksums.txt" "$a"
+  tar -xzf "$tmp/$a" -C "$tmp" actionlint && install -m 755 "$tmp/actionlint" "$bin/actionlint"
+}
+
+install_hadolint() {
+  local a; a="hadolint-$([ "$os" = darwin ] && echo macos || echo linux)-$([ "$arch" = amd64 ] && echo x86_64 || echo arm64)"
+  local base="https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}"
+  fetch "$base/$a" "$base/checksums.sha256" "$a"
+  install -m 755 "$tmp/$a" "$bin/hadolint"
+}
+
+install_osv_scanner() {
+  local a="osv-scanner_${os}_${arch}"
+  local base="https://github.com/google/osv-scanner/releases/download/v${OSV_SCANNER_VERSION}"
+  fetch "$base/$a" "$base/osv-scanner_SHA256SUMS" "$a"
+  install -m 755 "$tmp/$a" "$bin/osv-scanner"
+}
+
+tools=("$@")
+[ ${#tools[@]} -eq 0 ] && tools=(gitleaks actionlint hadolint)
+
+for t in "${tools[@]}"; do
+  case "$t" in
+    gitleaks|actionlint|hadolint|osv-scanner) "install_${t//-/_}" ;;
+    *) echo "install-tools: unknown tool '$t'" >&2; exit 64 ;;
+  esac
+  echo "installed $t -> $bin/$t"
+done
+
+case ":$PATH:" in
+  *":$bin:"*) ;;
+  *) echo "note: add $bin to PATH" ;;
+esac

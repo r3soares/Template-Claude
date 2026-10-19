@@ -19,9 +19,10 @@
 # ----- Runtime stage -----
 FROM <base>:<tag>
 
-# Create and use a non-root user
-RUN addgroup --system app && adduser --system --ingroup app app
-USER app
+# Create and use a non-root user (numeric UID so the host/Kubernetes can verify
+# it is not root; on Alpine use `addgroup -S -g 10001 app && adduser -S -u 10001 -G app app`)
+RUN addgroup --system --gid 10001 app && adduser --system --uid 10001 --ingroup app app
+USER 10001:10001
 
 WORKDIR /app
 
