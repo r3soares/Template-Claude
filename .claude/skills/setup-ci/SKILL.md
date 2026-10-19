@@ -19,6 +19,8 @@ Fill in the stage commands at the top of the file for the stack:
 | `TEST_CMD` | Unit tests — fast, no external services | `npm test` · `pytest -q tests/unit` · `go test ./...` |
 | `INTEGRATION_CMD` | Tests against real dependencies via Docker | `with_compose pytest -q tests/integration` |
 
+- A stage that doesn't apply (e.g. no integration tests in a library) is set to `"n/a"`,
+  not left empty — empty means "not configured yet" and fails under `VERIFY_STRICT=1`.
 - Keep `fast` (lint + test) quick — the Stop hook runs it after every turn with changes.
   Slow suites belong in `integration`.
 - **Keep `template_lint` first in `LINT_CMD`** — the stack-agnostic checks, each run only

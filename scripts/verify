@@ -23,7 +23,9 @@ cd "$(dirname "$0")/.." || exit 1
 strict="${VERIFY_STRICT:-0}"
 
 # ----- Stage commands — fill these in for your stack ------------------------
-# Leave a stage empty ("") to skip it. Keep `template_lint` and chain your
+# Leave a stage empty ("") while it is still to be configured; set it to "n/a"
+# when it does not apply (e.g. no integration tests in a library) — "n/a" passes
+# under VERIFY_STRICT=1, an empty stage does not. Keep `template_lint` and chain your
 # linter after it. Examples:
 #   LINT_CMD:        template_lint && npm run lint && npx tsc --noEmit
 #                    template_lint && ruff check . && ruff format --check . && mypy .
@@ -139,6 +141,10 @@ for stage in "${stages[@]}"; do
     audit)       cmd="$AUDIT_CMD" ;;
   esac
 
+  if [ "$cmd" = "n/a" ]; then
+    summary+=("N/A      $stage (not applicable)")
+    continue
+  fi
   if [ -z "$cmd" ]; then
     if [ "$strict" = "1" ]; then
       summary+=("FAIL     $stage (not configured; VERIFY_STRICT=1)")
