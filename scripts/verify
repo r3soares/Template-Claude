@@ -102,12 +102,13 @@ template_audit() {
 
 # ----- Helpers ---------------------------------------------------------------
 
-# with_compose <cmd...> — bring up the compose services, wait for their
-# healthchecks, run <cmd>, and always tear everything down (volumes included).
+# with_compose <cmd...> — (re)build and bring up the compose services, wait for
+# their healthchecks, run <cmd>, and always tear everything down (volumes
+# included). `--build` matters: without it a cached image runs stale code.
 with_compose() {
   local file="${VERIFY_COMPOSE_FILE:-docker-compose.yml}"
   local status
-  docker compose -f "$file" up -d --wait || {
+  docker compose -f "$file" up -d --wait --build --quiet-pull || {
     docker compose -f "$file" logs --tail=50
     docker compose -f "$file" down -v >/dev/null 2>&1
     return 1

@@ -20,13 +20,17 @@ root="${CLAUDE_PROJECT_DIR:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}
 cd "$root" || exit 0
 [ -x scripts/verify ] || exit 0
 
-# Nothing changed in the working tree → nothing to verify.
-[ -z "$(git status --porcelain 2>/dev/null)" ] && exit 0
-
 # Attempt counter, per session (state dir is gitignored).
 session="$(printf '%s' "$payload" | sed -n 's/.*"session_id" *: *"\([^"]*\)".*/\1/p' | tr -cd 'A-Za-z0-9_-')"
 state_dir=".claude/.state"
 counter="$state_dir/verify-attempts-${session:-default}"
+
+# Nothing changed in the working tree → nothing to verify (and any earlier
+# failure was resolved, e.g. fixed and committed — reset the counter).
+if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
+  rm -f "$counter"
+  exit 0
+fi
 mkdir -p "$state_dir"
 
 log="$(mktemp)"
