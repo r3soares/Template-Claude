@@ -33,10 +33,14 @@ actual stack:
 - `.dockerignore` — exclude VCS, deps, build output, secrets. Keep the build context small.
 - `docker-compose.yml` — include the app service; add DB/cache/broker services only if
   the project needs them locally. Use env vars for config; never hardcode secrets.
+  Give every service a `healthcheck` — `scripts/verify`'s `with_compose` uses
+  `docker compose up --wait` to run integration tests against them (see `setup-ci`).
 
 ## Step 3 — Wire it in
 
 - Document the run commands in `README.md` (`docker build`, `docker compose up`).
+- If the project has integration tests, wire them as `INTEGRATION_CMD` in
+  `scripts/verify` (e.g. `with_compose pytest -q tests/integration`).
 - If a hard-to-reverse choice was made (base image strategy, orchestration), record it
   with the `adr` skill.
 - Add a dated `CHANGELOG.md` entry.
