@@ -4,6 +4,10 @@
 #
 # The job name `verify` is the required status check in the branch ruleset
 # (`templates/github/branch-ruleset.json`) — keep it stable.
+#
+# No `paths-ignore` on purpose: a required check that never runs leaves docs-only
+# PRs stuck at "Expected". `scripts/verify` itself skips test/integration when only
+# non-essential files changed (NON_ESSENTIAL, ADR-003), so the check still reports.
 
 name: CI
 
@@ -52,4 +56,8 @@ jobs:
       #   with: { go-version-file: 'go.mod' }
 
       - name: Verify (lint, test, integration)
+        env:
+          # What the change is compared against, to detect docs-only changes. An
+          # unresolvable base (e.g. first push of a branch) runs every stage.
+          VERIFY_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: ./scripts/verify full

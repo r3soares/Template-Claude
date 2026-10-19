@@ -95,6 +95,10 @@ Three layers, one command set (`scripts/verify`) — see ADR-001 and ADR-002 in 
 3. **GitHub** — CI runs `verify full` on every PR; with the branch ruleset applied,
    master only accepts PRs whose `verify` check passed, and `ship` auto-merges them.
 
+Changes that touch only non-essential files (docs, `*.md`, `specs/`, `templates/` —
+`NON_ESSENTIAL` in `scripts/verify`) run lint only; test and integration are skipped
+(ADR-003).
+
 ---
 
 ## Working with Claude

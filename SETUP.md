@@ -50,8 +50,8 @@ git commit -m "chore: initial project structure from template"
   `scripts/verify` (the only place they live), adds the runtime setup to
   `.github/workflows/ci.yml`, sets `VERIFY_STRICT=1`, and — if the repo is on GitHub —
   applies the branch ruleset and enables auto-merge (it asks first).
-- **ADRs**: keep `docs/adr/ADR-001` and `ADR-002` — they record why the quality gates
-  work this way. Your project's own decisions start at `ADR-003`.
+- **ADRs**: keep `docs/adr/ADR-001` to `ADR-003` — they record why the quality gates
+  work this way. Your project's own decisions start at `ADR-004`.
 
 ---
 

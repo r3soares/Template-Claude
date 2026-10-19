@@ -40,6 +40,26 @@ Fill in the stage commands at the top of the file for the stack:
   test-only stack, use a separate `docker-compose.test.yml` with fixed test credentials.
 - Run `./scripts/verify full` locally until it is green.
 
+### Non-essential files (docs, markdown) — don't test them
+
+Tests should never spend time on files no test reads (ADR-003):
+
+- `NON_ESSENTIAL` in `scripts/verify` lists them (`*.md`, `docs/`, `specs/`,
+  `templates/`, `LICENSE*`, …). A change touching only those skips `test` and
+  `integration` (reported `N/A`); lint still runs so gitleaks scans docs. Extend the
+  list for the stack (e.g. design assets no test reads) — never with source, config,
+  lockfiles or anything a build or test consumes.
+- **Never add `paths-ignore`/`paths` to `ci.yml`**: `verify` is a required check, and a
+  check that doesn't run blocks docs-only PRs forever. The skip lives in the script.
+- **Scope every tool to code**, so a full run doesn't walk docs either: test discovery
+  limited to `tests/` (`pytest tests/`, `testpaths`, vitest `include`), coverage limited
+  to source dirs (`--cov=src`, `coverage.include`), linters/formatters on code paths
+  (`ruff check src tests`, eslint ignores `docs/`). Don't add markdown/prose linters to
+  the gate unless the developer asks.
+- Keep docs out of Docker build contexts (`.dockerignore` already excludes `*.md`,
+  `docs`, `specs`, `templates`), so a doc edit doesn't invalidate image layers in
+  `with_compose`.
+
 ## 2. Wire the workflows
 
 `.github/workflows/ci.yml` already installs the template tools (`scripts/install-tools`)

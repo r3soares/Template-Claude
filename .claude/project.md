@@ -25,7 +25,7 @@ scales with the size of the change. Copy it, fill in the placeholders, and start
 │   ├── dependabot.yml    # Keeps GitHub Actions (and your ecosystem) current
 │   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml weekly CVE scan
 ├── docs/                 # Documentation of what IS now (git holds the history)
-│   ├── adr/              # Architecture Decision Records (ADR-001/002: quality gates)
+│   ├── adr/              # Architecture Decision Records (ADR-001–003: quality gates)
 │   ├── architecture/     # System/component diagrams and architecture docs
 │   └── traceability/     # OPTIONAL — formal matrix, compliance projects only
 ├── specs/                # Specifications of what SHOULD BE

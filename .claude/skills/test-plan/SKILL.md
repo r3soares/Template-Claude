@@ -74,3 +74,6 @@ second, stale source of pass/fail status.
 - Never weaken or skip a test to get green (see the `verify` skill).
 - If a spec criterion can't be tested, flag it as an open question on the spec rather
   than silently skipping it.
+- Tests cover code, not docs: never write tests for, or point runners, coverage or
+  fixtures at, documentation and markdown (`NON_ESSENTIAL` in `scripts/verify`). A
+  docs-only change needs no new tests — `verify` skips test/integration for it.
