@@ -5,7 +5,8 @@
 # runs `scripts/verify fast`. On failure it exits 2: the harness feeds the output
 # back to Claude, which must diagnose and fix it (see the `verify` skill) before
 # stopping. After MAX_ATTEMPTS consecutive failures it lets Claude stop so it can
-# report to the developer instead of looping.
+# report to the developer instead of looping. A turn that only touched
+# non-essential files (docs, *.md — NON_ESSENTIAL in scripts/verify) runs lint only.
 #
 # Disable for a session with CLAUDE_VERIFY_ON_STOP=0.
 

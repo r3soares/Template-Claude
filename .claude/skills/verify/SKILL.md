@@ -13,6 +13,10 @@ the developer to debug for it.
 lint + test + integration. The `verify-on-stop` hook runs `fast` automatically when a
 turn ends with changes; `ship` and CI run `full`.
 
+If the change touches only non-essential files (docs, `*.md` — `NON_ESSENTIAL` in
+`scripts/verify`), `test` and `integration` report `N/A` by design; lint still runs.
+`VERIFY_ALL=1` forces every stage.
+
 ## Loop
 
 1. **Run** `./scripts/verify fast` (or `full` before shipping). Read the summary: it
