@@ -19,7 +19,7 @@ jobs:
     env:
       VERIFY_STRICT: '1'   # the scanner must actually run
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install osv-scanner
         run: |
