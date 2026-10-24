@@ -45,7 +45,7 @@ skills link here. Claude must follow these in every file it creates or edits.
 
 ## Branch Naming
 
-Work on a branch, never directly on `master`/`main` (the `git-guard` hook warns you).
+Work on a branch, never directly on `master`/`main` (the `ship` skill branches first).
 
 | Pattern | Example |
 |---------|---------|

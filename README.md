@@ -117,8 +117,8 @@ when you understand what Claude does on its own versus what you decide.
 - **Verifies its own work** — runs `./scripts/verify`, and the `verify-on-stop` hook
   makes it fix failures (root cause, no skipped/weakened tests) before handing back.
   After 3 failed attempts it stops and gives you an escalation report.
-- **`git-guard` hook** warns before committing/pushing on `master`/`main`, and blocks
-  gate bypasses (`--no-verify`, `--admin` merges, force-push to master).
+- **Permission deny rules** (`.claude/settings.json`) block gate bypasses:
+  `--no-verify`, `--admin` merges, force-push.
 - **Confirms outward actions** — it asks before `git push`, opening a PR, or changing
   repo settings (branch protection).
 - Keeps scope inside the spec and adds a dated `CHANGELOG.md` entry for every change.

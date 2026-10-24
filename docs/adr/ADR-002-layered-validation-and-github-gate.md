@@ -11,7 +11,8 @@
 `[ACCEPTED]`
 
 Supersedes: —  
-Superseded by: —
+Superseded by: —  
+Amended by: ADR-004 (gate bypasses are blocked by permission deny rules, not `git-guard.sh`)
 
 ---
 

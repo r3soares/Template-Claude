@@ -2,18 +2,14 @@
 
 Deterministic shell commands the Claude Code harness runs on events. Configured in
 `.claude/settings.json` under `"hooks"`. Keep them few and light — this is a solo-dev
-template. Both parse the payload with plain shell (no `jq` dependency).
+template. They parse the payload with plain shell (no `jq` dependency).
+
+Gate bypasses (`--no-verify`, `gh pr merge --admin`, force-push) are not a hook: they are
+`permissions.deny` rules in `.claude/settings.json` (ADR-004). Deny rules are matched per
+subcommand (`&&`, `;`, `|`, subshells), so they need no parsing here. They match the
+command text — they catch mistakes, not a determined bypass.
 
 ## Active
-
-### `git-guard.sh` — PreToolUse(Bash)
-
-- **Blocks** (exit 2) gate bypasses: `--no-verify` on commit/push, `gh pr merge --admin`,
-  and force-push to `master`/`main`.
-- **Warns** (non-blocking) when a `git commit`/`git push` runs on `master`/`main`,
-  nudging you to branch first.
-
-It matches the command text, so it catches mistakes — not a determined bypass.
 
 ### `verify-on-stop.sh` — Stop
 

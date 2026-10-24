@@ -37,8 +37,8 @@ If the change touches only non-essential files (docs, `*.md` — `NON_ESSENTIAL`
 
 - Skip, delete, `xfail`/`.skip`, or comment out a failing test.
 - Loosen an assertion, widen a tolerance, or update a snapshot just to get green.
-- Bypass hooks or gates: `--no-verify`, `gh pr merge --admin`, force-push to master
-  (the `git-guard` hook blocks these).
+- Bypass hooks or gates: `--no-verify`, `gh pr merge --admin`, force-push (permission
+  deny rules in `.claude/settings.json` block these).
 - Swallow errors with a catch-all, or disable a lint rule, to silence a failure — unless
   you explain why the rule is wrong *here* in a comment.
 - Empty a stage in `scripts/verify` to make it pass.

@@ -84,7 +84,7 @@ gh pr checks --watch                         # wait for CI
 - **Auto-merge unavailable** (not enabled on the repo, or no ruleset): wait for
   `gh pr checks --watch` to pass, then `gh pr merge --merge --delete-branch`.
 - **After the merge**: `git switch master && git pull --ff-only`.
-- Never `--admin`, never force-push master (the `git-guard` hook blocks both).
+- Never `--admin`, never force-push (permission deny rules block both).
 
 ---
 

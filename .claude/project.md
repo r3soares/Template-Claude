@@ -18,14 +18,14 @@ scales with the size of the change. Copy it, fill in the placeholders, and start
 │   ├── workflow.md       # The development lifecycle (tiered by change size)
 │   ├── conventions.md    # Naming, commits, status tags, language rules
 │   ├── settings.json     # Harness config: hooks, permissions
-│   ├── hooks/            # Deterministic guardrails: git-guard, verify-on-stop + README
+│   ├── hooks/            # Deterministic guardrails: verify-on-stop + README
 │   └── skills/           # On-demand procedures (one folder per skill, SKILL.md)
 ├── .github/
 │   ├── PULL_REQUEST_TEMPLATE.md  # PR description template for GitHub
 │   ├── dependabot.yml    # Keeps GitHub Actions (and your ecosystem) current
 │   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml weekly CVE scan
 ├── docs/                 # Documentation of what IS now (git holds the history)
-│   ├── adr/              # Architecture Decision Records (ADR-001–003: quality gates)
+│   ├── adr/              # Architecture Decision Records (ADR-001–004: quality gates)
 │   ├── architecture/     # System/component diagrams and architecture docs
 │   └── traceability/     # OPTIONAL — formal matrix, compliance projects only
 ├── specs/                # Specifications of what SHOULD BE

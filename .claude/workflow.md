@@ -67,13 +67,12 @@ One entry point, `scripts/verify` (ADR-001), used by three layers (ADR-002):
 
 Lint always starts with `template_lint` — secrets (gitleaks), workflows (actionlint),
 Dockerfiles (hadolint), shell (shellcheck) — then the stack's own tools. Stage commands
-live **only** in `scripts/verify` — CI, hooks and skills never repeat them. Configure them with the `setup-ci` skill. `git-guard` blocks bypasses
-(`--no-verify`, `--admin` merges, force-push to master).
+live **only** in `scripts/verify` — CI, hooks and skills never repeat them. Configure them with the `setup-ci` skill. Permission deny rules block bypasses
+(`--no-verify`, `--admin` merges, force-push).
 
 ## Git
 
 - Work on branches (`feat/…`, `fix/…`, `docs/…`), not directly on `master`/`main`.
-  The `git-guard` hook warns if you forget.
 - Conventional Commits — see `conventions.md`.
 - The `ship` skill handles branch → commit → verify → review → integrate, in two modes:
   - **Local** (no GitHub remote): `merge --no-ff` into master.
