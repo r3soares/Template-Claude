@@ -16,6 +16,7 @@ older released sections to `docs/CHANGELOG-ARCHIVE.md` so the working file stays
 ## [Unreleased]
 
 ### Added
+- **2026-10-24** `CLAUDE.md` *Template Feedback*: in projects created from the template, Claude flags template instructions that turn out wrong, outdated or contradictory in a `Template feedback:` block (file · problem · evidence · fix), so they can be corrected upstream.
 - **2026-10-24** `scripts/check-tool-versions` and the weekly `tool-versions.yml` workflow: compare the tools pinned in `scripts/install-tools` with their latest GitHub releases (read from the install URLs, so new tools are covered automatically; retries transient API errors) and open or refresh one tracking issue when one is behind — Dependabot can't see these pins.
 - **2026-10-24** Self-tests for `scripts/verify` (stage selection, docs-only skip, strict mode, failure handling) and the `verify-on-stop` hook (bounded retries, opt-out) in `scripts/tests/`, plain bash, under a second. Run as `template_test`, the new default `TEST_CMD`; under `VERIFY_STRICT=1`, `template_test` alone fails as not configured, so projects still chain their own tests.
 - **2026-10-19** `scripts/install-tools` — pinned, checksum-verified install of gitleaks, actionlint, hadolint and osv-scanner (Linux/macOS); weekly `audit.yml` workflow for dependency vulnerabilities.

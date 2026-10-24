@@ -50,3 +50,15 @@ When unsure which tier applies, ask before assuming.
 - Ask before architectural decisions or before creating modules/folders not described in
   `docs/architecture/overview.md` (update the map when one is added).
 - Don't assume — if a spec is ambiguous, flag it as an open question instead of guessing.
+
+## Template Feedback
+
+This project was created from the Template-Claude template. If an instruction that came
+from it — `CLAUDE.md`, a skill, a rule, a hook, `scripts/`, a workflow or a
+`templates/` file — turns out wrong, outdated (e.g. a Claude Code feature or tool
+behaves differently now) or contradictory, tell the developer in a separate block, so
+they can fix it in the template too:
+
+> **Template feedback:** `<file>` — what is wrong · evidence · suggested fix
+
+Do it as soon as you notice, even mid-task. Fix the local copy only if the developer asks.
