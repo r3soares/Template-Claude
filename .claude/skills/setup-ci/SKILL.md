@@ -66,7 +66,10 @@ Tests should never spend time on files no test reads (ADR-003):
 and runs `./scripts/verify full`. Only add the runtime setup + dependency install for the
 stack (commented examples are in the file). Keep: the job name `verify` (it's the
 required check), `fetch-depth: 0` (gitleaks scans the PR's commits),
-`permissions: contents: read`, the timeout and the concurrency group. Don't add
+`persist-credentials: false`, `permissions: contents: read`, the timeout and the
+concurrency group. Pin every action you add by full commit SHA with the version as a
+comment (`uses: owner/action@<sha> # vX.Y.Z`; get it with
+`gh api repos/<owner>/<action>/commits/<tag> --jq .sha`) — Dependabot keeps it current. Don't add
 deploy/release jobs unless asked.
 
 `.github/workflows/audit.yml` runs `./scripts/verify audit` (osv-scanner over the
