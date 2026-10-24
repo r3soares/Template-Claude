@@ -1,6 +1,6 @@
 ---
 name: feature-spec
-description: Write or update a feature specification before implementing a new feature or significant change. Use when the user asks to start, plan, design, or spec a feature, or when a change adds new behavior or a user-facing surface. Not for small fixes.
+description: Write or update a feature spec before implementing new behavior or a user-facing change. Use when asked to start, plan, design or spec a feature. Not for small fixes.
 ---
 
 # Feature Spec

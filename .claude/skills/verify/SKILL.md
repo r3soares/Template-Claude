@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Validate a change and self-correct before handing back — run scripts/verify, diagnose failures to their root cause, fix, re-run, and escalate with evidence after bounded attempts. Use after changing code, before saying work is done, before shipping, and whenever a check, test, hook (verify-on-stop) or CI run fails.
+description: Run scripts/verify, fix failures at the root cause, re-run, escalate after bounded attempts. Use after changing code, before saying done or shipping, and when a check, hook or CI fails.
 ---
 
 # Verify and self-correct

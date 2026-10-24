@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Branch, commit with Conventional Commits, verify, await dev review, and integrate into master — locally (no GitHub remote) or through a pull request gated by CI (GitHub remote). Use when the user asks to commit, ship, or merge a change.
+description: Branch, Conventional Commit, verify, await review, and merge to master — locally or via a CI-gated pull request. Use when asked to commit, ship or merge.
 ---
 
 # Ship a Change
@@ -53,6 +53,14 @@ small fixes.
 
 If it fails, follow the `verify` skill (diagnose → fix → re-run, bounded). Do not move
 on with a red result; if you hit the bound, stop and give the escalation report.
+
+## 4b. Security review (features only)
+
+For the feature tier — or a small change that touches auth, input parsing, secrets,
+permissions or external calls — run Claude Code's built-in `security-review` skill on
+the branch's changes. Fix confirmed findings (with a regression test) and re-run step 4;
+list anything left open in step 5. Skip it for other small changes — it costs tokens and
+lint/tests already cover them.
 
 ## 5. Await dev review
 
@@ -110,6 +118,7 @@ gh pr checks --watch                         # wait for CI
 
 - [ ] Spec is `[ACCEPTED]`, and its *Related* section points at the source/test files
 - [ ] Tests cover the spec (the `test-plan` skill) and `./scripts/verify full` is green
+- [ ] `security-review` run; findings fixed or listed for the developer
 - [ ] No scope added beyond the spec
 - [ ] `CHANGELOG.md` updated
 

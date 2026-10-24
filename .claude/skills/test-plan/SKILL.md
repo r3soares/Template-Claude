@@ -1,6 +1,6 @@
 ---
 name: test-plan
-description: Design testable code and write tests for a feature or bug fix — happy path, edge cases from the spec, failure scenarios, and a regression test for every bug. Use when writing tests, documenting a test strategy, designing code so it can be tested, or before shipping a significant change.
+description: Design testable code and write tests — happy path, spec edge cases, failures, and a regression test per bug. Use when writing tests or designing code for testability.
 ---
 
 # Test Plan
