@@ -20,6 +20,7 @@ older released sections to `docs/CHANGELOG-ARCHIVE.md` so the working file stays
 - **2026-10-19** `scripts/install-tools` — pinned, checksum-verified install of gitleaks, actionlint, hadolint and osv-scanner (Linux/macOS); weekly `audit.yml` workflow for dependency vulnerabilities.
 - **2026-10-19** Quality gates (ADR-001, ADR-002): `scripts/verify` as the single entry point for lint/test/integration (`fast`/`full`, `VERIFY_STRICT`, Docker `with_compose`); `verify-on-stop` Stop hook for a bounded agent self-correction loop; `verify` skill; branch ruleset template (`templates/github/branch-ruleset.json`); Dependabot for GitHub Actions; first ADRs in `docs/adr/`.
 ### Changed
+- **2026-10-24** osv-scanner 2.6.0 → 2.7.0 in `scripts/install-tools`.
 - **2026-10-24** `.gitignore` ignores `.claude/settings.local.json` and `CLAUDE.local.md` (personal Claude Code settings and instructions) — previously only a developer's global git ignore kept them out of commits.
 - **2026-10-24** `SETUP.md` matches the new template: copy with `git archive` (a plain `cp -r` carried the template's `.git` history and local Claude state into the new project), `TEST_CMD` keeps `template_test` first, Dependabot ecosystem and SHA pinning, area rules in `.claude/rules/` instead of `CLAUDE.md`, and the growth guidance.
 - **2026-10-24** Skill descriptions shortened (~38% fewer characters, same triggers) — they are in Claude's context every turn. `ship` gains a security-review step (Claude Code's built-in `security-review`) for features and security-sensitive small changes.
