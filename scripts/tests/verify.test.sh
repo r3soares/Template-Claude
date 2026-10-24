@@ -22,6 +22,12 @@ echo "x" >docs/adr/ADR-009.md
 run ./scripts/verify full
 check "docs-only (untracked file under docs/): test skipped" lacks RAN_TEST
 
+mkdir -p .claude/skills/x src/lib
+echo "x" >.claude/skills/x/SKILL.md
+echo "x" >src/lib/README.md
+run ./scripts/verify full
+check "docs-only (nested *.md outside docs/): test skipped" lacks RAN_TEST
+
 run env VERIFY_ALL=1 ./scripts/verify full
 check "VERIFY_ALL=1 forces test on a docs-only change" has RAN_TEST
 

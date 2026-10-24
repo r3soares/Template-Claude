@@ -47,7 +47,7 @@ Fill in the stage commands at the top of the file for the stack:
 
 Tests should never spend time on files no test reads (ADR-003):
 
-- `NON_ESSENTIAL` in `scripts/verify` lists them (`*.md`, `docs/`, `specs/`,
+- `NON_ESSENTIAL` in `scripts/verify` lists them (`**/*.md`, `docs/`, `specs/`,
   `templates/`, `LICENSE*`, …). A change touching only those skips `test` and
   `integration` (reported `N/A`); lint still runs so gitleaks scans docs. Extend the
   list for the stack (e.g. design assets no test reads) — never with source, config,
@@ -59,7 +59,7 @@ Tests should never spend time on files no test reads (ADR-003):
   to source dirs (`--cov=src`, `coverage.include`), linters/formatters on code paths
   (`ruff check src tests`, eslint ignores `docs/`). Don't add markdown/prose linters to
   the gate unless the developer asks.
-- Keep docs out of Docker build contexts (`.dockerignore` already excludes `*.md`,
+- Keep docs out of Docker build contexts (`.dockerignore` already excludes `**/*.md`,
   `docs`, `specs`, `templates`), so a doc edit doesn't invalidate image layers in
   `with_compose`.
 

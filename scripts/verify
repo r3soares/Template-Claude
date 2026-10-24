@@ -44,10 +44,10 @@ AUDIT_CMD="${VERIFY_AUDIT_CMD-template_audit}"
 # ----- Non-essential paths ----------------------------------------------------
 # Files no test reads. When a change touches ONLY these, the test and integration
 # stages are skipped (reported as N/A); lint still runs — gitleaks must scan docs
-# too. Git glob pathspecs; extend for your project (e.g. images no test reads).
+# too. Git glob pathspecs — `*` does not cross `/`, so use `**/` to match at any
+# depth; extend for your project (e.g. images no test reads).
 # Never point test runners, coverage or fixtures at these paths.
-NON_ESSENTIAL=('*.md' 'docs/**' 'specs/**' 'templates/**' 'LICENSE*' '.editorconfig'
-  '.github/PULL_REQUEST_TEMPLATE.md')
+NON_ESSENTIAL=('**/*.md' 'docs/**' 'specs/**' 'templates/**' 'LICENSE*' '.editorconfig')
 
 # ----- Template checks (stack-agnostic) --------------------------------------
 # Each check runs only when the files it covers exist. A missing tool is noted
