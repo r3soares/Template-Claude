@@ -33,15 +33,26 @@ with changes. Disable for a session with `CLAUDE_VERIFY_ON_STOP=0`
 
 ## Optional: format-on-edit (disabled by default)
 
-A formatter is stack-specific, so it ships disabled. To enable it, add a `PostToolUse`
-hook to `.claude/settings.json` and point it at your formatter. Example:
+A formatter is stack-specific, so it ships disabled. The edited file's path arrives in
+the hook payload on stdin (`tool_input.file_path`) — there is no environment variable
+for it. To enable it, create `.claude/hooks/format-on-edit.sh` (and `chmod +x` it):
+
+```bash
+#!/usr/bin/env bash
+# format-on-edit — PostToolUse(Edit|Write): format the file Claude just edited.
+f="$(sed -nE 's/.*"file_path"[[:space:]]*:[[:space:]]*"(([^"\\]|\\.)*)".*/\1/p')"
+[ -n "$f" ] && [ -f "$f" ] || exit 0
+<your-formatter> "$f"
+```
+
+and register it in `.claude/settings.json`:
 
 ```json
 "PostToolUse": [
   {
     "matcher": "Edit|Write",
     "hooks": [
-      { "type": "command", "command": "<your-formatter> $CLAUDE_FILE_PATHS" }
+      { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/format-on-edit.sh" }
     ]
   }
 ]
