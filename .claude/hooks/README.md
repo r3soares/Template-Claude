@@ -17,6 +17,9 @@ The agent's self-correction loop (ADR-002). When Claude ends a turn with uncommi
 changes, it runs `./scripts/verify fast`:
 
 - **Pass / clean tree** → Claude stops normally.
+- **Same tree as the last pass** (e.g. a turn that only answered a question) → skipped;
+  the fingerprint is HEAD + diff + untracked files, kept in `.claude/.state/`. Only
+  passes are cached; `ship` and CI always run the full check.
 - **Fail** → exit 2: the output goes back to Claude, which must fix the root cause (the
   `verify` skill) before stopping.
 - After **3** consecutive failures in a session it lets Claude stop, so Claude reports to

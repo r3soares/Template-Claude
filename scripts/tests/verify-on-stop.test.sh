@@ -61,7 +61,30 @@ hook
 check "pass: lets Claude stop" status_is 0
 check "pass: no counter left" no_counter
 
+before="$(calls)"
+hook
+check "unchanged tree after a pass: cached, verify not re-run" calls_are "$before"
+check "unchanged tree after a pass: lets Claude stop" status_is 0
+
+echo "echo again" >>src/app.sh
+hook
+check "tree changed after a pass: verify runs again" calls_are $((before + 1))
+
+echo "new" >src/new.sh
+hook
+check "new untracked file: verify runs again" calls_are $((before + 2))
+
+echo "edited" >src/new.sh
+hook
+check "edited untracked file: verify runs again" calls_are $((before + 3))
+
 echo 1 >.verify-result
+echo "broken" >>src/app.sh
+hook
+hook
+check "failures are never cached: verify re-runs on an unchanged tree" calls_are $((before + 5))
+rm -f "$counter"
+
 before="$(calls)"
 out="$(printf '{"session_id":"t1"}' | CLAUDE_VERIFY_ON_STOP=0 .claude/hooks/verify-on-stop.sh 2>&1)"
 code=$?

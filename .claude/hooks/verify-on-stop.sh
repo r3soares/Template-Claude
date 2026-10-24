@@ -6,7 +6,8 @@
 # back to Claude, which must diagnose and fix it (see the `verify` skill) before
 # stopping. After MAX_ATTEMPTS consecutive failures it lets Claude stop so it can
 # report to the developer instead of looping. A turn that only touched
-# non-essential files (docs, *.md — NON_ESSENTIAL in scripts/verify) runs lint only.
+# non-essential files (docs, *.md — NON_ESSENTIAL in scripts/verify) runs lint only,
+# and a tree identical to the last green run is not re-verified.
 #
 # Disable for a session with CLAUDE_VERIFY_ON_STOP=0.
 
@@ -34,11 +35,26 @@ if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
 fi
 mkdir -p "$state_dir"
 
+# Same tree as the last green run (e.g. a turn that only answered a question) →
+# nothing new to verify. Only passes are cached; `ship` and CI never use this.
+fingerprint() {
+  {
+    git rev-parse HEAD
+    git diff HEAD --binary
+    git ls-files -o --exclude-standard -z |
+      while IFS= read -r -d '' f; do printf '%s ' "$f"; git hash-object -- "$f"; done
+  } 2>/dev/null | git hash-object --stdin
+}
+pass_file="$state_dir/verify-pass"
+fp="$(fingerprint)"
+[ -n "$fp" ] && [ "$fp" = "$(cat "$pass_file" 2>/dev/null)" ] && exit 0
+
 log="$(mktemp)"
 trap 'rm -f "$log"' EXIT
 
 if ./scripts/verify fast >"$log" 2>&1; then
   rm -f "$counter"
+  echo "$fp" >"$pass_file"
   exit 0
 fi
 
