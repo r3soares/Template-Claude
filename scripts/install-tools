@@ -9,14 +9,15 @@
 #
 # ShellCheck is not installed here (no release checksums; it is preinstalled on
 # GitHub's ubuntu runners): use `apt install shellcheck` / `brew install shellcheck`.
-# To upgrade a tool, bump its version below.
+# To upgrade a tool, bump its version below. Dependabot can't see these pins:
+# scripts/check-tool-versions (weekly in CI, tool-versions.yml) reports when one is behind.
 
 set -euo pipefail
 
 GITLEAKS_VERSION=8.30.1
 ACTIONLINT_VERSION=1.7.12
 HADOLINT_VERSION=2.15.1
-OSV_SCANNER_VERSION=2.6.0
+OSV_SCANNER_VERSION=2.7.0
 
 bin="${TOOLS_BIN:-$HOME/.local/bin}"
 mkdir -p "$bin"

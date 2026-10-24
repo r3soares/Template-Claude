@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Branch, commit with Conventional Commits, verify, await dev review, and integrate into master — locally (no GitHub remote) or through a pull request gated by CI (GitHub remote). Use when the user asks to commit, ship, or merge a change.
+description: Branch, Conventional Commit, verify, await review, and merge to master — locally or via a CI-gated pull request. Use when asked to commit, ship or merge.
 ---
 
 # Ship a Change
@@ -15,8 +15,9 @@ the linked artifacts differ. Integration has two modes (ADR-002):
 
 ## 1. Branch
 
-Never commit work directly to `master`/`main`. Name the branch for the change:
-`feat/short-name`, `fix/short-name`, `docs/short-name`, etc.
+Never commit work directly to `master`/`main`. Name the branch `<type>/<short-name>`
+(kebab-case), with the same `type` as the commit: `feat/user-auth`, `fix/expired-token`,
+`docs/adr-005`.
 
 ```bash
 git switch -c feat/short-name
@@ -24,9 +25,20 @@ git switch -c feat/short-name
 
 ## 2. Commit — Conventional Commits
 
-Format: `<type>(<scope>): <short description>`. Types: `feat`, `fix`, `docs`, `test`,
-`refactor`, `chore`. See `.claude/conventions.md`. Commit only what the user asked to
-commit; one concern per commit (see *Commit hygiene*).
+Conventional Commits, in English:
+
+```text
+<type>(<scope>): <short description>
+
+[optional body — why, and the spec/ADR it implements]
+
+[optional footer: refs, closes, BREAKING CHANGE]
+```
+
+Types: `feat` (new feature), `fix` (bug fix), `docs`, `test`, `refactor` (neither fix nor
+feature), `chore` (tooling, dependencies). Example: `feat(auth): add JWT refresh token
+flow`. Commit only what the user asked to commit; one concern per commit (see *Commit
+hygiene*).
 
 ## 3. CHANGELOG
 
@@ -41,6 +53,14 @@ small fixes.
 
 If it fails, follow the `verify` skill (diagnose → fix → re-run, bounded). Do not move
 on with a red result; if you hit the bound, stop and give the escalation report.
+
+## 4b. Security review (features only)
+
+For the feature tier — or a small change that touches auth, input parsing, secrets,
+permissions or external calls — run Claude Code's built-in `security-review` skill on
+the branch's changes. Fix confirmed findings (with a regression test) and re-run step 4;
+list anything left open in step 5. Skip it for other small changes — it costs tokens and
+lint/tests already cover them.
 
 ## 5. Await dev review
 
@@ -84,7 +104,7 @@ gh pr checks --watch                         # wait for CI
 - **Auto-merge unavailable** (not enabled on the repo, or no ruleset): wait for
   `gh pr checks --watch` to pass, then `gh pr merge --merge --delete-branch`.
 - **After the merge**: `git switch master && git pull --ff-only`.
-- Never `--admin`, never force-push master (the `git-guard` hook blocks both).
+- Never `--admin`, never force-push (permission deny rules block both).
 
 ---
 
@@ -98,6 +118,7 @@ gh pr checks --watch                         # wait for CI
 
 - [ ] Spec is `[ACCEPTED]`, and its *Related* section points at the source/test files
 - [ ] Tests cover the spec (the `test-plan` skill) and `./scripts/verify full` is green
+- [ ] `security-review` run; findings fixed or listed for the developer
 - [ ] No scope added beyond the spec
 - [ ] `CHANGELOG.md` updated
 

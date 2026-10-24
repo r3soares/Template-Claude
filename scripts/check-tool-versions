@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# check-tool-versions — compare the versions pinned in scripts/install-tools with each
+# tool's latest GitHub release. Dependabot can't see those pins, so the weekly
+# `tool-versions.yml` workflow runs this and opens an issue when one falls behind.
+#
+# Usage: ./scripts/check-tool-versions        (needs an authenticated `gh`)
+# Exit:  0 all current · 1 something is outdated · 2 could not check
+#
+# Tools and repos are read from install-tools' release URLs
+# (github.com/<owner>/<repo>/releases/download/v${<NAME>_VERSION}), so a tool added
+# there is checked here with no extra configuration.
+
+set -uo pipefail
+cd "$(dirname "$0")/.." || exit 2
+
+file=scripts/install-tools
+outdated=0
+checked=0
+
+# latest_release <owner/repo> — tag of the latest release; retries transient failures.
+latest_release() {
+  local try
+  for try in 1 2 3; do
+    gh api "repos/$1/releases/latest" --jq .tag_name 2>&1 && return 0
+    [ "$try" -lt 3 ] && sleep $((try * 2))
+  done
+  return 1
+}
+
+while read -r repo var; do
+  pinned="$(sed -nE "s/^${var}=(.*)$/\1/p" "$file")"
+  if ! latest="$(latest_release "$repo" | tail -n 1)"; then
+    echo "error: could not read the latest release of $repo: $latest" >&2
+    exit 2
+  fi
+  latest="${latest#v}"
+  checked=$((checked + 1))
+  if [ "$pinned" = "$latest" ]; then
+    echo "ok        $var=$pinned ($repo)"
+  else
+    echo "OUTDATED  $var=$pinned -> $latest (https://github.com/$repo/releases)"
+    outdated=1
+  fi
+done < <(sed -nE 's|.*github\.com/([^/]+/[^/]+)/releases/download/v\$\{([A-Z_]+_VERSION)\}.*|\1 \2|p' "$file")
+
+if [ "$checked" -eq 0 ]; then
+  echo "error: no pinned tools found in $file" >&2
+  exit 2
+fi
+exit "$outdated"

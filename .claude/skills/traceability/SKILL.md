@@ -1,6 +1,6 @@
 ---
 name: traceability
-description: Maintain a formal traceability matrix — ONLY for projects that require it (audited, regulated, compliance). For typical solo-dev projects this is not used; the feature spec's Related section already links source and tests. Use only when the user explicitly asks for a traceability matrix or works under compliance.
+description: Formal traceability matrix — ONLY for audited/compliance projects, when explicitly requested. Normal projects use the spec's Related section instead.
 ---
 
 # Traceability (optional / compliance)

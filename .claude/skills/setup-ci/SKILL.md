@@ -1,6 +1,6 @@
 ---
 name: setup-ci
-description: Set up or adjust the project's quality gates — the stage commands in scripts/verify, the GitHub Actions workflow that runs them, and GitHub branch protection (ruleset + auto-merge). Use when the user asks to add CI, configure GitHub Actions, run tests/lint on push, protect the main branch, or fill in verification for their stack.
+description: Configure quality gates — scripts/verify stage commands for the stack, the GitHub Actions workflow, branch protection. Use when asked to add CI, run tests on push, or protect master.
 ---
 
 # Set up CI and quality gates
@@ -16,13 +16,16 @@ Fill in the stage commands at the top of the file for the stack:
 | Stage | Purpose | Examples |
 |-------|---------|----------|
 | `LINT_CMD` | Static checks: lint, format check, type check | `template_lint && npm run lint && npx tsc --noEmit` · `template_lint && ruff check . && ruff format --check . && mypy .` · `template_lint && golangci-lint run` |
-| `TEST_CMD` | Unit tests — fast, no external services | `npm test` · `pytest -q tests/unit` · `go test ./...` |
+| `TEST_CMD` | Unit tests — fast, no external services | `template_test && npm test` · `template_test && pytest -q tests/unit` · `template_test && go test ./...` |
 | `INTEGRATION_CMD` | Tests against real dependencies via Docker | `with_compose pytest -q tests/integration` |
 
 - A stage that doesn't apply (e.g. no integration tests in a library) is set to `"n/a"`,
   not left empty — empty means "not configured yet" and fails under `VERIFY_STRICT=1`.
 - Keep `fast` (lint + test) quick — the Stop hook runs it after every turn with changes.
   Slow suites belong in `integration`.
+- **Keep `template_test` first in `TEST_CMD`** — the self-tests of `scripts/verify` and the
+  Stop hook (`scripts/tests/`, under a second). Under `VERIFY_STRICT=1`, `template_test`
+  alone fails as "not configured": chain the project's tests after it.
 - **Keep `template_lint` first in `LINT_CMD`** — the stack-agnostic checks, each run only
   when its files exist: `shellcheck` (shell scripts), `actionlint` (workflows),
   `hadolint` (Dockerfiles, outside `templates/`), `gitleaks` (secrets in history and in
@@ -44,7 +47,7 @@ Fill in the stage commands at the top of the file for the stack:
 
 Tests should never spend time on files no test reads (ADR-003):
 
-- `NON_ESSENTIAL` in `scripts/verify` lists them (`*.md`, `docs/`, `specs/`,
+- `NON_ESSENTIAL` in `scripts/verify` lists them (`**/*.md`, `docs/`, `specs/`,
   `templates/`, `LICENSE*`, …). A change touching only those skips `test` and
   `integration` (reported `N/A`); lint still runs so gitleaks scans docs. Extend the
   list for the stack (e.g. design assets no test reads) — never with source, config,
@@ -56,7 +59,7 @@ Tests should never spend time on files no test reads (ADR-003):
   to source dirs (`--cov=src`, `coverage.include`), linters/formatters on code paths
   (`ruff check src tests`, eslint ignores `docs/`). Don't add markdown/prose linters to
   the gate unless the developer asks.
-- Keep docs out of Docker build contexts (`.dockerignore` already excludes `*.md`,
+- Keep docs out of Docker build contexts (`.dockerignore` already excludes `**/*.md`,
   `docs`, `specs`, `templates`), so a doc edit doesn't invalidate image layers in
   `with_compose`.
 
@@ -66,7 +69,10 @@ Tests should never spend time on files no test reads (ADR-003):
 and runs `./scripts/verify full`. Only add the runtime setup + dependency install for the
 stack (commented examples are in the file). Keep: the job name `verify` (it's the
 required check), `fetch-depth: 0` (gitleaks scans the PR's commits),
-`permissions: contents: read`, the timeout and the concurrency group. Don't add
+`persist-credentials: false`, `permissions: contents: read`, the timeout and the
+concurrency group. Pin every action you add by full commit SHA with the version as a
+comment (`uses: owner/action@<sha> # vX.Y.Z`; get it with
+`gh api repos/<owner>/<action>/commits/<tag> --jq .sha`) — Dependabot keeps it current. Don't add
 deploy/release jobs unless asked.
 
 `.github/workflows/audit.yml` runs `./scripts/verify audit` (osv-scanner over the
@@ -74,8 +80,10 @@ project's lockfiles) weekly and on demand — deliberately **not** a PR gate, so
 published CVE doesn't block unrelated work. It needs committed lockfiles to be useful.
 
 If the project has a dependency ecosystem, add it to `.github/dependabot.yml`. Tool
-versions in `scripts/install-tools` are pinned and bumped by hand (Dependabot can't
-see them).
+versions in `scripts/install-tools` are pinned and Dependabot can't see them:
+`.github/workflows/tool-versions.yml` runs `scripts/check-tool-versions` weekly and opens
+an issue when one is behind — bump it on a branch. A tool added to `install-tools` with
+the same release-URL pattern is checked automatically.
 
 ## 3. Turn on strict mode
 

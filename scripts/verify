@@ -28,25 +28,26 @@ strict="${VERIFY_STRICT:-0}"
 # ----- Stage commands — fill these in for your stack ------------------------
 # Leave a stage empty ("") while it is still to be configured; set it to "n/a"
 # when it does not apply (e.g. no integration tests in a library) — "n/a" passes
-# under VERIFY_STRICT=1, an empty stage does not. Keep `template_lint` and chain your
-# linter after it. Examples:
+# under VERIFY_STRICT=1, an empty stage does not. Keep `template_lint` / `template_test`
+# and chain your linter / tests after them (under VERIFY_STRICT=1, `template_test` alone
+# counts as not configured). Examples:
 #   LINT_CMD:        template_lint && npm run lint && npx tsc --noEmit
 #                    template_lint && ruff check . && ruff format --check . && mypy .
-#   TEST_CMD:        npm test | pytest -q tests/unit | go test ./...
+#   TEST_CMD:        template_test && npm test | template_test && pytest -q tests/unit
 #   INTEGRATION_CMD: with_compose pytest -q tests/integration
 
 LINT_CMD="${VERIFY_LINT_CMD-template_lint}"
-TEST_CMD="${VERIFY_TEST_CMD-}"
+TEST_CMD="${VERIFY_TEST_CMD-template_test}"
 INTEGRATION_CMD="${VERIFY_INTEGRATION_CMD-}"
 AUDIT_CMD="${VERIFY_AUDIT_CMD-template_audit}"
 
 # ----- Non-essential paths ----------------------------------------------------
 # Files no test reads. When a change touches ONLY these, the test and integration
 # stages are skipped (reported as N/A); lint still runs — gitleaks must scan docs
-# too. Git glob pathspecs; extend for your project (e.g. images no test reads).
+# too. Git glob pathspecs — `*` does not cross `/`, so use `**/` to match at any
+# depth; extend for your project (e.g. images no test reads).
 # Never point test runners, coverage or fixtures at these paths.
-NON_ESSENTIAL=('*.md' 'docs/**' 'specs/**' 'templates/**' 'LICENSE*' '.editorconfig'
-  '.github/PULL_REQUEST_TEMPLATE.md')
+NON_ESSENTIAL=('**/*.md' 'docs/**' 'specs/**' 'templates/**' 'LICENSE*' '.editorconfig')
 
 # ----- Template checks (stack-agnostic) --------------------------------------
 # Each check runs only when the files it covers exist. A missing tool is noted
@@ -90,7 +91,7 @@ scan_secrets() {
 template_lint() {
   local status=0 f shell_files=() dockerfiles=()
   while IFS= read -r f; do shell_files+=("$f"); done < <(
-    git ls-files -co --exclude-standard -- '*.sh' scripts/verify scripts/install-tools)
+    git ls-files -co --exclude-standard -- '*.sh' scripts/verify scripts/install-tools scripts/check-tool-versions)
   while IFS= read -r f; do dockerfiles+=("$f"); done < <(
     git ls-files -co --exclude-standard -- '*Dockerfile' '*Dockerfile.*' ':(exclude)templates/')
 
@@ -104,6 +105,17 @@ template_lint() {
     tool_check hadolint hadolint --failure-threshold warning "${dockerfiles[@]}" || status=1
   fi
   tool_check gitleaks scan_secrets || status=1
+  return "$status"
+}
+
+# template_test — self-tests for this script and the Stop hook (scripts/tests/).
+template_test() {
+  local t status=0
+  for t in scripts/tests/*.test.sh; do
+    [ -f "$t" ] || continue
+    echo "  - $t"
+    bash "$t" || status=1
+  done
   return "$status"
 }
 
@@ -191,6 +203,11 @@ for stage in "${stages[@]}"; do
   if [ "$docs_only" = "1" ] && { [ "$stage" = test ] || [ "$stage" = integration ]; }; then
     summary+=("N/A      $stage (only non-essential files changed; VERIFY_ALL=1 to force)")
     continue
+  fi
+  if [ "$stage" = test ] && [ "$cmd" = template_test ] && [ "$strict" = "1" ]; then
+    summary+=("FAIL     test (only template self-tests; chain yours: template_test && <cmd>)")
+    failed="$stage"
+    break
   fi
   if [ "$cmd" = "n/a" ]; then
     summary+=("N/A      $stage (not applicable)")

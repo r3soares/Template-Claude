@@ -2,18 +2,14 @@
 
 Deterministic shell commands the Claude Code harness runs on events. Configured in
 `.claude/settings.json` under `"hooks"`. Keep them few and light — this is a solo-dev
-template. Both parse the payload with plain shell (no `jq` dependency).
+template. They parse the payload with plain shell (no `jq` dependency).
+
+Gate bypasses (`--no-verify`, `gh pr merge --admin`, force-push) are not a hook: they are
+`permissions.deny` rules in `.claude/settings.json` (ADR-004). Deny rules are matched per
+subcommand (`&&`, `;`, `|`, subshells), so they need no parsing here. They match the
+command text — they catch mistakes, not a determined bypass.
 
 ## Active
-
-### `git-guard.sh` — PreToolUse(Bash)
-
-- **Blocks** (exit 2) gate bypasses: `--no-verify` on commit/push, `gh pr merge --admin`,
-  and force-push to `master`/`main`.
-- **Warns** (non-blocking) when a `git commit`/`git push` runs on `master`/`main`,
-  nudging you to branch first.
-
-It matches the command text, so it catches mistakes — not a determined bypass.
 
 ### `verify-on-stop.sh` — Stop
 
@@ -21,6 +17,9 @@ The agent's self-correction loop (ADR-002). When Claude ends a turn with uncommi
 changes, it runs `./scripts/verify fast`:
 
 - **Pass / clean tree** → Claude stops normally.
+- **Same tree as the last pass** (e.g. a turn that only answered a question) → skipped;
+  the fingerprint is HEAD + diff + untracked files, kept in `.claude/.state/`. Only
+  passes are cached; `ship` and CI always run the full check.
 - **Fail** → exit 2: the output goes back to Claude, which must fix the root cause (the
   `verify` skill) before stopping.
 - After **3** consecutive failures in a session it lets Claude stop, so Claude reports to
@@ -33,15 +32,26 @@ with changes. Disable for a session with `CLAUDE_VERIFY_ON_STOP=0`
 
 ## Optional: format-on-edit (disabled by default)
 
-A formatter is stack-specific, so it ships disabled. To enable it, add a `PostToolUse`
-hook to `.claude/settings.json` and point it at your formatter. Example:
+A formatter is stack-specific, so it ships disabled. The edited file's path arrives in
+the hook payload on stdin (`tool_input.file_path`) — there is no environment variable
+for it. To enable it, create `.claude/hooks/format-on-edit.sh` (and `chmod +x` it):
+
+```bash
+#!/usr/bin/env bash
+# format-on-edit — PostToolUse(Edit|Write): format the file Claude just edited.
+f="$(sed -nE 's/.*"file_path"[[:space:]]*:[[:space:]]*"(([^"\\]|\\.)*)".*/\1/p')"
+[ -n "$f" ] && [ -f "$f" ] || exit 0
+<your-formatter> "$f"
+```
+
+and register it in `.claude/settings.json`:
 
 ```json
 "PostToolUse": [
   {
     "matcher": "Edit|Write",
     "hooks": [
-      { "type": "command", "command": "<your-formatter> $CLAUDE_FILE_PATHS" }
+      { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/format-on-edit.sh" }
     ]
   }
 ]

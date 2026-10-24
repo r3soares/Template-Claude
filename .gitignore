@@ -105,5 +105,8 @@ temp/
 # *.exe
 # *.test
 
-# Claude hook state (verify-on-stop attempt counters)
+# Claude Code — personal settings/instructions and hook state (verify-on-stop
+# attempt counters and last-pass cache). Never commit these.
+.claude/settings.local.json
+CLAUDE.local.md
 .claude/.state/

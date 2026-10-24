@@ -11,7 +11,7 @@
 docs
 specs
 templates
-*.md
+**/*.md
 
 # Environment / secrets
 .env

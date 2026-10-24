@@ -1,6 +1,6 @@
 ---
 name: dockerize
-description: Containerize the project with Docker when the project type warrants it. Use when the user asks to dockerize, add a Dockerfile/compose, or set up containers. Includes a decision guide — apply only when containerization makes sense.
+description: Containerize the project (Dockerfile, compose) — decides first whether the project type warrants it. Use when asked to dockerize or set up containers.
 ---
 
 # Dockerize

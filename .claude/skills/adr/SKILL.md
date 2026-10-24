@@ -1,6 +1,6 @@
 ---
 name: adr
-description: Record an Architecture Decision Record (ADR) when adopting/replacing a technology or library, choosing a non-obvious pattern or data model, or making a decision that is hard to reverse. Use when the user asks to document a decision, or before implementing such a decision.
+description: Record an Architecture Decision Record before adopting/replacing a library, choosing a non-obvious pattern or data model, or any hard-to-reverse decision; also when asked to document a decision.
 ---
 
 # ADR — Architecture Decision Record

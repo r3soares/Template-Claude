@@ -7,8 +7,12 @@ from the new project once you're done.
 
 ## 1. Copy the Template
 
+Copy the committed files only — not the template's git history or local state
+(`.git/`, `.claude/.state/`, `.claude/settings.local.json`):
+
 ```bash
-cp -r /path/to/Template /path/to/NewProject
+mkdir /path/to/NewProject
+git -C /path/to/Template archive HEAD | tar -x -C /path/to/NewProject
 cd /path/to/NewProject
 ```
 
@@ -28,9 +32,9 @@ git commit -m "chore: initial project structure from template"
 
 | File | What to update |
 |------|---------------|
-| `CLAUDE.md` | Replace the project-identity placeholder line. Add project-specific rules only if needed. |
+| `CLAUDE.md` | Replace the project-identity placeholder line. Only rules that matter in *every* session go here; area-specific ones go in `.claude/rules/` (step 7). |
 | `README.md` | Project name, description, stack-specific setup/run/test commands |
-| `.claude/project.md` | Actual stack details and any structure changes |
+| `docs/architecture/overview.md` | Project map: real structure, stack, first modules |
 | `CHANGELOG.md` | Start fresh; the first entry is your project's start |
 
 ---
@@ -49,9 +53,12 @@ git commit -m "chore: initial project structure from template"
 - **Checks + CI**: use the `setup-ci` skill. It fills the stage commands in
   `scripts/verify` (the only place they live), adds the runtime setup to
   `.github/workflows/ci.yml`, sets `VERIFY_STRICT=1`, and — if the repo is on GitHub —
-  applies the branch ruleset and enables auto-merge (it asks first).
-- **ADRs**: keep `docs/adr/ADR-001` to `ADR-003` — they record why the quality gates
-  work this way. Your project's own decisions start at `ADR-004`.
+  applies the branch ruleset and enables auto-merge (it asks first). Keep the template's
+  self-tests first in the test stage: `TEST_CMD="template_test && <your tests>"` — under
+  `VERIFY_STRICT=1`, `template_test` alone fails as not configured. Add the stack's
+  ecosystem to `.github/dependabot.yml`, and pin any action you add by SHA.
+- **ADRs**: keep `docs/adr/ADR-001` to `ADR-004` — they record why the quality gates
+  work this way. Your project's own decisions start at `ADR-005`.
 
 ---
 
@@ -69,7 +76,7 @@ git commit -m "chore: initial project structure from template"
 
 ## 7. Start Development
 
-Process scales by change size (see `.claude/workflow.md`):
+Process scales by change size (see `CLAUDE.md` and the README's *Development Workflow*):
 
 - **Small fix** → code (+ regression test) → verify → conventional commit → dated
   `CHANGELOG.md` entry → merge (the `ship` skill).
@@ -77,6 +84,10 @@ Process scales by change size (see `.claude/workflow.md`):
 
 Claude loads the right skill when the task calls for it — you don't need to read all the
 docs up front.
+
+As the project grows (see the README's *When the project grows*): add a
+`.claude/rules/<area>.md` with `paths:` for conventions specific to one part of the
+code, and keep `docs/architecture/overview.md` current when a module is added.
 
 ---
 
@@ -86,11 +97,11 @@ docs up front.
 - [ ] Git initialized and first commit made
 - [ ] `CLAUDE.md` project identity filled in
 - [ ] `README.md` updated with project details
-- [ ] `.claude/project.md` updated with stack details
+- [ ] `docs/architecture/overview.md` updated with the real structure
 - [ ] `CHANGELOG.md` reset
 - [ ] Docker decision made (`dockerize` skill if applicable)
-- [ ] `scripts/verify` stages configured and `./scripts/verify` green (`setup-ci` skill)
-- [ ] CI runtime filled in, `VERIFY_STRICT=1` set, branch ruleset applied (GitHub only)
+- [ ] `scripts/verify` stages configured (`TEST_CMD` = `template_test && …`) and `./scripts/verify` green (`setup-ci` skill)
+- [ ] CI runtime filled in, stack ecosystem in `dependabot.yml`, `VERIFY_STRICT=1` set, branch ruleset applied (GitHub only)
 - [ ] `.gitignore` stack section uncommented
 - [ ] `SETUP.md` deleted from new project
 - [ ] First feature spec created (or first small fix shipped)
