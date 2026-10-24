@@ -2,9 +2,9 @@
 
 Entry point for Claude on this project. This file is intentionally small — it is
 loaded into context every session. Specialized procedures live in **skills**
-(`.claude/skills/`), which load only when a task triggers them. Reference docs
-(`.claude/project.md`, `.claude/workflow.md`, `.claude/conventions.md`) are read
-**on demand**, not eagerly.
+(`.claude/skills/`), which load when a task matches their description — invoke them
+instead of reinventing their steps inline. Path-scoped rules (`.claude/rules/`) load
+when you work on matching files. The project map is `docs/architecture/overview.md`.
 
 > Replace this line with the project identity once the template is in use.
 
@@ -29,7 +29,7 @@ These hold in every session, without exception.
 - **Docs describe the present, git records the past.** Don't keep hand-maintained
   history/edit logs inside files; `git log` answers "what changed", on demand.
 - **Keep this file lean.** `CLAUDE.md` is paid in every session — put detail in skills or
-  reference docs, not here. If a rule isn't always-relevant, it doesn't belong in `CLAUDE.md`.
+  path-scoped rules, not here. If a rule isn't always-relevant, it doesn't belong in `CLAUDE.md`.
 
 ---
 
@@ -45,35 +45,8 @@ When unsure which tier applies, ask before assuming.
 
 ---
 
-## Which skill, when
-
-Invoke these skills (don't reinvent their steps inline):
-
-| When you need to… | Skill |
-|-------------------|-------|
-| Start a feature / write a spec | `feature-spec` |
-| Record an architecture decision | `adr` |
-| Cover and write tests, design for testability | `test-plan` |
-| Validate a change, fix failing checks/CI | `verify` |
-| Branch, commit, merge to master (push optional) | `ship` |
-| Formal traceability matrix (compliance only) | `traceability` |
-| Containerize the project (when it fits) | `dockerize` |
-| Set up CI, verify stages, branch protection | `setup-ci` |
-
----
-
-## Reference docs (read on demand)
-
-| To understand… | Read |
-|----------------|------|
-| Folder structure & purpose | `.claude/project.md` |
-| The development lifecycle | `.claude/workflow.md` |
-| Naming, commits, status tags | `.claude/conventions.md` |
-
----
-
 ## When in Doubt
 
-- Ask before architectural decisions or before creating files/folders not described in
-  `.claude/project.md`.
+- Ask before architectural decisions or before creating modules/folders not described in
+  `docs/architecture/overview.md` (update the map when one is added).
 - Don't assume — if a spec is ambiguous, flag it as an open question instead of guessing.

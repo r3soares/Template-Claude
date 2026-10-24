@@ -60,7 +60,7 @@ sudo apt install shellcheck             # or: brew install shellcheck
 
 ```
 .
-├── .claude/        # Claude config: skills (on-demand procedures), hooks, settings, reference docs
+├── .claude/        # Claude config: skills (on-demand procedures), rules (path-scoped), hooks, settings
 ├── .github/        # GitHub PR template and CI workflows
 ├── docs/           # Documentation (ADRs, architecture)
 ├── scripts/        # verify — the single entry point for all checks
@@ -70,13 +70,13 @@ sudo apt install shellcheck             # or: brew install shellcheck
 └── tests/          # Tests
 ```
 
-See `.claude/project.md` for a detailed breakdown.
+See `docs/architecture/overview.md` — the project map Claude reads — for a detailed breakdown.
 
 ---
 
 ## Development Workflow
 
-See `.claude/workflow.md` for the full lifecycle. The process scales with change size:
+The process scales with change size (`CLAUDE.md` holds the rule Claude follows):
 
 - **Small fix** → code (+ regression test for a bug) → verify → conventional commit → dated `CHANGELOG.md` entry → merge.
 - **Feature** → spec → ADR (if needed) → implement → tests → verify → merge.
@@ -89,11 +89,16 @@ when relevant — `feature-spec`, `adr`, `test-plan`, `verify`, `ship`, `dockeri
 
 Three layers, one command set (`scripts/verify`) — see ADR-001 and ADR-002 in `docs/adr/`:
 
-1. **Claude** — when a turn ends with changes, the `verify-on-stop` hook runs
-   `verify fast`; failures go back to Claude to fix (up to 3 attempts, then it reports).
-2. **Ship** — `verify full` (including Docker integration tests) before merging.
-3. **GitHub** — CI runs `verify full` on every PR; with the branch ruleset applied,
-   master only accepts PRs whose `verify` check passed, and `ship` auto-merges them.
+| Layer | Runs | When | Purpose |
+|-------|------|------|---------|
+| 1. Claude | `verify fast` (lint + test) | `verify-on-stop` hook, end of every turn with changes | Claude fixes its own failures (≤3 attempts, then reports) |
+| 2. Ship | `verify full` (+ integration via Docker) | Before review and merge | Local gate |
+| 3. GitHub | `verify full` in CI job `verify` | Every PR and push to master | Independent gate; required check via the branch ruleset, `ship` auto-merges |
+| — Audit | `verify audit` (osv-scanner) | Weekly + on demand (`audit.yml`) | Known-vulnerable dependencies; not a PR gate |
+
+Lint always starts with `template_lint` (gitleaks, actionlint, hadolint, shellcheck),
+then the stack's own tools. Stage commands live **only** in `scripts/verify` — CI,
+hooks and skills never repeat them (configure them with the `setup-ci` skill).
 
 Changes that touch only non-essential files (docs, `*.md`, `specs/`, `templates/` —
 `NON_ESSENTIAL` in `scripts/verify`) run lint only; test and integration are skipped
@@ -110,8 +115,8 @@ when you understand what Claude does on its own versus what you decide.
 
 - **Loads `CLAUDE.md` every session** — it already knows the core principles, the
   size-based process, and which skill to use when.
-- **Reads reference docs on demand** (`.claude/workflow.md`, `conventions.md`,
-  `project.md`) — only when a task needs them.
+- **Loads path-scoped rules** (`.claude/rules/`) only when it works on matching files —
+  e.g. the documentation conventions load when it edits `docs/` or `specs/`.
 - **Triggers the right skill** from your request, and **reads the rest on demand** —
   no need to paste docs into the prompt.
 - **Verifies its own work** — runs `./scripts/verify`, and the `verify-on-stop` hook
@@ -123,8 +128,8 @@ when you understand what Claude does on its own versus what you decide.
   repo settings (branch protection).
 - Keeps scope inside the spec and adds a dated `CHANGELOG.md` entry for every change.
 
-> Skill triggering is the model's judgment, not guaranteed. For determinism, name the
-> skill in your prompt (e.g. "use the `adr` skill").
+> Skill triggering is the model's judgment, not guaranteed. For determinism, run the
+> skill directly as a command (e.g. `/adr`, `/ship`).
 
 ### What you decide / approve
 
@@ -151,10 +156,29 @@ when you understand what Claude does on its own versus what you decide.
 1. **Signal size/intent** ("small fix" vs "new feature") so Claude picks the right tier.
 2. **For features, ask for the spec first and review it** — cheapest place to correct course.
 3. **Be explicit about scope** — vague prompt, vague spec; out-of-spec scope is rejected.
-4. **Name the skill** when you want a guaranteed path.
+4. **Run the skill as `/name`** when you want a guaranteed path.
 5. **Say when to commit/push** — nothing is published without your go-ahead.
 6. **Don't dump huge context** — point at files/skills; let progressive disclosure work.
 7. **Keep `CLAUDE.md` lean** — if a rule isn't always relevant, it belongs in a skill or doc.
+
+### When the project grows
+
+The template keeps Claude's context proportional to the task, not to the size of the
+project. As modules multiply:
+
+- **One rule per area.** Put conventions that apply to one part of the code in
+  `.claude/rules/<area>.md` with `paths:` frontmatter (e.g. `paths: ["src/api/**"]`).
+  They load only when Claude works there. Don't put a README inside `.claude/rules/` —
+  every `.md` there is loaded as a rule.
+- **Keep the map current.** `docs/architecture/overview.md` is how Claude finds its way
+  around; update it whenever a module or top-level folder is added (`feature-spec`
+  reminds you).
+- **Keep `CLAUDE.md` under ~200 lines.** Anything not relevant to every session moves to
+  a rule or a skill.
+- **Specs are the feature index.** Each spec's *Related* section points at its source
+  and tests — ask Claude to start from the spec instead of searching the codebase.
+- **Broad searches go to a subagent.** Ask Claude to "use the Explore agent" for sweeps
+  across many files, so the search results don't fill the main conversation.
 
 ### Maintenance
 

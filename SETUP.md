@@ -30,7 +30,7 @@ git commit -m "chore: initial project structure from template"
 |------|---------------|
 | `CLAUDE.md` | Replace the project-identity placeholder line. Add project-specific rules only if needed. |
 | `README.md` | Project name, description, stack-specific setup/run/test commands |
-| `.claude/project.md` | Actual stack details and any structure changes |
+| `docs/architecture/overview.md` | Project map: real structure, stack, first modules |
 | `CHANGELOG.md` | Start fresh; the first entry is your project's start |
 
 ---
@@ -69,7 +69,7 @@ git commit -m "chore: initial project structure from template"
 
 ## 7. Start Development
 
-Process scales by change size (see `.claude/workflow.md`):
+Process scales by change size (see `CLAUDE.md` and the README's *Development Workflow*):
 
 - **Small fix** → code (+ regression test) → verify → conventional commit → dated
   `CHANGELOG.md` entry → merge (the `ship` skill).
@@ -86,7 +86,7 @@ docs up front.
 - [ ] Git initialized and first commit made
 - [ ] `CLAUDE.md` project identity filled in
 - [ ] `README.md` updated with project details
-- [ ] `.claude/project.md` updated with stack details
+- [ ] `docs/architecture/overview.md` updated with the real structure
 - [ ] `CHANGELOG.md` reset
 - [ ] Docker decision made (`dockerize` skill if applicable)
 - [ ] `scripts/verify` stages configured and `./scripts/verify` green (`setup-ci` skill)

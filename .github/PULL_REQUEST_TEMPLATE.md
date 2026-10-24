@@ -42,7 +42,7 @@ Steps to verify this PR works as expected:
 ## Checklist
 
 - [ ] Spec is accepted, and its *Related* section points at the source/test files (features only)
-- [ ] Code follows conventions in `.claude/conventions.md`
+- [ ] Code follows the project conventions (`.claude/rules/`, Conventional Commits)
 - [ ] Tests are written and passing
 - [ ] No unintended scope added beyond the spec
 - [ ] CHANGELOG.md updated

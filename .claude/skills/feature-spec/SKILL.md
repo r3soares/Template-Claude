@@ -36,5 +36,6 @@ Small fixes (see the decision rule in `CLAUDE.md`) skip this entirely.
 
 Implement in `src/` (design for testability) → use `test-plan` to cover and write real
 tests → `./scripts/verify full` green (the `verify` skill) → keep the spec's
-*Related* section pointing at the source/test files → `ship` to merge. Add a dated
+*Related* section pointing at the source/test files → if the feature added a module or
+top-level folder, update `docs/architecture/overview.md` → `ship` to merge. Add a dated
 `CHANGELOG.md` entry. (A formal `traceability` matrix is optional — compliance only.)

@@ -15,8 +15,9 @@ the linked artifacts differ. Integration has two modes (ADR-002):
 
 ## 1. Branch
 
-Never commit work directly to `master`/`main`. Name the branch for the change:
-`feat/short-name`, `fix/short-name`, `docs/short-name`, etc.
+Never commit work directly to `master`/`main`. Name the branch `<type>/<short-name>`
+(kebab-case), with the same `type` as the commit: `feat/user-auth`, `fix/expired-token`,
+`docs/adr-005`.
 
 ```bash
 git switch -c feat/short-name
@@ -24,9 +25,20 @@ git switch -c feat/short-name
 
 ## 2. Commit — Conventional Commits
 
-Format: `<type>(<scope>): <short description>`. Types: `feat`, `fix`, `docs`, `test`,
-`refactor`, `chore`. See `.claude/conventions.md`. Commit only what the user asked to
-commit; one concern per commit (see *Commit hygiene*).
+Conventional Commits, in English:
+
+```text
+<type>(<scope>): <short description>
+
+[optional body — why, and the spec/ADR it implements]
+
+[optional footer: refs, closes, BREAKING CHANGE]
+```
+
+Types: `feat` (new feature), `fix` (bug fix), `docs`, `test`, `refactor` (neither fix nor
+feature), `chore` (tooling, dependencies). Example: `feat(auth): add JWT refresh token
+flow`. Commit only what the user asked to commit; one concern per commit (see *Commit
+hygiene*).
 
 ## 3. CHANGELOG
 
