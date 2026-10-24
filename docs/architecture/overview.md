@@ -33,7 +33,8 @@ module under *Components* as the code grows.
 ├── specs/features/       # What features SHOULD do — one folder per feature, spec.md
 ├── scripts/
 │   ├── verify            # Single entry point for lint/test/integration/audit (ADR-001)
-│   └── install-tools     # Pinned, checksum-verified install of the template's quality tools
+│   ├── install-tools     # Pinned, checksum-verified install of the template's quality tools
+│   └── tests/            # Self-tests for scripts/verify and the Stop hook (template_test)
 ├── src/                  # Source code (stack-specific structure goes here)
 ├── templates/            # Blank models: *-template.md, docker/, github/
 ├── tests/                # Project tests (unit, integration, e2e)

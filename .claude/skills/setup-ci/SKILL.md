@@ -16,13 +16,16 @@ Fill in the stage commands at the top of the file for the stack:
 | Stage | Purpose | Examples |
 |-------|---------|----------|
 | `LINT_CMD` | Static checks: lint, format check, type check | `template_lint && npm run lint && npx tsc --noEmit` · `template_lint && ruff check . && ruff format --check . && mypy .` · `template_lint && golangci-lint run` |
-| `TEST_CMD` | Unit tests — fast, no external services | `npm test` · `pytest -q tests/unit` · `go test ./...` |
+| `TEST_CMD` | Unit tests — fast, no external services | `template_test && npm test` · `template_test && pytest -q tests/unit` · `template_test && go test ./...` |
 | `INTEGRATION_CMD` | Tests against real dependencies via Docker | `with_compose pytest -q tests/integration` |
 
 - A stage that doesn't apply (e.g. no integration tests in a library) is set to `"n/a"`,
   not left empty — empty means "not configured yet" and fails under `VERIFY_STRICT=1`.
 - Keep `fast` (lint + test) quick — the Stop hook runs it after every turn with changes.
   Slow suites belong in `integration`.
+- **Keep `template_test` first in `TEST_CMD`** — the self-tests of `scripts/verify` and the
+  Stop hook (`scripts/tests/`, under a second). Under `VERIFY_STRICT=1`, `template_test`
+  alone fails as "not configured": chain the project's tests after it.
 - **Keep `template_lint` first in `LINT_CMD`** — the stack-agnostic checks, each run only
   when its files exist: `shellcheck` (shell scripts), `actionlint` (workflows),
   `hadolint` (Dockerfiles, outside `templates/`), `gitleaks` (secrets in history and in
