@@ -80,8 +80,10 @@ project's lockfiles) weekly and on demand — deliberately **not** a PR gate, so
 published CVE doesn't block unrelated work. It needs committed lockfiles to be useful.
 
 If the project has a dependency ecosystem, add it to `.github/dependabot.yml`. Tool
-versions in `scripts/install-tools` are pinned and bumped by hand (Dependabot can't
-see them).
+versions in `scripts/install-tools` are pinned and Dependabot can't see them:
+`.github/workflows/tool-versions.yml` runs `scripts/check-tool-versions` weekly and opens
+an issue when one is behind — bump it on a branch. A tool added to `install-tools` with
+the same release-URL pattern is checked automatically.
 
 ## 3. Turn on strict mode
 

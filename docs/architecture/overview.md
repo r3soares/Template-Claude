@@ -25,7 +25,8 @@ module under *Components* as the code grows.
 ├── .github/
 │   ├── PULL_REQUEST_TEMPLATE.md
 │   ├── dependabot.yml    # Keeps GitHub Actions (and your ecosystem) current
-│   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml weekly CVE scan
+│   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml weekly CVE scan;
+│                         # tool-versions.yml weekly check of the pinned tools
 ├── docs/                 # What the system IS now (git holds the history)
 │   ├── adr/              # Architecture Decision Records (ADR-001–004: quality gates)
 │   ├── architecture/     # THIS FILE + component/system docs
@@ -34,6 +35,7 @@ module under *Components* as the code grows.
 ├── scripts/
 │   ├── verify            # Single entry point for lint/test/integration/audit (ADR-001)
 │   ├── install-tools     # Pinned, checksum-verified install of the template's quality tools
+│   ├── check-tool-versions  # Are those pins current? (exit 1 if one is behind)
 │   └── tests/            # Self-tests for scripts/verify and the Stop hook (template_test)
 ├── src/                  # Source code (stack-specific structure goes here)
 ├── templates/            # Blank models: *-template.md, docker/, github/

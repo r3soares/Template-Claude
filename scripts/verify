@@ -91,7 +91,7 @@ scan_secrets() {
 template_lint() {
   local status=0 f shell_files=() dockerfiles=()
   while IFS= read -r f; do shell_files+=("$f"); done < <(
-    git ls-files -co --exclude-standard -- '*.sh' scripts/verify scripts/install-tools)
+    git ls-files -co --exclude-standard -- '*.sh' scripts/verify scripts/install-tools scripts/check-tool-versions)
   while IFS= read -r f; do dockerfiles+=("$f"); done < <(
     git ls-files -co --exclude-standard -- '*Dockerfile' '*Dockerfile.*' ':(exclude)templates/')
 

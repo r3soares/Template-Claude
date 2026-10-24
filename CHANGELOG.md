@@ -16,6 +16,7 @@ older released sections to `docs/CHANGELOG-ARCHIVE.md` so the working file stays
 ## [Unreleased]
 
 ### Added
+- **2026-10-24** `scripts/check-tool-versions` and the weekly `tool-versions.yml` workflow: compare the tools pinned in `scripts/install-tools` with their latest GitHub releases (read from the install URLs, so new tools are covered automatically; retries transient API errors) and open or refresh one tracking issue when one is behind — Dependabot can't see these pins.
 - **2026-10-24** Self-tests for `scripts/verify` (stage selection, docs-only skip, strict mode, failure handling) and the `verify-on-stop` hook (bounded retries, opt-out) in `scripts/tests/`, plain bash, under a second. Run as `template_test`, the new default `TEST_CMD`; under `VERIFY_STRICT=1`, `template_test` alone fails as not configured, so projects still chain their own tests.
 - **2026-10-19** `scripts/install-tools` — pinned, checksum-verified install of gitleaks, actionlint, hadolint and osv-scanner (Linux/macOS); weekly `audit.yml` workflow for dependency vulnerabilities.
 - **2026-10-19** Quality gates (ADR-001, ADR-002): `scripts/verify` as the single entry point for lint/test/integration (`fast`/`full`, `VERIFY_STRICT`, Docker `with_compose`); `verify-on-stop` Stop hook for a bounded agent self-correction loop; `verify` skill; branch ruleset template (`templates/github/branch-ruleset.json`); Dependabot for GitHub Actions; first ADRs in `docs/adr/`.

@@ -51,6 +51,7 @@ CI always installs them; to run them locally too:
 ```bash
 ./scripts/install-tools                 # gitleaks, actionlint, hadolint → ~/.local/bin
 ./scripts/install-tools osv-scanner     # for `verify audit`
+./scripts/check-tool-versions           # are the pinned tool versions current? (weekly in CI)
 sudo apt install shellcheck             # or: brew install shellcheck
 ```
 
@@ -95,6 +96,7 @@ Three layers, one command set (`scripts/verify`) — see ADR-001 and ADR-002 in 
 | 2. Ship | `verify full` (+ integration via Docker) | Before review and merge | Local gate |
 | 3. GitHub | `verify full` in CI job `verify` | Every PR and push to master | Independent gate; required check via the branch ruleset, `ship` auto-merges |
 | — Audit | `verify audit` (osv-scanner) | Weekly + on demand (`audit.yml`) | Known-vulnerable dependencies; not a PR gate |
+| — Tool versions | `scripts/check-tool-versions` | Weekly + on demand (`tool-versions.yml`) | Opens an issue when a tool pinned in `install-tools` is behind |
 
 Lint always starts with `template_lint` (gitleaks, actionlint, hadolint, shellcheck),
 then the stack's own tools. Stage commands live **only** in `scripts/verify` — CI,

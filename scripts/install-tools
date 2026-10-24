@@ -9,7 +9,8 @@
 #
 # ShellCheck is not installed here (no release checksums; it is preinstalled on
 # GitHub's ubuntu runners): use `apt install shellcheck` / `brew install shellcheck`.
-# To upgrade a tool, bump its version below.
+# To upgrade a tool, bump its version below. Dependabot can't see these pins:
+# scripts/check-tool-versions (weekly in CI, tool-versions.yml) reports when one is behind.
 
 set -euo pipefail
 
