@@ -94,7 +94,7 @@ Three layers, one command set (`scripts/verify`) — see ADR-001 and ADR-002 in 
 |-------|------|------|---------|
 | 1. Claude | `verify fast` (lint + test) | `verify-on-stop` hook, end of every turn with changes | Claude fixes its own failures (≤3 attempts, then reports) |
 | 2. Ship | `verify full` (+ integration via Docker) | Before review and merge | Local gate |
-| 3. GitHub | `verify full` in CI job `verify` | Every PR and push to master | Independent gate; required check via the branch ruleset, `ship` auto-merges |
+| 3. GitHub | `verify full` in CI job `verify` | Every PR and direct push to master (PR merges are not re-run) | Independent gate; required check via the branch ruleset, `ship` auto-merges |
 | — Audit | `verify audit` (osv-scanner) | Weekly + on demand (`audit.yml`) | Known-vulnerable dependencies; not a PR gate |
 | — Tool versions | `scripts/check-tool-versions` | Weekly + on demand (`tool-versions.yml`) | Opens an issue when a tool pinned in `install-tools` is behind |
 

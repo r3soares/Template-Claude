@@ -79,11 +79,30 @@ deploy/release jobs unless asked.
 project's lockfiles) weekly and on demand — deliberately **not** a PR gate, so a newly
 published CVE doesn't block unrelated work. It needs committed lockfiles to be useful.
 
-If the project has a dependency ecosystem, add it to `.github/dependabot.yml`. Tool
+If the project has a dependency ecosystem, add it to `.github/dependabot.yml` with the
+same monthly `schedule` and a `groups` entry (one PR per ecosystem per month). Tool
 versions in `scripts/install-tools` are pinned and Dependabot can't see them:
 `.github/workflows/tool-versions.yml` runs `scripts/check-tool-versions` weekly and opens
 an issue when one is behind — bump it on a branch. A tool added to `install-tools` with
 the same release-URL pattern is checked automatically.
+
+### Keep CI cheap (private repos)
+
+On **private** repos every run spends the account's Actions minutes (GitHub Free:
+2,000/month; public repos are free). GitHub bills each **job** and rounds it **up to the
+minute**: a 10-second job costs 1 minute, and two jobs cost 2. So:
+
+- **One job** (`verify`). Put the stack's setup steps in it rather than in separate
+  lint/test jobs.
+- **Don't trigger on pushes to working branches.** Keep `push` on the default branch
+  only and use PRs for everything else. `ci.yml` already skips the push of a PR merge
+  commit, because the PR run verified that merge (ADR-006).
+- **Keep `integration`/E2E lean**, and cache what installs slowly: dependencies through
+  the `setup-*` actions' `cache:` option, browsers and tool binaries with `actions/cache`.
+- **Don't set `VERIFY_ALL=1` in CI.** It disables the docs-only skip (ADR-003).
+- **Verify locally before every push** (`ship` does). A failing PR that you fix with
+  several pushes costs one full run per push.
+- **Dependabot monthly and grouped**, as above.
 
 ## 3. Turn on strict mode
 

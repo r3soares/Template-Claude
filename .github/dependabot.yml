@@ -1,8 +1,18 @@
 # Keeps GitHub Actions versions current (stack-agnostic). Add your stack's
-# ecosystem (npm, pip, gomod, docker, …) as another entry when it applies.
+# ecosystem (npm, pip, gomod, docker, …) as another entry with the same
+# `schedule` and `groups` when it applies.
+#
+# Monthly and grouped: one PR per ecosystem per month instead of one per
+# dependency per week. Each PR runs the full CI, which costs Actions minutes on
+# private repos. Security updates are separate (enable "Dependabot security
+# updates" in the repo settings) and still open as soon as an advisory is
+# published.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
+    groups:
+      github-actions:
+        patterns: ["*"]

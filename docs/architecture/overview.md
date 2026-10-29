@@ -29,7 +29,7 @@ module under *Components* as the code grows.
 │   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml weekly CVE scan;
 │                         # tool-versions.yml weekly check of the pinned tools
 ├── docs/                 # What the system IS now (git holds the history)
-│   ├── adr/              # Architecture Decision Records (ADR-001–004: quality gates; 005: orchestrated mode)
+│   ├── adr/              # Architecture Decision Records (ADR-001–004, 006: quality gates; 005: orchestrated mode)
 │   ├── architecture/     # THIS FILE + component/system docs
 │   └── traceability/     # OPTIONAL — formal matrix, compliance projects only
 ├── specs/features/       # What features SHOULD do — one folder per feature, spec.md
@@ -82,3 +82,4 @@ module under *Components* as the code grows.
 | Skip tests for non-essential changes | [ADR-003](../adr/ADR-003-skip-tests-for-non-essential-changes.md) |
 | Permission deny rules block gate bypasses | [ADR-004](../adr/ADR-004-permission-deny-rules-replace-git-guard.md) |
 | Optional orchestrated mode (native subagents) | [ADR-005](../adr/ADR-005-orchestrated-mode.md) |
+| CI skips the redundant post-merge run | [ADR-006](../adr/ADR-006-skip-ci-on-pr-merge-push.md) |

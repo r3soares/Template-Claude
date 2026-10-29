@@ -26,6 +26,10 @@ concurrency:
 
 jobs:
   verify:
+    # Skip the push of a PR merge commit (`ship` merges with --merge): the PR run
+    # already verified that merge, and on private repos each run costs Actions
+    # minutes (ADR-006). Direct pushes to master — local mode — still run.
+    if: "github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'Merge pull request #')"
     runs-on: ubuntu-latest   # has Docker + Compose for the integration stage
     timeout-minutes: 20
     env:
