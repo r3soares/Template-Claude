@@ -23,6 +23,10 @@ older released sections to `docs/CHANGELOG-ARCHIVE.md` so the working file stays
 - **2026-10-19** `scripts/install-tools` — pinned, checksum-verified install of gitleaks, actionlint, hadolint and osv-scanner (Linux/macOS); weekly `audit.yml` workflow for dependency vulnerabilities.
 - **2026-10-19** Quality gates (ADR-001, ADR-002): `scripts/verify` as the single entry point for lint/test/integration (`fast`/`full`, `VERIFY_STRICT`, Docker `with_compose`); `verify-on-stop` Stop hook for a bounded agent self-correction loop; `verify` skill; branch ruleset template (`templates/github/branch-ruleset.json`); Dependabot for GitHub Actions; first ADRs in `docs/adr/`.
 ### Changed
+- **2026-10-29** CI cost on private repos (ADR-006):
+  - `ci.yml` skips the push of a PR merge commit, because the PR run already verified that merge. Direct pushes to master still run.
+  - Dependabot runs monthly with grouped updates, so each ecosystem gets one PR per month. Security updates are unaffected.
+  - The `setup-ci` skill explains how Actions bills minutes (per job, rounded up) and the cheap CI patterns.
 - **2026-10-29** `verify-on-stop` failure message lists the active `VERIFY_*` overrides and says to escalate, not work around, an environmental cause. In the orchestrated-mode smoke test, an override was the cause, and the implementer could not inspect its environment to find it.
 - **2026-10-29** `verify-on-stop` counts attempts per agent (`agent_id`, else session) and, on the main-agent `Stop`, skips verification while a background subagent is still running, because the tree may be half-edited. The check runs at the next Stop. Its fingerprint moved to `.claude/hooks/fingerprint.sh`, shared with `review-diff.sh`.
 - **2026-10-24** osv-scanner 2.6.0 → 2.7.0 in `scripts/install-tools`.
