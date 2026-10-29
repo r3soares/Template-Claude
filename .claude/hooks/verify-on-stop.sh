@@ -81,7 +81,15 @@ echo "$attempts" >"$counter"
 {
   echo "verify-on-stop: \`./scripts/verify fast\` FAILED (attempt $attempts/$MAX_ATTEMPTS)."
   echo "Follow the \`verify\` skill: find the root cause and fix the code — do not skip,"
-  echo "delete or weaken tests. Output (last 60 lines):"
+  echo "delete or weaken tests. If the cause is environmental (missing tool, Docker, an"
+  echo "override below), don't change code to work around it — escalate."
+  # Overrides change what verify runs; the agent may not be able to inspect its env.
+  overrides="$(env | grep -E '^VERIFY_[A-Z_]+=' | sort)"
+  if [ -n "$overrides" ]; then
+    echo "Active VERIFY_* overrides in this environment:"
+    printf '%s\n' "$overrides" | sed 's/^/  /'
+  fi
+  echo "Output (last 60 lines):"
   echo "----"
   tail -n 60 "$log"
   echo "----"
