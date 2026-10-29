@@ -46,6 +46,17 @@ check "failure: blocks the stop (exit 2)" status_is 2
 check "failure: reports attempt 1/3" has "attempt 1/3"
 check "failure: passes verify output back" has "fake verify output"
 check "failure: counter is 1" counter_is 1
+check "failure without overrides: lists none" lacks "Active VERIFY_* overrides"
+rm -f "$counter"
+
+out="$(printf '{"session_id":"t1","hook_event_name":"Stop"}' |
+  VERIFY_TEST_CMD=false VERIFY_STRICT=1 .claude/hooks/verify-on-stop.sh 2>&1)"
+code=$?
+check "failure with overrides: lists them" has "Active VERIFY_* overrides"
+check "failure with overrides: shows each one" has "  VERIFY_TEST_CMD=false"
+check "failure with overrides: sorted" has "$(printf '  VERIFY_STRICT=1\n  VERIFY_TEST_CMD=false')"
+check "failure: points at environmental causes" has "If the cause is environmental"
+echo 1 >"$counter"
 
 hook
 hook
