@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Self-tests for .claude/hooks/verify-on-stop.sh: when it runs verify, the bounded
-# retry counter and the opt-out. scripts/verify is replaced by a fake whose exit
+# retry counter (per agent), the background-subagent deferral and the opt-out. scripts/verify is replaced by a fake whose exit
 # status comes from .verify-result and whose calls are logged to .verify-calls.
 
 # shellcheck source=scripts/tests/lib.sh
 . "$(dirname "$0")/lib.sh"
 
-new_repo .claude/hooks/verify-on-stop.sh
+new_repo .claude/hooks/verify-on-stop.sh .claude/hooks/fingerprint.sh
 mkdir -p scripts
 cat >scripts/verify <<'EOF'
 #!/usr/bin/env bash
@@ -84,6 +84,35 @@ hook
 hook
 check "failures are never cached: verify re-runs on an unchanged tree" calls_are $((before + 5))
 rm -f "$counter"
+
+# payload_hook <json> — run the hook with an arbitrary payload.
+payload_hook() {
+  out="$(printf '%s' "$1" | .claude/hooks/verify-on-stop.sh 2>&1)"
+  code=$?
+}
+bg='"background_tasks":[{"id":"a1","type":"subagent","status":"running","agent_type":"implementer"}]'
+
+before="$(calls)"
+payload_hook '{"session_id":"t1","hook_event_name":"Stop",'"$bg"'}'
+check "Stop with a background subagent running: deferred, verify not run" calls_are "$before"
+check "Stop with a background subagent running: lets Claude stop" status_is 0
+check "Stop with a background subagent running: no attempt counted" no_counter
+
+payload_hook '{"session_id":"t1","hook_event_name":"Stop","background_tasks":[{"id":"s1","type":"shell","status":"running"}]}'
+check "Stop with only a background shell task: verify runs" calls_are $((before + 1))
+check "Stop with only a background shell task: still blocks on failure" status_is 2
+rm -f "$counter"
+
+before="$(calls)"
+payload_hook '{"session_id":"t1","hook_event_name":"SubagentStop","agent_id":"impl1","agent_type":"implementer",'"$bg"'}'
+check "SubagentStop: verify runs even though background_tasks lists a subagent" calls_are $((before + 1))
+check "SubagentStop failure: blocks the subagent (exit 2)" status_is 2
+check "SubagentStop failure: counted for the agent" test "$(cat .claude/.state/verify-attempts-impl1 2>/dev/null)" = 1
+check "SubagentStop failure: main session counter untouched" no_counter
+
+hook
+check "main session after a subagent failure: its own attempt 1/3" has "attempt 1/3"
+rm -f "$counter" .claude/.state/verify-attempts-impl1
 
 before="$(calls)"
 out="$(printf '{"session_id":"t1"}' | CLAUDE_VERIFY_ON_STOP=0 .claude/hooks/verify-on-stop.sh 2>&1)"
