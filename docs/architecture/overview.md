@@ -19,7 +19,8 @@ module under *Components* as the code grows.
 .
 ├── .claude/
 │   ├── settings.json     # Harness config: permissions (incl. gate-bypass deny rules), hooks
-│   ├── hooks/            # verify-on-stop (agent self-correction loop) + README
+│   ├── agents/           # Orchestrated mode (opt-in): orchestrator, implementer, reviewer (ADR-005)
+│   ├── hooks/            # verify-on-stop (self-correction loop), review-diff (reviewer's diff) + README
 │   ├── rules/            # Path-scoped instructions, loaded when Claude works on matching files
 │   └── skills/           # On-demand procedures (one folder per skill, SKILL.md)
 ├── .github/
@@ -28,7 +29,7 @@ module under *Components* as the code grows.
 │   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml weekly CVE scan;
 │                         # tool-versions.yml weekly check of the pinned tools
 ├── docs/                 # What the system IS now (git holds the history)
-│   ├── adr/              # Architecture Decision Records (ADR-001–004: quality gates)
+│   ├── adr/              # Architecture Decision Records (ADR-001–004: quality gates; 005: orchestrated mode)
 │   ├── architecture/     # THIS FILE + component/system docs
 │   └── traceability/     # OPTIONAL — formal matrix, compliance projects only
 ├── specs/features/       # What features SHOULD do — one folder per feature, spec.md
@@ -36,7 +37,7 @@ module under *Components* as the code grows.
 │   ├── verify            # Single entry point for lint/test/integration/audit (ADR-001)
 │   ├── install-tools     # Pinned, checksum-verified install of the template's quality tools
 │   ├── check-tool-versions  # Are those pins current? (exit 1 if one is behind)
-│   └── tests/            # Self-tests for scripts/verify and the Stop hook (template_test)
+│   └── tests/            # Self-tests for scripts/verify, the hooks and the agents (template_test)
 ├── src/                  # Source code (stack-specific structure goes here)
 ├── templates/            # Blank models: *-template.md, docker/, github/
 ├── tests/                # Project tests (unit, integration, e2e)
@@ -80,3 +81,4 @@ module under *Components* as the code grows.
 | Layered validation + GitHub gate | [ADR-002](../adr/ADR-002-layered-validation-and-github-gate.md) |
 | Skip tests for non-essential changes | [ADR-003](../adr/ADR-003-skip-tests-for-non-essential-changes.md) |
 | Permission deny rules block gate bypasses | [ADR-004](../adr/ADR-004-permission-deny-rules-replace-git-guard.md) |
+| Optional orchestrated mode (native subagents) | [ADR-005](../adr/ADR-005-orchestrated-mode.md) |

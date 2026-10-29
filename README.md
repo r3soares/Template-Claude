@@ -61,7 +61,7 @@ sudo apt install shellcheck             # or: brew install shellcheck
 
 ```
 .
-├── .claude/        # Claude config: skills (on-demand procedures), rules (path-scoped), hooks, settings
+├── .claude/        # Claude config: skills (on-demand procedures), rules (path-scoped), agents, hooks, settings
 ├── .github/        # GitHub PR template and CI workflows
 ├── docs/           # Documentation (ADRs, architecture)
 ├── scripts/        # verify — the single entry point for all checks
@@ -181,6 +181,14 @@ project. As modules multiply:
   and tests — ask Claude to start from the spec instead of searching the codebase.
 - **Broad searches go to a subagent.** Ask Claude to "use the Explore agent" for sweeps
   across many files, so the search results don't fill the main conversation.
+
+### Orchestrated mode (optional)
+
+For larger tasks, `claude --agent orchestrator` starts a session whose main agent can't
+write: it plans, delegates to an `implementer` (one task at a time) and a read-only
+`reviewer`, and reports. The reviewer gets the real diff from a hook, and the same
+verify gates block the implementer. You ship from a classic session (`claude`). Classic
+mode stays the default. See `docs/architecture/orchestrated-mode.md` and ADR-005.
 
 ### Maintenance
 
