@@ -99,7 +99,7 @@ for t in Bash Edit Write NotebookEdit PowerShell Agent; do
   check "reviewer: no $t" lacks_tool "$AGENTS/reviewer.md" "$t"
 done
 check "implementer: no Agent (no nested delegation)" lacks_tool "$AGENTS/implementer.md" Agent
-for t in Agent Edit Write NotebookEdit Skill; do
+for t in Agent Edit Write NotebookEdit PowerShell Skill; do
   check "integrator: no $t" lacks_tool "$AGENTS/integrator.md" "$t"
 done
 

@@ -45,21 +45,28 @@ Forces:
    - `start <branch>`: create the task branch from an up-to-date master.
    - `commit <paths> <message>`: stage exactly those paths and make one Conventional
      Commit. Minimal prompt; the integrator reads no project docs.
-   - `ship`: `verify full`, push, open a PR, arm auto-merge, wait for CI, return to an
+   - `ship <title> <body>`: `verify full`, push, open a PR (or reuse the branch's open
+     PR in a fix round), arm auto-merge, wait for CI and for the merge, return to an
      up-to-date master. Without a GitHub remote: local `merge --no-ff` after a green
      `verify full`.
 2. **Authorization**: starting orchestrated mode is the developer's standing
    authorization to integrate. The gates are the confirmation: `verify full` locally,
    then CI's required check and the branch ruleset on GitHub.
-3. **No external gate → no merge.** If the repo has no ruleset requiring CI
-   (auto-merge unavailable), the integrator stops after opening the PR and reports. It
-   never merges an ungated PR by hand.
+3. **No external gate → no merge.** Before arming auto-merge, the integrator checks
+   master's rules (`gh api repos/{owner}/{repo}/rules/branches/master`). Without a
+   `required_status_checks` rule it stops after opening the PR and reports. A refused
+   `--auto` is not a reliable signal: on a PR that is already mergeable, `gh pr merge
+   --auto` merges at once.
 4. **Failures go back through the orchestrator.** The integrator never edits project
    files and never resolves conflicts. On a red `verify full`, a failed CI run or a
    conflict, it reports the log and stops. The orchestrator delegates the fix to an
    implementer (bounded: 3 rounds), then asks the integrator to commit and ship again.
-5. **Flow**: `integrator start` → per task: implementer → reviewer (risky changes only)
-   → `integrator commit` → at the end, `integrator ship`.
+5. **Flow**: `integrator start` → per task: implementer → reviewer → `integrator
+   commit` → at the end, `integrator ship`.
+6. **Review replaces the developer's look.** The reviewer runs for every feature-tier
+   change (standing in for `ship`'s `security-review` step) and for risky small
+   changes. Must-fix findings get one fix round and a focused re-review; a task with an
+   unresolved must-fix or an unconfirmed review is not committed.
 
 ---
 
@@ -99,7 +106,9 @@ Forces:
 ### Negative / Trade-offs
 
 - Merges happen without a human look at the diff. Quality rests on `verify`, CI, the
-  reviewer for risky changes, and the PR history for after-the-fact review.
+  reviewer (features and risky changes), and the PR history for after-the-fact review.
+- The rule check reads rulesets only; a repo protected by classic branch protection
+  instead is treated as ungated and stops at the PR.
 
 ### Risks
 

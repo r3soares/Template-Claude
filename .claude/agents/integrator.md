@@ -37,32 +37,36 @@ git commit -m "<message>"
 
 Then run `git status --porcelain`; report any path still uncommitted.
 
-## `ship`
+## `ship <title> <body>`
 
-1. `./scripts/verify full`. Red → report the summary and stop.
-2. Pick the mode: run `git remote -v`, then `gh auth status`. GitHub if `origin` is on
+`<title>` is a Conventional Commit title; `<body>` is the PR description. Both come
+from the orchestrator.
+
+1. `git branch --show-current` — note this branch name before anything else.
+2. `./scripts/verify full`. Red → report the summary and stop.
+3. Pick the mode: run `git remote -v`, then `gh auth status`. GitHub if `origin` is on
    GitHub and `gh auth status` succeeds, else local.
-3. **GitHub**:
-
-   ```bash
-   git push -u origin HEAD
-   gh pr create --fill                 # title and body from the branch's commits
-   gh pr merge --auto --merge --delete-branch
-   gh pr checks --watch
-   ```
-
-   - `gh pr merge --auto` refused (no ruleset or auto-merge disabled) → stop and report
-     the PR URL: there is no external gate, so never merge it by hand.
-   - Checks fail → `gh run view <run-id> --log-failed`; report the failing step and the
-     log excerpt, and stop.
-   - Merged → `git switch master`, then `git pull --ff-only`.
-4. **Local** (no GitHub remote): `git switch master`, then `git merge --no-ff <branch>`,
-   then `git branch -d <branch>`. Don't push. Note the branch name (`git branch
-   --show-current`) before switching.
+4. **GitHub**:
+   1. `git push -u origin HEAD`
+   2. `gh pr view --json number,state,url` — an `OPEN` PR already exists for this
+      branch (a fix round): skip to step 6. Auto-merge, if armed, stays armed.
+   3. `gh pr create --title "<title>" --body "<body>"`
+   4. `gh api repos/{owner}/{repo}/rules/branches/master --jq '.[].type'` — if the output
+      has no `required_status_checks` line, master has no CI gate: stop and report the
+      PR URL as **open, not merged**. Never run `gh pr merge` in that case.
+   5. `gh pr merge --auto --merge --delete-branch`
+   6. `gh pr checks --watch`. Failed → `gh run view <run-id> --log-failed`; report the
+      failing step and the log excerpt, and stop.
+   7. `gh pr view --json state,mergedAt` — repeat (with `sleep 15` between calls, at
+      most 10 times) until `state` is `MERGED`. Not merged by then → report the state
+      and stop.
+   8. `git switch master`, then `git pull --ff-only`.
+5. **Local** (no GitHub remote): `git switch master`, then `git merge --no-ff <branch>`
+   (the name from step 1), then `git branch -d <branch>`. Don't push.
 
 Never use `--admin`, `--force`, `--no-verify` or `git reset --hard`.
 
 ## Report
 
-The operation, the commands' outcome (commit SHA, PR URL, merge state), and anything
-left undone.
+The operation, the commands' outcome (commit SHA, PR URL, final PR state, merge
+commit), and anything left undone.

@@ -54,7 +54,8 @@ git commit -m "chore: initial project structure from template"
   `scripts/verify` (the only place they live), adds the runtime setup to
   `.github/workflows/ci.yml`, sets `VERIFY_STRICT=1`, and — if the repo is on GitHub —
   applies the branch ruleset and enables auto-merge (it asks first). Orchestrated mode
-  merges on its own only behind that ruleset (ADR-007); without it, it stops at the PR. Keep the template's
+  merges on its own only when that ruleset requires the CI check (ADR-007); without it,
+  it stops at the open PR. Keep the template's
   self-tests first in the test stage: `TEST_CMD="template_test && <your tests>"` — under
   `VERIFY_STRICT=1`, `template_test` alone fails as not configured. Add the stack's
   ecosystem to `.github/dependabot.yml`, and pin any action you add by SHA.

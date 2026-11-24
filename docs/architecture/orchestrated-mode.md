@@ -28,15 +28,17 @@ run without prompts, allow them in your untracked `.claude/settings.local.json`:
 
 ```json
 { "permissions": { "allow": [
-  "Bash(git switch *)", "Bash(git pull --ff-only*)", "Bash(git add *)",
-  "Bash(git commit *)", "Bash(git status *)", "Bash(git push *)",
-  "Bash(git merge --no-ff *)", "Bash(git branch *)", "Bash(git remote*)",
-  "Bash(gh auth status*)",
-  "Bash(gh pr create *)", "Bash(gh pr merge *)"
+  "Bash(git switch *)", "Bash(git pull --ff-only)", "Bash(git add -A -- *)",
+  "Bash(git commit -m *)", "Bash(git status --porcelain)", "Bash(git push -u origin HEAD)",
+  "Bash(git merge --no-ff *)", "Bash(git branch -d *)", "Bash(git branch --show-current)",
+  "Bash(git remote)", "Bash(git remote -v)", "Bash(gh auth status)",
+  "Bash(gh pr create *)", "Bash(gh pr merge --auto *)", "Bash(sleep *)",
+  "Bash(gh api repos/{owner}/{repo}/rules/branches/*)"
 ] } }
 ```
 
-The deny rules (`--no-verify`, force-push, `--admin`) still win over these.
+The deny rules (`--no-verify`, force-push, `--admin`) still win over these. `gh pr
+view`, `gh pr checks` and `gh run view` are already in the shared allow list.
 
 ---
 
@@ -51,9 +53,9 @@ developer ─▶ orchestrator (Agent(implementer, reviewer, integrator), Read, G
                ├─▶ reviewer (Read, Glob, Grep)
                │     SubagentStart ─▶ review-diff.sh ─▶ .claude/.state/review-<state>.diff
                │                                       + path/state via additionalContext
-               │ compare review <state> with verify-pass; must-fix findings back (1 round)
+               │ compare review <state> with verify-pass; must-fix: 1 fix round + focused re-review
                ├─▶ integrator (Bash, Read; haiku)
-               │     start <branch> · commit <paths> <msg> per task · ship ─▶ PR ─▶ CI ─▶ auto-merge
+               │     start <branch> · commit <paths> <msg> per task · ship ─▶ PR ─▶ gate check ─▶ CI ─▶ auto-merge
                └─ Stop ─▶ verify-on-stop.sh (skipped while a subagent runs in background)
 ```
 
@@ -106,7 +108,7 @@ perm=(--permission-mode acceptEdits --allowedTools 'Bash(./**)' 'Bash(chmod *)' 
 | 7 | Classic mode unchanged | `claude -p --permission-mode acceptEdits "Append a line to README.md"` | Stop hook runs verify; `verify-pass` equals the current fingerprint | Pass, automated (2.1.312) |
 | 8 | Background deferral (interactive) | `claude --agent orchestrator`, delegate a multi-file task; while the implementer runs, the orchestrator's turn ends | No verify failure reported mid-implementation; verify runs when the orchestrator stops after the result | Manual, not yet run |
 | 9 | Interactive niceties | Same session | `AskUserQuestion` available for approvals; workspace trust accepted, so project allow rules apply | Manual, not yet run |
-| 10 | Autonomous integration | In a throwaway repo with a GitHub remote, ruleset and CI: `claude --agent orchestrator`, a small task | One commit per task by the integrator; no reviewer for a non-risky change; PR opened with auto-merge, merged after CI | Local mode (no remote): pass, automated (2.1.331) — branch, one commit, `verify full`, `merge --no-ff`. GitHub mode not yet run |
+| 10 | Autonomous integration | In a throwaway repo with a GitHub remote, ruleset and CI: `claude --agent orchestrator`, a small task | One commit per task by the integrator; no reviewer for a non-risky small change; PR opened with auto-merge, merged after CI | Local mode (no remote): pass, automated (2.1.331) — branch, one commit, `verify full`, `merge --no-ff`. GitHub mode not yet run |
 
 When upgrading Claude Code, re-run 1–7 (a few minutes, a few cents of tokens) and
 update the Status column.

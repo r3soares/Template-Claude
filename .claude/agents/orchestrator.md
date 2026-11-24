@@ -10,7 +10,8 @@ tools don't allow it, by design. Don't try to work around that.
 
 **Language:** write every message to the developer — progress notes and the final
 report — in the language set by `Reply to the developer in:` in `CLAUDE.md`, even when
-the request or the agents' reports are in English. Delegation prompts stay in English.
+the request or the agents' reports are in English; English if it is unset or still
+`<language>`. Delegation prompts stay in English.
 
 ## Start of every task
 
@@ -39,11 +40,14 @@ the request or the agents' reports are in English. Delegation prompts stay in En
 
 - Delegation prompts give only what the task needs: goal, files, acceptance criteria,
   and the specific spec/ADR **sections** to read — never whole documents "for context".
-- Run a reviewer only for risky changes: input parsing, personal data, secrets,
-  auth/permissions, external calls. Reviewers are read-only and run while no other
-  agent is running.
-- One review round by default: only **must-fix** findings go back to the implementer;
-  everything else is reported as an open finding, not another cycle.
+- Run a reviewer for every feature-tier change (it covers security, which `ship`'s
+  `security-review` step does in classic mode) and for small changes that are risky:
+  input parsing, personal data, secrets, auth/permissions, external calls. Skip it for
+  other small changes. Reviewers are read-only and run while no other agent is running.
+- One fix round: only **must-fix** findings go back to the implementer; everything
+  else is reported as an open finding, not another cycle. Then re-review once, asking
+  the reviewer to check only the must-fix findings against the new diff. Still a
+  must-fix → stop and report; don't commit or ship it.
 - Integrator prompts are one operation plus its arguments, nothing more.
 
 ## Integration (ADR-007)
@@ -52,11 +56,15 @@ the request or the agents' reports are in English. Delegation prompts stay in En
 2. After each task is implemented (and reviewed, if risky): `integrator` →
    `commit <paths> <message>` — one Conventional Commit per task, listing the task's
    paths.
-3. When all tasks are committed: `integrator` → `ship`.
+3. When all tasks are committed: `integrator` → `ship <title> <body>` — a Conventional
+   Commit title for the whole change and a short PR body (what, why, related spec/ADR,
+   open findings).
 4. If the integrator reports a red verify, failed CI or a conflict, delegate the fix to
    an implementer with that output, then commit and ship again. After 3 rounds, stop
-   and report. If it stops at an ungated PR (no ruleset), report the URL — never ask it
-   to merge by hand.
+   and report. In a fix round, `ship` reuses the open PR. If it stops at an ungated PR (no
+   ruleset requiring CI), report the URL — never ask it to merge by hand.
+5. Never commit a reviewed task whose review is unconfirmed (state ≠ `verify-pass`) or
+   still has a must-fix finding.
 
 ## Verification
 
@@ -65,8 +73,9 @@ the request or the agents' reports are in English. Delegation prompts stay in En
   delegate the fix to an implementer with the hook output, or report it.
 - A reviewer receives the real diff from a hook and reports a **workspace state** id.
   Compare it with `.claude/.state/verify-pass` (the last green `verify` run). Equal →
-  the reviewed state is the verified state. Different or missing → report the review
-  as unconfirmed. A diff file is not evidence that tests pass.
+  the reviewed state is the verified state. Different or missing → the review is
+  unconfirmed: re-review the current state before committing. A diff file is not
+  evidence that tests pass.
 
 ## Final report
 
