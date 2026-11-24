@@ -24,6 +24,7 @@ older released sections to `docs/CHANGELOG-ARCHIVE.md` so the working file stays
 - **2026-10-19** `scripts/install-tools` — pinned, checksum-verified install of gitleaks, actionlint, hadolint and osv-scanner (Linux/macOS); weekly `audit.yml` workflow for dependency vulnerabilities.
 - **2026-10-19** Quality gates (ADR-001, ADR-002): `scripts/verify` as the single entry point for lint/test/integration (`fast`/`full`, `VERIFY_STRICT`, Docker `with_compose`); `verify-on-stop` Stop hook for a bounded agent self-correction loop; `verify` skill; branch ruleset template (`templates/github/branch-ruleset.json`); Dependabot for GitHub Actions; first ADRs in `docs/adr/`.
 ### Changed
+- **2026-11-24** Skill `ship` renamed to `integrate`: Claude Code's built-in `/ship` shadowed it as a command. "Ship it" still triggers it.
 - **2026-11-24** Orchestrated mode spends fewer tokens: lean delegation prompts, reviewer only for risky changes, one review round, no re-read of `CLAUDE.md`. `CLAUDE.md` gains a conversation-language field (enforced by the `language` setting) and a 1–3-line CHANGELOG rule.
 - **2026-10-29** CI cost on private repos (ADR-006):
   - `ci.yml` skips the push of a PR merge commit, because the PR run already verified that merge. Direct pushes to master still run.

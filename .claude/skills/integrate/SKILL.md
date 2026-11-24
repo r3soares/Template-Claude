@@ -1,9 +1,9 @@
 ---
-name: ship
-description: Branch, Conventional Commit, verify, await review, and merge to master — locally or via a CI-gated pull request. Use when asked to commit, ship or merge.
+name: integrate
+description: Branch, Conventional Commit, verify, await review, and merge to master — locally or via a CI-gated pull request. Use when asked to commit, ship, integrate or merge.
 ---
 
-# Ship a Change
+# Integrate a Change
 
 In orchestrated mode the `integrator` agent runs these steps instead (ADR-007). The
 gates (verify, required CI check, ruleset) replace step 5's confirmation, and the

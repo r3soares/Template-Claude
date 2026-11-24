@@ -11,7 +11,7 @@ the developer to debug for it.
 
 `scripts/verify` is the single entry point (ADR-001): `fast` = lint + test, `full` =
 lint + test + integration. The `verify-on-stop` hook runs `fast` automatically when a
-turn ends with changes; `ship` and CI run `full`.
+turn ends with changes; `integrate` and CI run `full`.
 
 If the change touches only non-essential files (docs, `*.md` — `NON_ESSENTIAL` in
 `scripts/verify`), `test` and `integration` report `N/A` by design; lint still runs.

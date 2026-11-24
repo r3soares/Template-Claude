@@ -55,7 +55,7 @@ fi
 mkdir -p "$state_dir"
 
 # Same tree as the last green run (e.g. a turn that only answered a question) →
-# nothing new to verify. Only passes are cached; `ship` and CI never use this.
+# nothing new to verify. Only passes are cached; `integrate` and CI never use this.
 pass_file="$state_dir/verify-pass"
 fp="$(fingerprint)"
 [ -n "$fp" ] && [ "$fp" = "$(cat "$pass_file" 2>/dev/null)" ] && exit 0

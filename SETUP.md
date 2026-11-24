@@ -81,7 +81,7 @@ git commit -m "chore: initial project structure from template"
 Process scales by change size (see `CLAUDE.md` and the README's *Development Workflow*):
 
 - **Small fix** → code (+ regression test) → verify → conventional commit → dated
-  `CHANGELOG.md` entry → merge (the `ship` skill).
+  `CHANGELOG.md` entry → merge (the `integrate` skill).
 - **Feature** → start with the `feature-spec` skill: `specs/features/{name}/spec.md`.
 
 Claude loads the right skill when the task calls for it — you don't need to read all the
