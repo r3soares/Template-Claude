@@ -19,13 +19,16 @@ These hold in every session, without exception.
 - **Process scales by size** (see decision rule below). Don't impose feature-level
   ceremony on a one-line fix.
 - **English everywhere** — code, comments, docs, and commit messages.
+- **Reply to the developer in: <language>** — the conversation language, separate from
+  the language of code and docs.
 - **Done means verified.** A change is done only when `./scripts/verify` passes — show
   the result, don't assume it. On failure, find the root cause and fix it (the `verify`
   skill) before asking the developer; never skip or weaken tests to get green.
 - **Specs are the source of truth for features.** When code and spec disagree, fix the
   spec first, then the code.
 - **Every change updates `CHANGELOG.md`** with a dated entry — even small ones. This is
-  the lightweight history that is always current.
+  the lightweight history that is always current. Entries are 1–3 lines: what changed
+  and why. Details belong in the spec's implementation notes or in git log, not here.
 - **Docs describe the present, git records the past.** Don't keep hand-maintained
   history/edit logs inside files; `git log` answers "what changed", on demand.
 - **Keep this file lean.** `CLAUDE.md` is paid in every session — put detail in skills or

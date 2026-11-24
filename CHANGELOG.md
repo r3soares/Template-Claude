@@ -16,6 +16,7 @@ older released sections to `docs/CHANGELOG-ARCHIVE.md` so the working file stays
 ## [Unreleased]
 
 ### Added
+- **2026-11-24** Orchestrated mode integrates on its own (ADR-007): a new `integrator` agent (`Bash, Read`, haiku) branches, commits once per task, and ships via PR + auto-merge behind CI and the ruleset. Replaces delegating commits to the implementer.
 - **2026-10-29** Optional orchestrated mode (ADR-005): `claude --agent orchestrator` runs a main agent that can't write (tool allowlist `Agent(implementer, reviewer), Read, Glob, Grep, …`). It delegates to an `implementer` and a read-only `reviewer` in `.claude/agents/`. A `SubagentStart` hook (`review-diff.sh`) gives the reviewer the real uncommitted diff, untracked files included, named by the same workspace fingerprint as `verify-pass`. A `SubagentStop` hook runs `verify-on-stop` for the implementer. Self-tests pin the agents' frontmatter to a canonical form and exact tool sets, with mutation cases; smoke tests are in `docs/architecture/orchestrated-mode.md`. Classic mode stays the default.
 - **2026-10-24** `CLAUDE.md` *Template Feedback*: in projects created from the template, Claude flags template instructions that turn out wrong, outdated or contradictory in a `Template feedback:` block (file · problem · evidence · fix), so they can be corrected upstream.
 - **2026-10-24** `scripts/check-tool-versions` and the weekly `tool-versions.yml` workflow: compare the tools pinned in `scripts/install-tools` with their latest GitHub releases (read from the install URLs, so new tools are covered automatically; retries transient API errors) and open or refresh one tracking issue when one is behind — Dependabot can't see these pins.
@@ -23,6 +24,7 @@ older released sections to `docs/CHANGELOG-ARCHIVE.md` so the working file stays
 - **2026-10-19** `scripts/install-tools` — pinned, checksum-verified install of gitleaks, actionlint, hadolint and osv-scanner (Linux/macOS); weekly `audit.yml` workflow for dependency vulnerabilities.
 - **2026-10-19** Quality gates (ADR-001, ADR-002): `scripts/verify` as the single entry point for lint/test/integration (`fast`/`full`, `VERIFY_STRICT`, Docker `with_compose`); `verify-on-stop` Stop hook for a bounded agent self-correction loop; `verify` skill; branch ruleset template (`templates/github/branch-ruleset.json`); Dependabot for GitHub Actions; first ADRs in `docs/adr/`.
 ### Changed
+- **2026-11-24** Orchestrated mode spends fewer tokens: lean delegation prompts, reviewer only for risky changes, one review round, no re-read of `CLAUDE.md`. `CLAUDE.md` gains a conversation-language field (enforced by the `language` setting) and a 1–3-line CHANGELOG rule.
 - **2026-10-29** CI cost on private repos (ADR-006):
   - `ci.yml` skips the push of a PR merge commit, because the PR run already verified that merge. Direct pushes to master still run.
   - Dependabot runs monthly with grouped updates, so each ecosystem gets one PR per month. Security updates are unaffected.

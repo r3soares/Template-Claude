@@ -5,6 +5,9 @@ description: Branch, Conventional Commit, verify, await review, and merge to mas
 
 # Ship a Change
 
+In orchestrated mode the `integrator` agent runs these steps instead, and the gates
+(verify, required CI check, ruleset) replace step 5's confirmation (ADR-007).
+
 Branch → commit → CHANGELOG → verify → review → integrate. Works for both tiers — only
 the linked artifacts differ. Integration has two modes (ADR-002):
 

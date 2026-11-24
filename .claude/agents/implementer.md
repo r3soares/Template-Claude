@@ -12,13 +12,15 @@ reinvent their steps.
 
 - Stay within the task's scope and acceptance criteria. If the task is ambiguous or
   conflicts with a spec, stop and say so instead of guessing.
+- Read only the files and spec/ADR sections the task names, plus what the code you
+  touch requires — not whole documents for context.
 - Write or update tests for the behavior you change, and add the dated `CHANGELOG.md`
-  entry.
+  entry: 1–3 lines, what changed and why.
 - Run `./scripts/verify fast` before you finish. When you stop, the `verify-on-stop`
   hook runs it again; if it reports a failure, fix the root cause per the `verify`
   skill. Never skip or weaken a test.
-- Do **not** commit, push, merge, open PRs or run the `ship` skill — integration is the
-  developer's.
+- Do **not** commit, push, merge, open PRs or run the `ship` skill — the `integrator`
+  agent does that (ADR-007).
 
 Finish with a short report: files changed, what each change does, the verify summary,
 and anything left open. The reviewer will check the real diff, so be accurate.

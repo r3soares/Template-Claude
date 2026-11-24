@@ -32,7 +32,7 @@ git commit -m "chore: initial project structure from template"
 
 | File | What to update |
 |------|---------------|
-| `CLAUDE.md` | Replace the project-identity placeholder line. Only rules that matter in *every* session go here; area-specific ones go in `.claude/rules/` (step 7). |
+| `CLAUDE.md` | Replace the project-identity placeholder line and set `Reply to the developer in: <language>` (your conversation language; code and docs stay in English). To enforce it — an English prompt or agent report otherwise pulls replies to English — also set `"language": "<language>"` in `~/.claude/settings.json` or `.claude/settings.local.json`. Only rules that matter in *every* session go here; area-specific ones go in `.claude/rules/` (step 7). |
 | `README.md` | Project name, description, stack-specific setup/run/test commands |
 | `docs/architecture/overview.md` | Project map: real structure, stack, first modules |
 | `CHANGELOG.md` | Start fresh; the first entry is your project's start |
@@ -53,7 +53,8 @@ git commit -m "chore: initial project structure from template"
 - **Checks + CI**: use the `setup-ci` skill. It fills the stage commands in
   `scripts/verify` (the only place they live), adds the runtime setup to
   `.github/workflows/ci.yml`, sets `VERIFY_STRICT=1`, and — if the repo is on GitHub —
-  applies the branch ruleset and enables auto-merge (it asks first). Keep the template's
+  applies the branch ruleset and enables auto-merge (it asks first). Orchestrated mode
+  merges on its own only behind that ruleset (ADR-007); without it, it stops at the PR. Keep the template's
   self-tests first in the test stage: `TEST_CMD="template_test && <your tests>"` — under
   `VERIFY_STRICT=1`, `template_test` alone fails as not configured. Add the stack's
   ecosystem to `.github/dependabot.yml`, and pin any action you add by SHA.
@@ -95,7 +96,7 @@ code, and keep `docs/architecture/overview.md` current when a module is added.
 
 - [ ] Template copied to new project folder
 - [ ] Git initialized and first commit made
-- [ ] `CLAUDE.md` project identity filled in
+- [ ] `CLAUDE.md` project identity and conversation language filled in
 - [ ] `README.md` updated with project details
 - [ ] `docs/architecture/overview.md` updated with the real structure
 - [ ] `CHANGELOG.md` reset
