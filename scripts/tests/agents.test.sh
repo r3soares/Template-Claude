@@ -17,9 +17,10 @@
 
 AGENTS="$ROOT/.claude/agents"
 SETTINGS="$ROOT/.claude/settings.json"
-ORCHESTRATOR_TOOLS="Agent(implementer, reviewer), Read, Glob, Grep, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate"
+ORCHESTRATOR_TOOLS="Agent(implementer, reviewer, integrator), Read, Glob, Grep, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate"
 REVIEWER_TOOLS="Read, Glob, Grep"
 IMPLEMENTER_TOOLS="Read, Edit, Write, Bash, Skill"
+INTEGRATOR_TOOLS="Bash, Read"
 KEYS=" name description tools model "
 REQUIRED="name description tools"
 
@@ -87,7 +88,7 @@ valid_agent() {
 # check already implies it; this keeps the intent readable in a failure).
 lacks_tool() { ! frontmatter "$1" | grep -E '^tools: ' | tr ',' '\n' | sed 's/^ *//' | grep -qxE "$2(\(.*)?"; }
 
-for a in orchestrator:ORCHESTRATOR_TOOLS reviewer:REVIEWER_TOOLS implementer:IMPLEMENTER_TOOLS; do
+for a in orchestrator:ORCHESTRATOR_TOOLS reviewer:REVIEWER_TOOLS implementer:IMPLEMENTER_TOOLS integrator:INTEGRATOR_TOOLS; do
   name="${a%%:*}" var="${a#*:}"
   check "$name: canonical frontmatter with exactly the expected tools" valid_agent "$AGENTS/$name.md" "${!var}"
 done
@@ -98,6 +99,9 @@ for t in Bash Edit Write NotebookEdit PowerShell Agent; do
   check "reviewer: no $t" lacks_tool "$AGENTS/reviewer.md" "$t"
 done
 check "implementer: no Agent (no nested delegation)" lacks_tool "$AGENTS/implementer.md" Agent
+for t in Agent Edit Write NotebookEdit PowerShell Skill; do
+  check "integrator: no $t" lacks_tool "$AGENTS/integrator.md" "$t"
+done
 
 # settings.json: mode is per session, agent teams stay off, hooks are wired.
 out="$(cat "$SETTINGS")"
@@ -124,8 +128,8 @@ rejects() {
 O="$ORCHESTRATOR_TOOLS"
 rejects "tools removed" orchestrator "$O" '/^tools: /d'
 rejects "Bash added" orchestrator "$O" 's/^tools: /tools: Bash, /'
-rejects "delegation widened" orchestrator "$O" 's/Agent(implementer, reviewer)/Agent(implementer, reviewer, Explore)/'
-rejects "unrestricted Agent" orchestrator "$O" 's/Agent(implementer, reviewer)/Agent/'
+rejects "delegation widened" orchestrator "$O" 's/Agent(implementer, reviewer, integrator)/Agent(implementer, reviewer, integrator, Explore)/'
+rejects "unrestricted Agent" orchestrator "$O" 's/Agent(implementer, reviewer, integrator)/Agent/'
 rejects "duplicate tool entry" orchestrator "$O" 's/^tools: /tools: Read, /'
 rejects "tools as a YAML list" orchestrator "$O" 's/^tools: .*/tools:\n  - Read/'
 rejects "tools in brackets" orchestrator "$O" 's/^tools: \(.*\)/tools: [\1]/'
@@ -138,5 +142,6 @@ rejects "unclosed frontmatter" orchestrator "$O" '1!{/^---$/d}'
 rejects "name differs from file" orchestrator "$O" 's/^name: .*/name: boss/'
 rejects "Edit added to reviewer" reviewer "$REVIEWER_TOOLS" 's/^tools: .*/&, Edit/'
 rejects "Agent added to implementer" implementer "$IMPLEMENTER_TOOLS" 's/^tools: .*/&, Agent/'
+rejects "Edit added to integrator" integrator "$INTEGRATOR_TOOLS" 's/^tools: .*/&, Edit/'
 
 finish

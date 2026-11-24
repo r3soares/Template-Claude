@@ -13,7 +13,8 @@
 `[ACCEPTED]`
 
 Supersedes: —  
-Superseded by: —
+Superseded by: —  
+Amended by: ADR-007 (an `integrator` agent integrates autonomously; replaces decision 5)
 
 ---
 
@@ -63,7 +64,7 @@ unchanged.
    and it skips verification while a background subagent is in flight (verifying a
    half-edited tree proves nothing). The check runs at the next Stop instead.
 5. **Integration is the developer's**: the orchestrator ends by telling the developer to
-   run the `ship` skill in a classic session.
+   run the `ship` skill in a classic session. *(Amended by ADR-007.)*
 6. **Sequential implementation in the current working tree.** No worktrees, Docker per
    agent, external orchestrator or agent teams.
 
