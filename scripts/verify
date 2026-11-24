@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # verify — the single entry point for every quality check in this project.
 #
-# Claude, the Stop hook, the `ship` skill and CI all run THIS script, so local
+# Claude, the Stop hook, the `integrate` skill and CI all run THIS script, so local
 # green == CI green. Configure the stage commands below for your stack (the
 # `setup-ci` skill walks through it); never duplicate them elsewhere.
 #
 # Usage: ./scripts/verify [fast|full|audit]      (default: full)
 #   fast   lint + test                 — quick feedback (the Stop hook)
-#   full   lint + test + integration   — before merging (`ship`) and in CI
+#   full   lint + test + integration   — before merging (`integrate`) and in CI
 #   audit  dependency vulnerability scan (network) — scheduled CI job
 #
 # Environment:

@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   verify:
-    # Skip the push of a PR merge commit (`ship` merges with --merge): the PR run
+    # Skip the push of a PR merge commit (`integrate` merges with --merge): the PR run
     # already verified that merge, and on private repos each run costs Actions
     # minutes (ADR-006). Direct pushes to master — local mode — still run.
     if: "github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'Merge pull request #')"

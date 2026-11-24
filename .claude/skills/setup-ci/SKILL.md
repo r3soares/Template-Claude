@@ -6,7 +6,7 @@ description: Configure quality gates — scripts/verify stage commands for the s
 # Set up CI and quality gates
 
 One entry point, three layers (ADR-001, ADR-002): the commands live **only** in
-`scripts/verify`; the Stop hook, `ship` and CI all call it. Never copy a lint/test
+`scripts/verify`; the Stop hook, `integrate` and CI all call it. Never copy a lint/test
 command into `ci.yml` or a skill — that's how local and CI drift apart.
 
 ## 1. Configure `scripts/verify`
@@ -100,7 +100,7 @@ minute**: a 10-second job costs 1 minute, and two jobs cost 2. So:
 - **Keep `integration`/E2E lean**, and cache what installs slowly: dependencies through
   the `setup-*` actions' `cache:` option, browsers and tool binaries with `actions/cache`.
 - **Don't set `VERIFY_ALL=1` in CI.** It disables the docs-only skip (ADR-003).
-- **Verify locally before every push** (`ship` does). A failing PR that you fix with
+- **Verify locally before every push** (`integrate` does). A failing PR that you fix with
   several pushes costs one full run per push.
 - **Dependabot monthly and grouped**, as above.
 
@@ -134,7 +134,7 @@ developer. Re-applying the ruleset creates a duplicate; update an existing one w
 
 ## 5. Validate
 
-- Push a branch and open a PR (the `ship` skill, GitHub mode); `gh pr checks --watch`
+- Push a branch and open a PR (the `integrate` skill, GitHub mode); `gh pr checks --watch`
   must show `verify` passing.
 - Add a dated `CHANGELOG.md` entry. A new gate or required check is significant —
   record it with the `adr` skill if it departs from ADR-002.

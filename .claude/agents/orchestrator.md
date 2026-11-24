@@ -40,7 +40,7 @@ the request or the agents' reports are in English; English if it is unset or sti
 
 - Delegation prompts give only what the task needs: goal, files, acceptance criteria,
   and the specific spec/ADR **sections** to read — never whole documents "for context".
-- Run a reviewer for every feature-tier change (it covers security, which `ship`'s
+- Run a reviewer for every feature-tier change (it covers security, which `integrate`'s
   `security-review` step does in classic mode) and for small changes that are risky:
   input parsing, personal data, secrets, auth/permissions, external calls. Skip it for
   other small changes. Reviewers are read-only and run while no other agent is running.

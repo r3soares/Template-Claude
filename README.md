@@ -83,7 +83,7 @@ The process scales with change size (`CLAUDE.md` holds the rule Claude follows):
 - **Feature** → spec → ADR (if needed) → implement → tests → verify → merge.
 
 Specialized steps are handled by Claude **skills** (`.claude/skills/`) that load only
-when relevant — `feature-spec`, `adr`, `test-plan`, `verify`, `ship`, `dockerize`,
+when relevant — `feature-spec`, `adr`, `test-plan`, `verify`, `integrate`, `dockerize`,
 `setup-ci` (plus an optional `traceability` skill for compliance projects).
 
 ### Quality gates
@@ -93,8 +93,8 @@ Three layers, one command set (`scripts/verify`) — see ADR-001 and ADR-002 in 
 | Layer | Runs | When | Purpose |
 |-------|------|------|---------|
 | 1. Claude | `verify fast` (lint + test) | `verify-on-stop` hook, end of every turn with changes | Claude fixes its own failures (≤3 attempts, then reports) |
-| 2. Ship | `verify full` (+ integration via Docker) | Before review and merge | Local gate |
-| 3. GitHub | `verify full` in CI job `verify` | Every PR and direct push to master (PR merges are not re-run) | Independent gate; required check via the branch ruleset, `ship` auto-merges |
+| 2. Integrate | `verify full` (+ integration via Docker) | Before review and merge | Local gate |
+| 3. GitHub | `verify full` in CI job `verify` | Every PR and direct push to master (PR merges are not re-run) | Independent gate; required check via the branch ruleset, `integrate` auto-merges |
 | — Audit | `verify audit` (osv-scanner) | Weekly + on demand (`audit.yml`) | Known-vulnerable dependencies; not a PR gate |
 | — Tool versions | `scripts/check-tool-versions` | Weekly + on demand (`tool-versions.yml`) | Opens an issue when a tool pinned in `install-tools` is behind |
 
@@ -131,7 +131,7 @@ when you understand what Claude does on its own versus what you decide.
 - Keeps scope inside the spec and adds a dated `CHANGELOG.md` entry for every change.
 
 > Skill triggering is the model's judgment, not guaranteed. For determinism, run the
-> skill directly as a command (e.g. `/adr`, `/ship`).
+> skill directly as a command (e.g. `/adr`, `/integrate`). Claude Code's built-in `/ship` is a different command.
 
 ### What you decide / approve
 
@@ -150,7 +150,7 @@ when you understand what Claude does on its own versus what you decide.
 | A small fix | "Fix … — this is a small fix" | regression test → fix → verify → commit → CHANGELOG → merge |
 | Tests | "Cover feature X with tests" | real tests in `tests/` derived from the spec |
 | Check a change | "Verify this" / "CI failed, fix it" | `verify`: run, diagnose, fix, re-run (bounded) |
-| Commit + merge | "Ship this" | `ship`: branch → commit → CHANGELOG → verify → review → merge locally or via CI-gated PR |
+| Commit + merge | "Ship this" | `integrate`: branch → commit → CHANGELOG → verify → review → merge locally or via CI-gated PR |
 | Docker / CI | "Containerize this" / "Set up CI" | `dockerize` (decision guide first) / `setup-ci` (verify stages, workflow, protection) |
 
 ### Prompt tips
@@ -185,10 +185,11 @@ project. As modules multiply:
 ### Orchestrated mode (optional)
 
 For larger tasks, `claude --agent orchestrator` starts a session whose main agent can't
-write: it plans, delegates to an `implementer` (one task at a time) and a read-only
-`reviewer`, and reports. The reviewer gets the real diff from a hook, and the same
-verify gates block the implementer. You ship from a classic session (`claude`). Classic
-mode stays the default. See `docs/architecture/orchestrated-mode.md` and ADR-005.
+write: it plans, delegates to an `implementer` (one task at a time), a read-only
+`reviewer` and an `integrator` that commits and merges via a CI-gated PR, and reports.
+The reviewer gets the real diff from a hook, and the same verify gates block the
+implementer. Classic mode stays the default. See `docs/architecture/orchestrated-mode.md`,
+ADR-005 and ADR-007.
 
 ### Maintenance
 

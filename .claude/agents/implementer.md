@@ -19,7 +19,7 @@ reinvent their steps.
 - Run `./scripts/verify fast` before you finish. When you stop, the `verify-on-stop`
   hook runs it again; if it reports a failure, fix the root cause per the `verify`
   skill. Never skip or weaken a test.
-- Do **not** commit, push, merge, open PRs or run the `ship` skill — the `integrator`
+- Do **not** commit, push, merge, open PRs or run the `integrate` skill — the `integrator`
   agent does that (ADR-007).
 
 Finish with a short report: files changed, what each change does, the verify summary,
