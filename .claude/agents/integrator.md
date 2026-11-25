@@ -25,37 +25,46 @@ git pull --ff-only
 git switch -c <branch>
 ```
 
-## `commit <paths> <message>`
+## `commit <paths> <message> <trailer>`
 
 Stage exactly the named paths (deletions included) and commit with the given
-Conventional Commit message:
+Conventional Commit message. `<trailer>` is the `Co-Authored-By:` line from the
+orchestrator: pass it verbatim as a second `-m`, never write or change one yourself
+(your model is not the session's). No trailer given → commit without one.
 
 ```bash
 git add -A -- <paths>
-git commit -m "<message>"
+git commit -m '<message>' -m '<trailer>'
 ```
+
+Use single quotes: nothing inside them is expanded by the shell (backticks, `$`). A
+literal `'` in the text is written `'\''`.
 
 Then run `git status --porcelain`; report any path still uncommitted.
 
 ## `ship <title> <body>`
 
-`<title>` is a Conventional Commit title; `<body>` is the PR description. Both come
-from the orchestrator.
+`<title>` is a Conventional Commit title; `<body>` is the PR description, already ending
+with the attribution line the orchestrator gave. Both come from the orchestrator; never
+add or change an attribution line.
 
 1. `git branch --show-current` — note this branch name before anything else.
 2. `./scripts/verify full`. Red → report the summary and stop.
-3. Pick the mode: run `git remote -v`, then `gh auth status`. GitHub if `origin` is on
-   GitHub and `gh auth status` succeeds, else local.
+3. Pick the mode: run `git remote -v`. `origin` on GitHub → GitHub mode: run
+   `gh auth status`; if it fails, **stop**, report its output and leave master
+   untouched — never fall back to local. No GitHub remote → local mode.
 4. **GitHub**:
    1. `git push -u origin HEAD`
    2. `gh pr view --json number,state,url` — an `OPEN` PR already exists for this
       branch (a fix round): skip to step 6. Auto-merge, if armed, stays armed.
-   3. `gh pr create --title "<title>" --body "<body>"`
+   3. `gh pr create --title '<title>' --body '<body>'` (single quotes, as in `commit`)
    4. `gh api repos/{owner}/{repo}/rules/branches/master --jq '.[].type'` — if the output
       has no `required_status_checks` line, master has no CI gate: stop and report the
       PR URL as **open, not merged**. Never run `gh pr merge` in that case.
    5. `gh pr merge --auto --merge --delete-branch`
-   6. `gh pr checks --watch`. Failed → `gh run view <run-id> --log-failed`; report the
+   6. `gh pr checks --watch`. If it says "no checks reported", GitHub may not have
+      registered the CI job yet: `sleep 15` and run it again, at most 4 times, before
+      reporting there are no checks (stop; never merge). Failed → `gh run view <run-id> --log-failed`; report the
       failing step and the log excerpt, and stop.
    7. `gh pr view --json state,mergedAt` — repeat (with `sleep 15` between calls, at
       most 10 times) until `state` is `MERGED`. Not merged by then → report the state

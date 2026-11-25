@@ -19,6 +19,10 @@ reinvent their steps.
 - Run `./scripts/verify fast` before you finish. When you stop, the `verify-on-stop`
   hook runs it again; if it reports a failure, fix the root cause per the `verify`
   skill. Never skip or weaken a test.
+- When you run the project's CLI or app to check behavior, never touch the developer's
+  real data: point its database/data paths (the project's env vars or config) at a temp
+  dir and set a temp `HOME` (`mktemp -d`), then clean up. Backups, caches and state
+  files land under `HOME`.
 - Do **not** commit, push, merge, open PRs or run the `integrate` skill — the `integrator`
   agent does that (ADR-007).
 
