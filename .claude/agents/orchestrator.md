@@ -59,6 +59,10 @@ the request or the agents' reports are in English; English if it is unset or sti
 3. When all tasks are committed: `integrator` → `ship <title> <body>` — a Conventional
    Commit title for the whole change and a short PR body (what, why, related spec/ADR,
    open findings).
+   Attribution: the integrator's model differs from this session's, so you supply it.
+   Pass the `Co-Authored-By:` trailer from your commit instructions as the `commit`
+   trailer argument, and end the `ship` body with the PR attribution line. Keep text
+   plain (no backticks).
 4. If the integrator reports a red verify, failed CI or a conflict, delegate the fix to
    an implementer with that output, then commit and ship again. After 3 rounds, stop
    and report. In a fix round, `ship` reuses the open PR. If it stops at an ungated PR (no

@@ -15,7 +15,7 @@ the linked artifacts differ. Integration has two modes (ADR-002):
 | Mode | When | Gate before master |
 |------|------|--------------------|
 | **Local** | No GitHub remote, or the developer asks for local | `./scripts/verify full` |
-| **GitHub** | `origin` is on GitHub and `gh auth status` succeeds | Same, **plus** CI `verify` as a required check on a PR |
+| **GitHub** | `origin` is on GitHub (if `gh auth status` fails, stop — never fall back to local) | Same, **plus** CI `verify` as a required check on a PR |
 
 ## 1. Branch
 
