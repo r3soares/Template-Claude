@@ -18,11 +18,16 @@ run in the project root), no `&&`, `;`, pipes, `if`, `$(…)` or redirections. P
 rules match each command's text, so anything else is denied. Decide between steps from
 each command's output.
 
+`<default>` below is the default branch (`main`, `master`, …): run
+`./scripts/default-branch` once per operation and use the name it prints. It fails →
+stop and report its output.
+
 ## `start <branch>`
 
 ```bash
 git remote              # empty output → no remote: skip the pull
-git switch master
+./scripts/default-branch
+git switch <default>
 git pull --ff-only
 git switch -c <branch>
 ```
@@ -50,10 +55,11 @@ Then run `git status --porcelain`; report any path still uncommitted.
 with the attribution line the orchestrator gave. Both come from the orchestrator; never
 add or change an attribution line.
 
-1. `git branch --show-current` — note this branch name before anything else.
+1. `git branch --show-current` — note this branch name before anything else. Then
+   `./scripts/default-branch` — note `<default>`.
 2. `./scripts/verify full`. Red → report the summary and stop.
 3. Pick the mode: run `git remote -v`. `origin` on GitHub → GitHub mode: run
-   `gh auth status`; if it fails, **stop**, report its output and leave master
+   `gh auth status`; if it fails, **stop**, report its output and leave `<default>`
    untouched — never fall back to local. No GitHub remote → local mode.
 4. **GitHub**:
    1. `git push -u origin HEAD`. Rejected as non-fast-forward (the remote branch has
@@ -63,7 +69,7 @@ add or change an attribution line.
       branch (a fix round): skip to step 4, so the gate is picked again. Re-arming
       auto-merge in step 5 is harmless.
    3. `gh pr create --title '<title>' --body '<body>'` (single quotes, as in `commit`)
-   4. `gh api repos/{owner}/{repo}/rules/branches/master --jq '.[].type'` — pick the
+   4. `gh api repos/{owner}/{repo}/rules/branches/<default> --jq '.[].type'` — pick the
       gate (ADR-008):
       - output has a `required_status_checks` line → **ruleset** gate: GitHub enforces
         CI. Go to step 5.
@@ -79,13 +85,13 @@ add or change an attribution line.
    7. `gh pr view --json state,mergedAt` — repeat (with `sleep 15` between calls, at
       most 10 times) until `state` is `MERGED`. Not merged by then → report the state
       and stop.
-   8. `git switch master`, then `git pull --ff-only`. Done.
+   8. `git switch <default>`, then `git pull --ff-only`. Done.
    9. **Agent gate** — merge only when every check below holds; any other outcome →
       stop and report, never merge:
       Use `gh api` as written — it works on every `gh` version, unlike newer `gh pr`
       subcommands and flags. `<branch>` is the name from step 1; `<number>` is the PR
       number from step 2, or the end of the URL step 3 printed.
-      1. `git fetch origin`, then `git merge-base --is-ancestor origin/master origin/<branch>`.
+      1. `git fetch origin`, then `git merge-base --is-ancestor origin/<default> origin/<branch>`.
          Exit 0 → up to date: go to step 2. Exit 1 → behind: run
          `gh api -X PUT repos/{owner}/{repo}/pulls/<number>/update-branch` (an error, e.g.
          a merge conflict → stop and report; never resolve it), then `sleep 15` and repeat
@@ -101,7 +107,7 @@ add or change an attribution line.
       5. `gh pr merge --merge --delete-branch --match-head-commit <SHA>` with the SHA from
          step 2. If it fails because the head moved, stop and report.
       6. `gh pr view --json state,mergedAt` — `state` must be `MERGED`. Then step 8.
-5. **Local** (no GitHub remote): `git switch master`, then `git merge --no-ff <branch>`
+5. **Local** (no GitHub remote): `git switch <default>`, then `git merge --no-ff <branch>`
    (the name from step 1), then `git branch -d <branch>`. Don't push.
 
 Never use `--admin`, `--force`, `--no-verify` or `git reset --hard`.
