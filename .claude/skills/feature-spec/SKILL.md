@@ -10,6 +10,9 @@ Small fixes (see the decision rule in `CLAUDE.md`) skip this entirely.
 
 ## Steps
 
+0. **Open design decisions?** If the request leaves real choices unsettled (who it's
+   for, what happens on failure, which data, which approach), suggest `/grill-me` first:
+   settling them in an interview is cheaper than a spec full of Open Questions.
 1. **Check for an existing spec** under `specs/features/`. If one exists for this
    feature, update it instead of creating a new file.
 2. **Create the spec** at `specs/features/{feature-name}/spec.md` (folder name in
