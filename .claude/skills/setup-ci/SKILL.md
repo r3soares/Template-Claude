@@ -76,13 +76,13 @@ comment (`uses: owner/action@<sha> # vX.Y.Z`; get it with
 deploy/release jobs unless asked.
 
 `.github/workflows/audit.yml` runs `./scripts/verify audit` (osv-scanner over the
-project's lockfiles) weekly and on demand — deliberately **not** a PR gate, so a newly
+project's lockfiles) monthly and on demand — deliberately **not** a PR gate, so a newly
 published CVE doesn't block unrelated work. It needs committed lockfiles to be useful.
 
 If the project has a dependency ecosystem, add it to `.github/dependabot.yml` with the
 same monthly `schedule` and a `groups` entry (one PR per ecosystem per month). Tool
 versions in `scripts/install-tools` are pinned and Dependabot can't see them:
-`.github/workflows/tool-versions.yml` runs `scripts/check-tool-versions` weekly and opens
+`.github/workflows/tool-versions.yml` runs `scripts/check-tool-versions` monthly and opens
 an issue when one is behind — bump it on a branch. A tool added to `install-tools` with
 the same release-URL pattern is checked automatically.
 

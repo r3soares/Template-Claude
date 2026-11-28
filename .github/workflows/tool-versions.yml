@@ -1,4 +1,4 @@
-# Tool versions — weekly check of the quality tools pinned in scripts/install-tools
+# Tool versions — monthly check of the quality tools pinned in scripts/install-tools
 # (gitleaks, actionlint, hadolint, osv-scanner). Dependabot can't see those pins, so
 # this opens (or refreshes) one tracking issue when a newer release exists. Bump the
 # version in install-tools on a branch; the issue is closed by hand after the merge.
@@ -6,7 +6,8 @@ name: Tool versions
 
 on:
   schedule:
-    - cron: '0 6 * * 1'   # Mondays 06:00 UTC
+    # Monthly, for the same Actions-minutes reason as audit.yml.
+    - cron: '0 6 2 * *'   # 2nd of the month, 06:00 UTC
   workflow_dispatch:
 
 permissions:

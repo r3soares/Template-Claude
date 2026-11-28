@@ -26,8 +26,8 @@ module under *Components* as the code grows.
 ├── .github/
 │   ├── PULL_REQUEST_TEMPLATE.md
 │   ├── dependabot.yml    # Keeps GitHub Actions (and your ecosystem) current
-│   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml weekly CVE scan;
-│                         # tool-versions.yml weekly check of the pinned tools
+│   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml monthly CVE scan;
+│                         # tool-versions.yml monthly check of the pinned tools
 ├── docs/                 # What the system IS now (git holds the history)
 │   ├── adr/              # Architecture Decision Records (ADR-001–004, 006, 008: quality gates; 005, 007: orchestrated mode)
 │   ├── architecture/     # THIS FILE + component/system docs
