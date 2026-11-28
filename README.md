@@ -88,6 +88,8 @@ Specialized steps are handled by Claude **skills** (`.claude/skills/`) that load
 when relevant — `feature-spec`, `adr`, `test-plan`, `verify`, `integrate`, `dockerize`,
 `setup-ci` (plus an optional `traceability` skill for compliance projects). `bootstrap`
 runs once, as `/bootstrap`, to set up a project created from the template (`SETUP.md`).
+`/release` cuts a version: proposes the SemVer bump from `[Unreleased]`, dates the
+CHANGELOG section, integrates it and tags the merge.
 Adapted from Matt Pocock's skills (MIT, licence in each folder): `grill-me` (an interview
 that settles a design before the spec), `diagnosing-bugs` (red feedback loop first for a
 reported bug), and the commands `/handoff` (a note for a fresh session) and `/retro`
