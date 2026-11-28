@@ -204,6 +204,21 @@ ADR-005, ADR-007, ADR-008 and ADR-009.
 
 ### Maintenance
 
+**Skill evals.** Skills are instructions, so their behavior is checked by running them:
+each skill with evals has `.claude/skills/<skill>/evals/<case>/` (prompt, expected
+outcome, graders, and a `place-files.sh` that builds a throwaway copy of the template).
+Re-run them after upgrading Claude Code or editing a skill — real, billed runs, about a
+minute each:
+
+```bash
+scripts/tests/run-skill-evals.sh <skill> <case> with_skill /tmp/skill-evals/iteration-1
+# or, from a skill folder: claude plugin eval . --scaffold --allow-tools Write,Edit,Bash,Agent
+```
+
+The runner saves the transcript, final message, repo state and diff under `outputs/`,
+the layout the `skill-creator` skill grades and shows in its review page. Keep result
+folders outside `.claude/` — Claude Code asks before writing under any `.claude/` path.
+
 Audit dependencies periodically (a notable bump is a CHANGELOG entry; swapping a core
 library is an ADR). Keep docs describing the *present* — "what changed" is answered by
 git, not by history tables. Archive old `CHANGELOG.md` sections to

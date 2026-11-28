@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: api-feature-impact-finish-line
+expected_outcome: |
+  A new feature spec with an Impact section (today, after, files touched) and a Finish
+  Line (run command plus HTTP check steps), acceptance criteria phrased as observable
+  HTTP behavior, and no change to the code.
+context:
+  scaffold_script: place-files.sh
