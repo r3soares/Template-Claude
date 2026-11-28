@@ -19,17 +19,18 @@ module under *Components* as the code grows.
 .
 ├── .claude/
 │   ├── settings.json     # Harness config: permissions (incl. gate-bypass deny rules), hooks
-│   ├── agents/           # Orchestrated mode (opt-in): orchestrator, implementer, reviewer, integrator (ADR-005, 007)
-│   ├── hooks/            # verify-on-stop (self-correction loop), review-diff (reviewer's diff) + README
+│   ├── agents/           # orchestrator, implementer, reviewer, integrator (opt-in mode, ADR-005, 007); acceptance (ADR-009)
+│   ├── hooks/            # verify-on-stop (self-correction loop), review-diff (reviewer's diff),
+│   │                     # acceptance-start/-guard (acceptance evidence, black box) + README
 │   ├── rules/            # Path-scoped instructions, loaded when Claude works on matching files
 │   └── skills/           # On-demand procedures (one folder per skill, SKILL.md)
 ├── .github/
 │   ├── PULL_REQUEST_TEMPLATE.md
 │   ├── dependabot.yml    # Keeps GitHub Actions (and your ecosystem) current
-│   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml weekly CVE scan;
-│                         # tool-versions.yml weekly check of the pinned tools
+│   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml monthly CVE scan;
+│                         # tool-versions.yml monthly check of the pinned tools
 ├── docs/                 # What the system IS now (git holds the history)
-│   ├── adr/              # Architecture Decision Records (ADR-001–004, 006: quality gates; 005, 007: orchestrated mode)
+│   ├── adr/              # Architecture Decision Records (ADR-001–004, 006, 008: quality gates; 005, 007: orchestrated mode; 009: acceptance)
 │   ├── architecture/     # THIS FILE + component/system docs
 │   └── traceability/     # OPTIONAL — formal matrix, compliance projects only
 ├── specs/features/       # What features SHOULD do — one folder per feature, spec.md
@@ -37,7 +38,8 @@ module under *Components* as the code grows.
 │   ├── verify            # Single entry point for lint/test/integration/audit (ADR-001)
 │   ├── install-tools     # Pinned, checksum-verified install of the template's quality tools
 │   ├── check-tool-versions  # Are those pins current? (exit 1 if one is behind)
-│   └── tests/            # Self-tests for scripts/verify, the hooks and the agents (template_test)
+│   ├── default-branch    # Prints the default branch (main/master); used by integrate and the integrator
+│   └── tests/            # Self-tests for scripts/verify, the hooks, the agents and skills (template_test)
 ├── src/                  # Source code (stack-specific structure goes here)
 ├── templates/            # Blank models: *-template.md, docker/, github/
 ├── tests/                # Project tests (unit, integration, e2e)
@@ -84,3 +86,5 @@ module under *Components* as the code grows.
 | Optional orchestrated mode (native subagents) | [ADR-005](../adr/ADR-005-orchestrated-mode.md) |
 | CI skips the redundant post-merge run | [ADR-006](../adr/ADR-006-skip-ci-on-pr-merge-push.md) |
 | Autonomous integration in orchestrated mode | [ADR-007](../adr/ADR-007-autonomous-integration-in-orchestrated-mode.md) |
+| Agent-enforced merge gate without rulesets | [ADR-008](../adr/ADR-008-agent-enforced-gate-without-rulesets.md) |
+| Black-box acceptance agent | [ADR-009](../adr/ADR-009-black-box-acceptance-agent.md) |

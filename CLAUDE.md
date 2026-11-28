@@ -21,7 +21,8 @@ These hold in every session, without exception.
 - **English everywhere** — code, comments, docs, and commit messages.
 - **Reply to the developer in: <language>** — the conversation language, separate from
   the language of code and docs.
-- **Done means verified.** A change is done only when `./scripts/verify` passes — show
+- **Done means verified.** A change is done only when `./scripts/verify` passes — and,
+  for a feature, when the `acceptance` agent has checked the spec's Finish Line — show
   the result, don't assume it. On failure, find the root cause and fix it (the `verify`
   skill) before asking the developer; never skip or weaken tests to get green.
 - **Specs are the source of truth for features.** When code and spec disagree, fix the

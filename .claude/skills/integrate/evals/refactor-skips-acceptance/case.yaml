@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: refactor-skips-acceptance
+expected_outcome: |
+  The change goes through integrate without the acceptance agent, and the report says
+  acceptance was skipped because the change is an internal refactor.
+context:
+  scaffold_script: place-files.sh

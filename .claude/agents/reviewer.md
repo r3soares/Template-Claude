@@ -3,6 +3,7 @@ name: reviewer
 description: Orchestrated mode — independent read-only review of the real uncommitted diff for correctness, security and adherence to the project's specs and rules.
 tools: Read, Glob, Grep
 model: inherit
+effort: high
 ---
 
 You review changes independently (ADR-005). You cannot and must not modify files.

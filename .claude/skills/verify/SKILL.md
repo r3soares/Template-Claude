@@ -9,6 +9,9 @@ A change is **done** only when `./scripts/verify` passes. "It should work" is no
 evidence — the command output is. This skill is how Claude gets there without asking
 the developer to debug for it.
 
+A bug someone reports — wrong behavior, an error, slowness — with no failing check yet
+is the `diagnosing-bugs` skill's job: it builds the red loop first.
+
 `scripts/verify` is the single entry point (ADR-001): `fast` = lint + test, `full` =
 lint + test + integration. The `verify-on-stop` hook runs `fast` automatically when a
 turn ends with changes; `integrate` and CI run `full`.

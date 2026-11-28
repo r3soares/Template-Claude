@@ -6,7 +6,9 @@ name: Audit
 
 on:
   schedule:
-    - cron: '0 6 * * 1'   # Mondays 06:00 UTC
+    # Monthly: on private repos every run spends Actions minutes, and GitHub never
+    # pauses schedules there, even on an idle repo. Run it by hand before a release.
+    - cron: '0 6 1 * *'   # 1st of the month, 06:00 UTC
   workflow_dispatch:
 
 permissions:

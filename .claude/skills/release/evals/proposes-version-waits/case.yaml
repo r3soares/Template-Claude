@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: proposes-version-waits
+expected_outcome: |
+  /release proposes 0.2.0 (an Added entry after v0.1.0), says why, and changes nothing
+  while it waits for the developer's confirmation.
+context:
+  scaffold_script: place-files.sh

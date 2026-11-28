@@ -2,6 +2,8 @@
 
 > One-line description of the project.
 
+<!-- Just created from the template? Run `claude` and type `/bootstrap` (see SETUP.md). -->
+
 ---
 
 ## Overview
@@ -41,7 +43,7 @@ uses:
 ```bash
 ./scripts/verify fast   # lint + unit tests
 ./scripts/verify        # full: + integration tests (Docker)
-./scripts/verify audit  # dependency vulnerability scan (also weekly in CI)
+./scripts/verify audit  # dependency vulnerability scan (also monthly in CI)
 ```
 
 Lint includes stack-agnostic checks — secrets (gitleaks), workflows (actionlint),
@@ -51,7 +53,7 @@ CI always installs them; to run them locally too:
 ```bash
 ./scripts/install-tools                 # gitleaks, actionlint, hadolint → ~/.local/bin
 ./scripts/install-tools osv-scanner     # for `verify audit`
-./scripts/check-tool-versions           # are the pinned tool versions current? (weekly in CI)
+./scripts/check-tool-versions           # are the pinned tool versions current? (monthly in CI)
 sudo apt install shellcheck             # or: brew install shellcheck
 ```
 
@@ -84,7 +86,14 @@ The process scales with change size (`CLAUDE.md` holds the rule Claude follows):
 
 Specialized steps are handled by Claude **skills** (`.claude/skills/`) that load only
 when relevant — `feature-spec`, `adr`, `test-plan`, `verify`, `integrate`, `dockerize`,
-`setup-ci` (plus an optional `traceability` skill for compliance projects).
+`setup-ci` (plus an optional `traceability` skill for compliance projects). `bootstrap`
+runs once, as `/bootstrap`, to set up a project created from the template (`SETUP.md`).
+`/release` cuts a version: proposes the SemVer bump from `[Unreleased]`, dates the
+CHANGELOG section, integrates it and tags the merge.
+Adapted from Matt Pocock's skills (MIT, licence in each folder): `grill-me` (an interview
+that settles a design before the spec), `diagnosing-bugs` (red feedback loop first for a
+reported bug), and the commands `/handoff` (a note for a fresh session) and `/retro`
+(improvements to the agent's environment after a session).
 
 ### Quality gates
 
@@ -94,9 +103,9 @@ Three layers, one command set (`scripts/verify`) — see ADR-001 and ADR-002 in 
 |-------|------|------|---------|
 | 1. Claude | `verify fast` (lint + test) | `verify-on-stop` hook, end of every turn with changes | Claude fixes its own failures (≤3 attempts, then reports) |
 | 2. Integrate | `verify full` (+ integration via Docker) | Before review and merge | Local gate |
-| 3. GitHub | `verify full` in CI job `verify` | Every PR and direct push to master (PR merges are not re-run) | Independent gate; required check via the branch ruleset, `integrate` auto-merges |
-| — Audit | `verify audit` (osv-scanner) | Weekly + on demand (`audit.yml`) | Known-vulnerable dependencies; not a PR gate |
-| — Tool versions | `scripts/check-tool-versions` | Weekly + on demand (`tool-versions.yml`) | Opens an issue when a tool pinned in `install-tools` is behind |
+| 3. GitHub | `verify full` in CI job `verify` | Every PR and direct push to master (PR merges are not re-run) | Independent gate; required check via the branch ruleset, `integrate` auto-merges. Private repos on GitHub Free have no rulesets: `integrate` merges only an up-to-date PR with `verify` passing (agent gate, ADR-008) |
+| — Audit | `verify audit` (osv-scanner) | Monthly + on demand (`audit.yml`) | Known-vulnerable dependencies; not a PR gate |
+| — Tool versions | `scripts/check-tool-versions` | Monthly + on demand (`tool-versions.yml`) | Opens an issue when a tool pinned in `install-tools` is behind |
 
 Lint always starts with `template_lint` (gitleaks, actionlint, hadolint, shellcheck),
 then the stack's own tools. Stage commands live **only** in `scripts/verify` — CI,
@@ -121,11 +130,17 @@ when you understand what Claude does on its own versus what you decide.
   e.g. the documentation conventions load when it edits `docs/` or `specs/`.
 - **Triggers the right skill** from your request, and **reads the rest on demand** —
   no need to paste docs into the prompt.
+- **Checks features like a user** — every feature spec has a *Finish Line* (an
+  observable outcome); the `acceptance` agent runs the product and checks it without
+  reading the code, for features and user-visible fixes (ADR-009). Evidence
+  (HTTP transcripts, screenshots) lands in `.claude/.state/acceptance/`.
 - **Verifies its own work** — runs `./scripts/verify`, and the `verify-on-stop` hook
   makes it fix failures (root cause, no skipped/weakened tests) before handing back.
   After 3 failed attempts it stops and gives you an escalation report.
 - **Permission deny rules** (`.claude/settings.json`) block gate bypasses:
-  `--no-verify`, `--admin` merges, force-push.
+  `--no-verify`, `--admin` merges, force-push. Edits outside the project are refused
+  (`blockWritesOutsideWorkingDirectories`) — use `/add-dir` when a task really needs
+  another directory.
 - **Confirms outward actions** — it asks before `git push`, opening a PR, or changing
   repo settings (branch protection).
 - Keeps scope inside the spec and adds a dated `CHANGELOG.md` entry for every change.
@@ -145,8 +160,10 @@ when you understand what Claude does on its own versus what you decide.
 
 | You want… | Say something like… | What happens |
 |-----------|---------------------|--------------|
-| A feature | "New feature: … — write the spec first" | `feature-spec` → you approve → implement → tests → verify → merge |
+| A feature | "New feature: … — write the spec first" | `feature-spec` (impact, finish line, 3 directions for UI) → you approve → implement → tests → verify → acceptance → merge |
 | A decision | "Record an ADR for choosing X over Y" | `adr` (use for libraries, data models, hard-to-reverse choices) |
+| Settle a plan | "Grill me on this plan: …" | `grill-me`: rounds of numbered questions with recommendations → `feature-spec` or `adr` |
+| A reported bug | "Bug: … returns 500 when …" | `diagnosing-bugs`: red loop → minimise → hypotheses → regression test → fix → `integrate` |
 | A small fix | "Fix … — this is a small fix" | regression test → fix → verify → commit → CHANGELOG → merge |
 | Tests | "Cover feature X with tests" | real tests in `tests/` derived from the spec |
 | Check a change | "Verify this" / "CI failed, fix it" | `verify`: run, diagnose, fix, re-run (bounded) |
@@ -185,13 +202,30 @@ project. As modules multiply:
 ### Orchestrated mode (optional)
 
 For larger tasks, `claude --agent orchestrator` starts a session whose main agent can't
-write: it plans, delegates to an `implementer` (one task at a time), a read-only
-`reviewer` and an `integrator` that commits and merges via a CI-gated PR, and reports.
+write: it plans, delegates to an `implementer` (one task at a time), a black-box
+`acceptance` agent that runs the product against the spec's Finish Line, a read-only
+`reviewer` and an `integrator` that commits and merges via a CI-gated PR (ruleset, or the agent
+gate on private GitHub Free repos), and reports.
 The reviewer gets the real diff from a hook, and the same verify gates block the
 implementer. Classic mode stays the default. See `docs/architecture/orchestrated-mode.md`,
-ADR-005 and ADR-007.
+ADR-005, ADR-007, ADR-008 and ADR-009.
 
 ### Maintenance
+
+**Skill evals.** Skills are instructions, so their behavior is checked by running them:
+each skill with evals has `.claude/skills/<skill>/evals/<case>/` (prompt, expected
+outcome, graders, and a `place-files.sh` that builds a throwaway copy of the template).
+Re-run them after upgrading Claude Code or editing a skill — real, billed runs, about a
+minute each:
+
+```bash
+scripts/tests/run-skill-evals.sh <skill> <case> with_skill /tmp/skill-evals/iteration-1
+# or, from a skill folder: claude plugin eval . --scaffold --allow-tools Write,Edit,Bash,Agent
+```
+
+The runner saves the transcript, final message, repo state and diff under `outputs/`,
+the layout the `skill-creator` skill grades and shows in its review page. Keep result
+folders outside `.claude/` — Claude Code asks before writing under any `.claude/` path.
 
 Audit dependencies periodically (a notable bump is a CHANGELOG entry; swapping a core
 library is an ADR). Keep docs describing the *present* — "what changed" is answered by

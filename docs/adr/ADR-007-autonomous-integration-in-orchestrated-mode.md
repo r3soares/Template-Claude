@@ -14,7 +14,8 @@
 
 Supersedes: —  
 Superseded by: —  
-Amends: ADR-005 (decision 5: integration is the developer's)
+Amends: ADR-005 (decision 5: integration is the developer's)  
+Amended by: ADR-008 (decision 3: agent gate where rulesets are unavailable)
 
 ---
 

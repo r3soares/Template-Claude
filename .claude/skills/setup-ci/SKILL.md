@@ -1,6 +1,6 @@
 ---
 name: setup-ci
-description: Configure quality gates — scripts/verify stage commands for the stack, the GitHub Actions workflow, branch protection. Use when asked to add CI, run tests on push, or protect master.
+description: Configure quality gates — scripts/verify stage commands for the stack, the GitHub Actions workflow, branch protection. Use when asked to add CI, run tests on push, or protect the default branch.
 ---
 
 # Set up CI and quality gates
@@ -76,13 +76,13 @@ comment (`uses: owner/action@<sha> # vX.Y.Z`; get it with
 deploy/release jobs unless asked.
 
 `.github/workflows/audit.yml` runs `./scripts/verify audit` (osv-scanner over the
-project's lockfiles) weekly and on demand — deliberately **not** a PR gate, so a newly
+project's lockfiles) monthly and on demand — deliberately **not** a PR gate, so a newly
 published CVE doesn't block unrelated work. It needs committed lockfiles to be useful.
 
 If the project has a dependency ecosystem, add it to `.github/dependabot.yml` with the
 same monthly `schedule` and a `groups` entry (one PR per ecosystem per month). Tool
 versions in `scripts/install-tools` are pinned and Dependabot can't see them:
-`.github/workflows/tool-versions.yml` runs `scripts/check-tool-versions` weekly and opens
+`.github/workflows/tool-versions.yml` runs `scripts/check-tool-versions` monthly and opens
 an issue when one is behind — bump it on a branch. A tool added to `install-tools` with
 the same release-URL pattern is checked automatically.
 
@@ -115,8 +115,24 @@ gh variable set VERIFY_STRICT --body 1
 
 ## 4. Protect the default branch (GitHub remote only)
 
-Outward-facing and changes how the repo accepts work — **confirm with the developer
-before each command.**
+First check whether the repo can have rulesets (read-only):
+
+```bash
+gh api repos/{owner}/{repo}/rulesets --jq length
+```
+
+**It fails with `Upgrade to GitHub Pro`** — a private repo on GitHub Free, where
+rulesets, branch protection and environments are unavailable. Skip the rest of this
+step and tell the developer: CI still runs on every PR, and `integrate` (and the
+orchestrated mode's integrator) enforce it with the **agent gate** (ADR-008): merge only
+an up-to-date PR whose `verify` check passed on its current head. It is not enforced by
+GitHub — a manual merge from the web UI can still skip it. Just run
+`gh repo edit --delete-branch-on-merge` (confirm first).
+
+**It prints a number** — rulesets are available. Outward-facing and changes how the repo
+accepts work — **confirm with the developer before each command.** A number above 0
+means a ruleset may already exist: update it instead of creating a duplicate
+(`gh api repos/{owner}/{repo}/rulesets/<id> --method PUT --input …`).
 
 ```bash
 gh repo edit --enable-auto-merge --delete-branch-on-merge
@@ -126,11 +142,6 @@ gh api repos/{owner}/{repo}/rulesets --method POST --input templates/github/bran
 The ruleset requires a PR, requires the `verify` check (from GitHub Actions) on an
 up-to-date branch, and blocks force-push and deletion of the default branch. Zero
 approvals are required — a solo dev can't approve their own PR; CI is the gate.
-
-**Limitation:** rulesets on **private** repos require GitHub Pro/Team/Enterprise. On
-GitHub Free, private repos keep CI as a signal but not a hard gate — say so to the
-developer. Re-applying the ruleset creates a duplicate; update an existing one with
-`gh api repos/{owner}/{repo}/rulesets/<id> --method PUT --input …`.
 
 ## 5. Validate
 

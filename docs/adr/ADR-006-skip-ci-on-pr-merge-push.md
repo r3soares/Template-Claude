@@ -12,7 +12,8 @@
 
 Supersedes: —  
 Superseded by: —  
-Amends: ADR-002 (Layer 3: when CI runs)
+Amends: ADR-002 (Layer 3: when CI runs)  
+Amended by: ADR-008 (the agent gate's up-to-date check closes the unverified-merge risk on GitHub Free)
 
 ---
 

@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: asks-questions-first
+expected_outcome: |
+  With no answers in the request, the skill asks its five questions together (name and
+  description, stack, language, where it runs, modules) and modifies nothing yet.
+context:
+  scaffold_script: place-files.sh

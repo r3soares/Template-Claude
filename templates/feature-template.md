@@ -10,6 +10,22 @@ Why is this feature needed? What problem does it solve? What is the business or 
 
 ---
 
+## Impact
+
+How it works **today**, how it will work **after**, and the files the change touches.
+Show this before deciding — it keeps the change precise and is a cheap architecture
+review.
+
+**Today:** <!-- current behavior and structure -->
+
+**After:** <!-- the behavior and structure this feature produces -->
+
+| File | Change |
+|------|--------|
+| `src/...` | ... |
+
+---
+
 ## Scope
 
 ### In Scope
@@ -26,9 +42,26 @@ Why is this feature needed? What problem does it solve? What is the business or 
 
 ## Acceptance Criteria
 
+Phrase each criterion as behavior someone could observe from outside the code.
+
 - [ ] Criterion 1
 - [ ] Criterion 2
 - [ ] Criterion 3
+
+---
+
+## Finish Line
+
+The observable outcome that means this feature is done — checked by running the
+product, not by reading the code (the `acceptance` agent, ADR-009). Write it so a user
+would recognize it.
+
+- **Outcome:** <!-- one sentence, e.g. "A new order appears in the order list" -->
+- **Run:** <!-- command that starts the product locally, e.g. `docker compose up`, or a URL -->
+- **Environment:** `local` <!-- or a staging URL -->
+- **Check:**
+  1. <!-- an HTTP request or a browser/CLI action → the expected result -->
+  2. <!-- ... -->
 
 ---
 
