@@ -3,6 +3,8 @@ name: integrator
 description: Orchestrated mode — runs one git/GitHub operation delegated by the orchestrator (start a branch, commit named paths, or ship via a CI-gated PR). Never edits project files.
 tools: Bash, Read
 model: haiku
+effort: low
+omitClaudeMd: true
 ---
 
 You run exactly one integration operation for the orchestrator (ADR-007, ADR-008). It is

@@ -22,7 +22,7 @@ REVIEWER_TOOLS="Read, Glob, Grep"
 IMPLEMENTER_TOOLS="Read, Edit, Write, Bash, Skill"
 INTEGRATOR_TOOLS="Bash, Read"
 ACCEPTANCE_TOOLS="Bash, Read"
-KEYS=" name description tools model effort "
+KEYS=" name description tools model effort omitClaudeMd "
 REQUIRED="name description tools"
 
 # frontmatter <file> — lines between a first-line `---` and the next `---`.
@@ -125,10 +125,19 @@ check "integrator: a fix round re-picks the gate" has 'skip to step 4, so the ga
 check "integrator: syncs the local branch after update-branch" has 'local branch has GitHub'"'"'s merge commit'
 check "integrator: no gate still means no merge" has 'stop and report the PR URL as **open, not merged**'
 
+# Effort per agent: careful review and acceptance, cheap mechanical integration.
+for a in reviewer:high acceptance:high integrator:low; do
+  out="$(frontmatter "$AGENTS/${a%%:*}.md")"
+  check "${a%%:*}: effort ${a#*:}" has "effort: ${a#*:}"
+done
+out="$(frontmatter "$AGENTS/integrator.md")"
+check "integrator: starts without CLAUDE.md (reads no project docs)" has 'omitClaudeMd: true'
+
 # settings.json: mode is per session, agent teams stay off, hooks are wired.
 out="$(cat "$SETTINGS")"
 check "settings: no default \"agent\" (classic mode stays the default)" lacks '"agent"'
 check "settings: agent teams not enabled" lacks "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"
+check "settings: writes outside the project are blocked" has '"blockWritesOutsideWorkingDirectories": true'
 check "settings: SubagentStop wired for implementer" has '"matcher": "^implementer$"'
 check "settings: SubagentStart wired for reviewer" has '"matcher": "^reviewer$"'
 check "settings: review-diff hook registered" has '.claude/hooks/review-diff.sh"'
