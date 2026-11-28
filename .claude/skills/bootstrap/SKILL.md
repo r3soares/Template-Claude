@@ -34,6 +34,11 @@ Skip any question the request already answers. Ask the rest in one go (with
 5. **Module structure**: single module · API and implementation modules (ask for the
    names) · decide later.
 
+If the stack or the module structure is still unclear (undecided, "não sei", options
+the developer can't choose between), suggest `/grill-me` before going on: it settles
+them in rounds and writes nothing, and `/bootstrap` resumes afterwards. "Where it
+runs: undecided" alone is fine — continue.
+
 ## 2. Branch
 
 Follow `integrate` step 1: `git switch -c chore/bootstrap`.
