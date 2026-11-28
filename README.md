@@ -132,7 +132,9 @@ when you understand what Claude does on its own versus what you decide.
   makes it fix failures (root cause, no skipped/weakened tests) before handing back.
   After 3 failed attempts it stops and gives you an escalation report.
 - **Permission deny rules** (`.claude/settings.json`) block gate bypasses:
-  `--no-verify`, `--admin` merges, force-push.
+  `--no-verify`, `--admin` merges, force-push. Edits outside the project are refused
+  (`blockWritesOutsideWorkingDirectories`) — use `/add-dir` when a task really needs
+  another directory.
 - **Confirms outward actions** — it asks before `git push`, opening a PR, or changing
   repo settings (branch protection).
 - Keeps scope inside the spec and adds a dated `CHANGELOG.md` entry for every change.

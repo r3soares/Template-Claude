@@ -59,11 +59,11 @@ developer ─▶ orchestrator (Agent(implementer, reviewer, integrator, acceptan
                │     SubagentStart ─▶ acceptance-start.sh ─▶ .claude/.state/acceptance/<state>/ (evidence)
                │     PreToolUse(Read) ─▶ acceptance-guard.sh ─▶ deny src/, tests/ (black box)
                │     runs the product; PASS / FAIL / BLOCKED per criterion; FAIL joins the fix round
-               ├─▶ reviewer (Read, Glob, Grep)
+               ├─▶ reviewer (Read, Glob, Grep; effort high)
                │     SubagentStart ─▶ review-diff.sh ─▶ .claude/.state/review-<state>.diff
                │                                       + path/state via additionalContext
                │ compare review <state> with verify-pass; must-fix: 1 fix round + focused re-review
-               ├─▶ integrator (Bash, Read; haiku)
+               ├─▶ integrator (Bash, Read; haiku, effort low, no CLAUDE.md)
                │     start <branch> · commit <paths> <msg> per task · ship ─▶ PR ─▶ gate check
                │       ruleset: CI ─▶ auto-merge · agent (no rulesets, ADR-008): up to date + CI pass ─▶ merge
                └─ Stop ─▶ verify-on-stop.sh (skipped while a subagent runs in background)
