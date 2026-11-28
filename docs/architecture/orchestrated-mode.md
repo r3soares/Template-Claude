@@ -22,9 +22,11 @@ The orchestrator delegates in the background. After it spawns an agent it ends i
 and picks up again when the result arrives. Permission prompts from subagents appear in
 the main session.
 
-The `integrator` branches, commits, pushes and merges (ADR-007). Its git and `gh`
-commands aren't in the shared allow list, since classic sessions would inherit them. To
-run without prompts, allow them in your untracked `.claude/settings.local.json`:
+The `integrator` branches, commits, pushes and merges (ADR-007). Where GitHub has no
+rulesets (private repos on GitHub Free) it enforces the CI gate itself (ADR-008). Its
+git and `gh` commands aren't in the shared allow list, since classic sessions would
+inherit them. To run without prompts, allow them in your untracked
+`.claude/settings.local.json`:
 
 ```json
 { "permissions": { "allow": [
@@ -33,7 +35,9 @@ run without prompts, allow them in your untracked `.claude/settings.local.json`:
   "Bash(git merge --no-ff *)", "Bash(git branch -d *)", "Bash(git branch --show-current)",
   "Bash(git remote)", "Bash(git remote -v)", "Bash(gh auth status)",
   "Bash(gh pr create *)", "Bash(gh pr merge --auto *)", "Bash(sleep *)",
-  "Bash(gh api repos/{owner}/{repo}/rules/branches/*)"
+  "Bash(gh api repos/{owner}/{repo}/rules/branches/*)",
+  "Bash(git fetch origin master)", "Bash(git merge-base --is-ancestor *)",
+  "Bash(gh pr update-branch)", "Bash(gh pr merge --merge *)"
 ] } }
 ```
 
@@ -55,7 +59,8 @@ developer ─▶ orchestrator (Agent(implementer, reviewer, integrator), Read, G
                │                                       + path/state via additionalContext
                │ compare review <state> with verify-pass; must-fix: 1 fix round + focused re-review
                ├─▶ integrator (Bash, Read; haiku)
-               │     start <branch> · commit <paths> <msg> per task · ship ─▶ PR ─▶ gate check ─▶ CI ─▶ auto-merge
+               │     start <branch> · commit <paths> <msg> per task · ship ─▶ PR ─▶ gate check
+               │       ruleset: CI ─▶ auto-merge · agent (no rulesets, ADR-008): up to date + CI pass ─▶ merge
                └─ Stop ─▶ verify-on-stop.sh (skipped while a subagent runs in background)
 ```
 
@@ -108,7 +113,7 @@ perm=(--permission-mode acceptEdits --allowedTools 'Bash(./**)' 'Bash(chmod *)' 
 | 7 | Classic mode unchanged | `claude -p --permission-mode acceptEdits "Append a line to README.md"` | Stop hook runs verify; `verify-pass` equals the current fingerprint | Pass, automated (2.1.312) |
 | 8 | Background deferral (interactive) | `claude --agent orchestrator`, delegate a multi-file task; while the implementer runs, the orchestrator's turn ends | No verify failure reported mid-implementation; verify runs when the orchestrator stops after the result | Manual, not yet run |
 | 9 | Interactive niceties | Same session | `AskUserQuestion` available for approvals; workspace trust accepted, so project allow rules apply | Manual, not yet run |
-| 10 | Autonomous integration | In a throwaway repo with a GitHub remote, ruleset and CI: `claude --agent orchestrator`, a small task | One commit per task by the integrator; no reviewer for a non-risky small change; PR opened with auto-merge, merged after CI | Local mode (no remote): pass, automated (2.1.331) — branch, one commit, `verify full`, `merge --no-ff`. GitHub mode not yet run |
+| 10 | Autonomous integration | In a throwaway repo with a GitHub remote, ruleset and CI: `claude --agent orchestrator`, a small task | One commit per task by the integrator; no reviewer for a non-risky small change; PR opened with auto-merge, merged after CI | Local mode (no remote): pass, automated (2.1.331) — branch, one commit, `verify full`, `merge --no-ff`. GitHub mode not yet run. Agent gate (private repo, GitHub Free; ADR-008): PR merged with `--match-head-commit` only after `verify` passed on an up-to-date head — not yet run |
 
 When upgrading Claude Code, re-run 1–7 (a few minutes, a few cents of tokens) and
 update the Status column.

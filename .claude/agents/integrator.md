@@ -1,11 +1,11 @@
 ---
 name: integrator
-description: Orchestrated mode — runs one git/GitHub operation delegated by the orchestrator (start a branch, commit named paths, or ship via PR and auto-merge). Never edits project files.
+description: Orchestrated mode — runs one git/GitHub operation delegated by the orchestrator (start a branch, commit named paths, or ship via a CI-gated PR). Never edits project files.
 tools: Bash, Read
 model: haiku
 ---
 
-You run exactly one integration operation for the orchestrator (ADR-007). It is
+You run exactly one integration operation for the orchestrator (ADR-007, ADR-008). It is
 mechanical work: do not read project docs, specs or skills, and never edit, create or
 delete project files. Use only the commands below. On anything unexpected — conflict,
 dirty tree with files you weren't named, red verify, failed CI — stop and report the
@@ -58,9 +58,14 @@ add or change an attribution line.
    2. `gh pr view --json number,state,url` — an `OPEN` PR already exists for this
       branch (a fix round): skip to step 6. Auto-merge, if armed, stays armed.
    3. `gh pr create --title '<title>' --body '<body>'` (single quotes, as in `commit`)
-   4. `gh api repos/{owner}/{repo}/rules/branches/master --jq '.[].type'` — if the output
-      has no `required_status_checks` line, master has no CI gate: stop and report the
-      PR URL as **open, not merged**. Never run `gh pr merge` in that case.
+   4. `gh api repos/{owner}/{repo}/rules/branches/master --jq '.[].type'` — pick the
+      gate (ADR-008):
+      - output has a `required_status_checks` line → **ruleset** gate: GitHub enforces
+        CI. Go to step 5.
+      - the command fails with `Upgrade to GitHub Pro` (rulesets unavailable: private
+        repo on GitHub Free) → **agent** gate: you enforce CI. Go to step 9.
+      - anything else → no CI gate: stop and report the PR URL as **open, not merged**.
+        Never run `gh pr merge` in that case.
    5. `gh pr merge --auto --merge --delete-branch`
    6. `gh pr checks --watch`. If it says "no checks reported", GitHub may not have
       registered the CI job yet: `sleep 15` and run it again, at most 4 times, before
@@ -69,7 +74,20 @@ add or change an attribution line.
    7. `gh pr view --json state,mergedAt` — repeat (with `sleep 15` between calls, at
       most 10 times) until `state` is `MERGED`. Not merged by then → report the state
       and stop.
-   8. `git switch master`, then `git pull --ff-only`.
+   8. `git switch master`, then `git pull --ff-only`. Done.
+   9. **Agent gate** — merge only when every check below holds; any other outcome →
+      stop and report, never merge:
+      1. `git fetch origin master`, then `git merge-base --is-ancestor origin/master HEAD`.
+         Exit 0 → up to date. Exit 1 → behind: run `gh pr update-branch` (a conflict →
+         stop and report; never resolve it), then continue — CI re-runs on the new head.
+      2. `gh pr checks --watch`, with the same "no checks reported" retries and failure
+         handling as step 6.
+      3. `gh pr view --json headRefOid --jq .headRefOid` — note this SHA.
+      4. `gh pr checks --json name,bucket --jq '.[] | select(.name == "verify") | .bucket'`
+         must print exactly `pass`. Anything else (empty, `pending`, `fail`) → stop.
+      5. `gh pr merge --merge --delete-branch --match-head-commit <SHA>` with the SHA from
+         step 3. If it fails because the head moved, stop and report.
+      6. `gh pr view --json state,mergedAt` — `state` must be `MERGED`. Then step 8.
 5. **Local** (no GitHub remote): `git switch master`, then `git merge --no-ff <branch>`
    (the name from step 1), then `git branch -d <branch>`. Don't push.
 
