@@ -53,6 +53,10 @@ hygiene*).
 Add a dated entry under `[Unreleased]` in `CHANGELOG.md` — **always**, including for
 small fixes.
 
+For a feature, also set its spec's title tag from `[ACCEPTED]` to `[IMPLEMENTED]` on the
+branch, so the status lands in the same merge as the code. If the merge doesn't happen,
+the branch carries it, not the default branch.
+
 ## 4. Verify
 
 ```bash
@@ -166,11 +170,14 @@ locally, resolve, commit, push, and start the checks again.
 
 ## Pre-merge checklist (full features)
 
-- [ ] Spec is `[ACCEPTED]`, and its *Related* section points at the source/test files
+- [ ] Spec was `[ACCEPTED]` before implementing, is now `[IMPLEMENTED]`, and its *Related*
+      section points at the source/test files
 - [ ] Tests cover the spec (the `test-plan` skill) and `./scripts/verify full` is green
 - [ ] `security-review` run; findings fixed or listed for the developer
 - [ ] No scope added beyond the spec
 - [ ] `CHANGELOG.md` updated
+- [ ] `traceability` matrix row updated — only if the project keeps one
+      (`docs/traceability/traceability.md`)
 
 ## For small fixes
 

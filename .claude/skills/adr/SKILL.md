@@ -15,7 +15,9 @@ implementing it.
 - A decision will be costly to reverse later.
 - There is genuine uncertainty between options worth documenting.
 
-If none of these apply, skip the ADR.
+If none of these apply, skip the ADR. If the options are still open — the developer
+hasn't chosen, or choosing depends on several unsettled questions — suggest `/grill-me`
+first, then write the ADR from the settled decision.
 
 ## Steps
 

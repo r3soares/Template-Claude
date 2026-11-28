@@ -1,4 +1,4 @@
-# Feature: Adopted Skills — grill-me, diagnosing-bugs, handoff, retro [ACCEPTED]
+# Feature: Adopted Skills — grill-me, diagnosing-bugs, handoff, retro [IMPLEMENTED]
 
 > Four skills adapted from Matt Pocock's `skills` collection (MIT) fill the template's
 > gaps before and after the code: settling a design, hunting a hard bug, handing a

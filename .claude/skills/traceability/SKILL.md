@@ -20,7 +20,8 @@ matrix (audited / regulated / compliance contexts), or when the user asks for on
    feature name · spec link · ADR link (or `—`) · source files · test files · status.
 3. **Set the status** from the legend (🔵 Spec → 🟡 In Progress → 🟠 Testing → 🟢 Done;
    🔴 Blocked, ⚫ Cancelled).
-4. Keep the matrix current before merging a feature PR.
+4. Keep the matrix current before merging a feature PR — `integrate`'s pre-merge
+   checklist includes it; set 🟢 Done in the same branch that merges the feature.
 
 ## Rule
 

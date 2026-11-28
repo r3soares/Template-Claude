@@ -1,4 +1,4 @@
-# Feature: Finish Line and Black-Box Acceptance [ACCEPTED]
+# Feature: Finish Line and Black-Box Acceptance [IMPLEMENTED]
 
 > Every feature spec states a finish line observable outside the code, and an
 > independent `acceptance` agent checks it the way a user would, without reading the
