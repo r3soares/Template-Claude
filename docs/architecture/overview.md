@@ -38,7 +38,7 @@ module under *Components* as the code grows.
 │   ├── verify            # Single entry point for lint/test/integration/audit (ADR-001)
 │   ├── install-tools     # Pinned, checksum-verified install of the template's quality tools
 │   ├── check-tool-versions  # Are those pins current? (exit 1 if one is behind)
-│   └── tests/            # Self-tests for scripts/verify, the hooks and the agents (template_test)
+│   └── tests/            # Self-tests for scripts/verify, the hooks, the agents and skills (template_test)
 ├── src/                  # Source code (stack-specific structure goes here)
 ├── templates/            # Blank models: *-template.md, docker/, github/
 ├── tests/                # Project tests (unit, integration, e2e)

@@ -28,7 +28,8 @@ Folders are always `kebab-case`.
 
 ## ADR numbering
 
-- Sequential, zero-padded to 3 digits, never reused — even when superseded.
+- Sequential, zero-padded to 3 digits, never reused — even when superseded. A project
+  created from the template continues after the template's ADRs: take the next free number.
 - Superseding: new ADR with `Supersedes: ADR-NNN`; old one gets `[SUPERSEDED]` and
   `Superseded by: ADR-MMM`. Never delete or rewrite an accepted ADR.
 

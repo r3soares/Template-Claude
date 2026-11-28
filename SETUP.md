@@ -1,110 +1,58 @@
 # Using This Template
 
-Step-by-step checklist for starting a new project from this template. Delete this file
-from the new project once you're done.
+How to start a new project from this template. The `/bootstrap` skill deletes this file
+once the project is set up.
 
 ---
 
-## 1. Copy the Template
+## 1. Create the repository
 
-Copy the committed files only — not the template's git history or local state
-(`.git/`, `.claude/.state/`, `.claude/settings.local.json`):
+On GitHub, open the template and choose **Use this template → Create a new
+repository** (private is fine — the template works on GitHub Free). Then clone it:
 
 ```bash
-mkdir /path/to/NewProject
-git -C /path/to/Template archive HEAD | tar -x -C /path/to/NewProject
-cd /path/to/NewProject
+git clone <your-new-repo-url>
+cd <your-new-repo>
 ```
 
----
-
-## 2. Initialize Git
+Without GitHub, copy the committed files only (not the template's history or local
+state) and start a repo:
 
 ```bash
-git init
-git add .
-git commit -m "chore: initial project structure from template"
+git -C /path/to/Template-Claude archive HEAD | tar -x -C /path/to/NewProject
+cd /path/to/NewProject && git init && git add . && git commit -m "chore: initial project structure from template"
 ```
 
----
+## 2. Run `/bootstrap`
 
-## 3. Update Project Identity
+```bash
+claude
+```
 
-| File | What to update |
-|------|---------------|
-| `CLAUDE.md` | Replace the project-identity placeholder line and set `Reply to the developer in: <language>` (your conversation language; code and docs stay in English). To enforce it — an English prompt or agent report otherwise pulls replies to English — also set `"language": "<language>"` in `~/.claude/settings.json` or `.claude/settings.local.json`. Only rules that matter in *every* session go here; area-specific ones go in `.claude/rules/` (step 7). |
-| `README.md` | Project name, description, stack-specific setup/run/test commands |
-| `docs/architecture/overview.md` | Project map: real structure, stack, first modules |
-| `CHANGELOG.md` | Start fresh; the first entry is your project's start |
+Then type `/bootstrap`. Claude asks five questions — project name and description,
+stack, conversation language, where it runs, and how the code is split into modules —
+and then:
 
----
+- fills in `CLAUDE.md` (identity, language), `README.md` (run instructions and
+  environments), `docs/architecture/overview.md` and, for a modular project,
+  `.claude/rules/architecture.md`;
+- resets `CHANGELOG.md` and uncomments the stack's `.gitignore` section;
+- decides on Docker (`dockerize`) and configures checks and CI (`setup-ci`), including
+  the merge gate: a ruleset where GitHub allows it, the agent gate on private GitHub
+  Free repos (ADR-008);
+- runs `./scripts/verify full`, deletes this file, merges the setup (`integrate`) and
+  offers the `v0.1.0` tag.
 
-## 4. Clean Up Placeholder Content
+Pushing, the PR and the tag each wait for your confirmation. Running `/bootstrap` again
+on a bootstrapped project changes nothing.
 
-- Remove placeholder comments from `README.md`
-- Delete `SETUP.md` (template-only)
+## 3. Optional
 
----
+- Install the template's quality tools locally, so the Stop hook runs the same checks
+  as CI: `./scripts/install-tools` and `shellcheck` (apt/brew).
+- Enable a format-on-edit hook for your formatter: see `.claude/hooks/README.md`.
 
-## 5. Decide on Docker, configure checks and CI
+## 4. Start building
 
-- **Docker**: use the `dockerize` skill — it has a decision guide. SaaS/API/web/worker →
-  yes; CLI/desktop/library → no. If yes, it applies `templates/docker/`.
-- **Checks + CI**: use the `setup-ci` skill. It fills the stage commands in
-  `scripts/verify` (the only place they live), adds the runtime setup to
-  `.github/workflows/ci.yml`, sets `VERIFY_STRICT=1`, and — if the repo is on GitHub —
-  applies the branch ruleset and enables auto-merge (it asks first). Private repos on
-  GitHub Free can't have rulesets: there CI is enforced by the agent gate instead
-  (ADR-008), and orchestrated mode still merges on its own. A repo that could have a
-  ruleset but doesn't stops at the open PR (ADR-007). Keep the template's
-  self-tests first in the test stage: `TEST_CMD="template_test && <your tests>"` — under
-  `VERIFY_STRICT=1`, `template_test` alone fails as not configured. Add the stack's
-  ecosystem to `.github/dependabot.yml`, and pin any action you add by SHA.
-- **ADRs**: keep `docs/adr/ADR-001` to `ADR-004` — they record why the quality gates
-  work this way. Your project's own decisions start at `ADR-005`.
-
----
-
-## 6. Configure Stack Tooling
-
-- Update `.gitignore` — uncomment the relevant stack section
-- Update `.editorconfig` if your stack differs
-- (Optional) Enable a format-on-edit hook — see `.claude/hooks/README.md`
-- (Recommended) Install the template's quality tools locally so the Stop hook runs the
-  same checks as CI: `./scripts/install-tools` (gitleaks, actionlint, hadolint) and
-  `shellcheck` via apt/brew. Missing tools are listed in the verify summary; CI installs
-  them regardless.
-
----
-
-## 7. Start Development
-
-Process scales by change size (see `CLAUDE.md` and the README's *Development Workflow*):
-
-- **Small fix** → code (+ regression test) → verify → conventional commit → dated
-  `CHANGELOG.md` entry → merge (the `integrate` skill).
-- **Feature** → start with the `feature-spec` skill: `specs/features/{name}/spec.md`.
-
-Claude loads the right skill when the task calls for it — you don't need to read all the
-docs up front.
-
-As the project grows (see the README's *When the project grows*): add a
-`.claude/rules/<area>.md` with `paths:` for conventions specific to one part of the
-code, and keep `docs/architecture/overview.md` current when a module is added.
-
----
-
-## Checklist Summary
-
-- [ ] Template copied to new project folder
-- [ ] Git initialized and first commit made
-- [ ] `CLAUDE.md` project identity and conversation language filled in
-- [ ] `README.md` updated with project details
-- [ ] `docs/architecture/overview.md` updated with the real structure
-- [ ] `CHANGELOG.md` reset
-- [ ] Docker decision made (`dockerize` skill if applicable)
-- [ ] `scripts/verify` stages configured (`TEST_CMD` = `template_test && …`) and `./scripts/verify` green (`setup-ci` skill)
-- [ ] CI runtime filled in, stack ecosystem in `dependabot.yml`, `VERIFY_STRICT=1` set, branch ruleset applied (GitHub only; skipped on private GitHub Free repos)
-- [ ] `.gitignore` stack section uncommented
-- [ ] `SETUP.md` deleted from new project
-- [ ] First feature spec created (or first small fix shipped)
+Ask for the first feature ("New feature: … — write the spec first"); the `feature-spec`
+skill takes it from there.

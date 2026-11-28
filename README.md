@@ -2,6 +2,8 @@
 
 > One-line description of the project.
 
+<!-- Just created from the template? Run `claude` and type `/bootstrap` (see SETUP.md). -->
+
 ---
 
 ## Overview
@@ -84,7 +86,8 @@ The process scales with change size (`CLAUDE.md` holds the rule Claude follows):
 
 Specialized steps are handled by Claude **skills** (`.claude/skills/`) that load only
 when relevant — `feature-spec`, `adr`, `test-plan`, `verify`, `integrate`, `dockerize`,
-`setup-ci` (plus an optional `traceability` skill for compliance projects).
+`setup-ci` (plus an optional `traceability` skill for compliance projects). `bootstrap`
+runs once, as `/bootstrap`, to set up a project created from the template (`SETUP.md`).
 
 ### Quality gates
 
