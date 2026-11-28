@@ -88,6 +88,10 @@ Specialized steps are handled by Claude **skills** (`.claude/skills/`) that load
 when relevant — `feature-spec`, `adr`, `test-plan`, `verify`, `integrate`, `dockerize`,
 `setup-ci` (plus an optional `traceability` skill for compliance projects). `bootstrap`
 runs once, as `/bootstrap`, to set up a project created from the template (`SETUP.md`).
+Adapted from Matt Pocock's skills (MIT, licence in each folder): `grill-me` (an interview
+that settles a design before the spec), `diagnosing-bugs` (red feedback loop first for a
+reported bug), and the commands `/handoff` (a note for a fresh session) and `/retro`
+(improvements to the agent's environment after a session).
 
 ### Quality gates
 
@@ -156,6 +160,8 @@ when you understand what Claude does on its own versus what you decide.
 |-----------|---------------------|--------------|
 | A feature | "New feature: … — write the spec first" | `feature-spec` (impact, finish line, 3 directions for UI) → you approve → implement → tests → verify → acceptance → merge |
 | A decision | "Record an ADR for choosing X over Y" | `adr` (use for libraries, data models, hard-to-reverse choices) |
+| Settle a plan | "Grill me on this plan: …" | `grill-me`: rounds of numbered questions with recommendations → `feature-spec` or `adr` |
+| A reported bug | "Bug: … returns 500 when …" | `diagnosing-bugs`: red loop → minimise → hypotheses → regression test → fix → `integrate` |
 | A small fix | "Fix … — this is a small fix" | regression test → fix → verify → commit → CHANGELOG → merge |
 | Tests | "Cover feature X with tests" | real tests in `tests/` derived from the spec |
 | Check a change | "Verify this" / "CI failed, fix it" | `verify`: run, diagnose, fix, re-run (bounded) |

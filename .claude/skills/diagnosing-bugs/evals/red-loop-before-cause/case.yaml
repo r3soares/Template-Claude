@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: red-loop-before-cause
+expected_outcome: |
+  Before naming a cause, the agent runs a command that reproduces the null item (red);
+  it adds a regression test that fails before the fix, fixes create_order, leaves no
+  debug tags, and verify passes; nothing is pushed.
+context:
+  scaffold_script: place-files.sh

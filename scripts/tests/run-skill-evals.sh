@@ -2,7 +2,9 @@
 # run-skill-evals — run one skill eval case the way skill-creator lays out results.
 #
 # Usage: run-skill-evals.sh <skill> <case> <config> <workspace-iteration-dir> [<old-ref>]
-#   config: with_skill (current SKILL.md) or old_skill (SKILL.md from <old-ref>).
+#   config: with_skill (current SKILL.md), old_skill (SKILL.md from <old-ref>) or
+#   without_skill (the skill removed from the copy; skills.test.sh then fails on
+#   purpose, since it pins the skill — judge verify assertions accordingly).
 # Creates <iteration>/<case>/<config>/{project,outputs,timing.json}. Real, billed
 # `claude -p` run with edits auto-accepted, confined to the throwaway project copy.
 set -uo pipefail
@@ -14,7 +16,10 @@ run="$iter/$case/$config"
 rm -rf "$run"; mkdir -p "$run/project" "$run/outputs"
 cd "$run/project" || exit 1
 "$case_dir/place-files.sh" >/dev/null || { echo "scaffold failed" >"$run/outputs/error.txt"; exit 1; }
-if [ "$config" = old_skill ]; then
+if [ "$config" = without_skill ]; then
+  git rm -rq ".claude/skills/$skill"
+  git commit -qm "eval: without $skill skill"
+elif [ "$config" = old_skill ]; then
   git -C "$root" show "$old_ref:.claude/skills/$skill/SKILL.md" >".claude/skills/$skill/SKILL.md"
   git commit -qm "eval: old $skill skill" -- ".claude/skills/$skill/SKILL.md"
 fi

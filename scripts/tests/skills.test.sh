@@ -29,4 +29,19 @@ out="$(cat "$ROOT/.claude/skills/integrate/SKILL.md")"
 check "integrate: ship-it authorizes a local merge only" has 'is the go-ahead for a **local** merge'
 check "integrate: push, PR and tags still need explicit confirmation" has 'still needs an'
 
+# Adopted skills (Matt Pocock's collection, MIT): notice kept, invocation as designed.
+for sk in grill-me diagnosing-bugs handoff retro; do
+  out="$(cat "$ROOT/.claude/skills/$sk/LICENSE" 2>/dev/null)"
+  check "$sk: MIT notice of the original kept" has 'Copyright (c) 2026 Matt Pocock'
+  out="$(cat "$ROOT/.claude/skills/$sk/SKILL.md")"
+  check "$sk: says where it was adapted from" has 'github.com/mattpocock/skills'
+done
+for sk in handoff retro; do
+  out="$(awk 'NR == 1 && $0 == "---" { next } $0 == "---" { exit } { print }' "$ROOT/.claude/skills/$sk/SKILL.md")"
+  check "$sk: not auto-invoked" has 'disable-model-invocation: true'
+done
+out="$(cat "$ROOT/.claude/skills/diagnosing-bugs/SKILL.md")"
+check "diagnosing-bugs: no hypothesis before a red loop" has 'Reading code'
+check "diagnosing-bugs: ships its HITL script" test -f "$ROOT/.claude/skills/diagnosing-bugs/scripts/hitl-loop.template.sh"
+
 finish
