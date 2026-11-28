@@ -24,7 +24,8 @@ elif [ "$config" = old_skill ]; then
   git commit -qm "eval: old $skill skill" -- ".claude/skills/$skill/SKILL.md"
 fi
 head_before="$(git rev-parse HEAD)"
-prompt="$(awk 'BEGIN{n=0} /^---$/ && n<2 {n++; next} n>=2' "$case_dir/prompt.md")"
+# Drop the blank lines after the frontmatter: a prompt must start with "/" to run as a command.
+prompt="$(awk 'BEGIN{n=0} /^---$/ && n<2 {n++; next} n>=2 && (started || NF) {started=1; print}' "$case_dir/prompt.md")"
 
 start=$(date +%s%3N)
 timeout 1200 claude -p --permission-mode acceptEdits \
