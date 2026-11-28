@@ -74,6 +74,12 @@ the branch's changes. Fix confirmed findings (with a regression test) and re-run
 list anything left open in step 5. Skip it for other small changes — it costs tokens and
 lint/tests already cover them.
 
+Without a remote, `security-review` fails: it diffs against `origin/HEAD`. Then review
+`git diff <default>...HEAD` yourself for the same classes of issue (injection, authn and
+authz, secrets in code or logs, unsafe deserialization, path traversal, SSRF, unchecked
+input reaching the shell, a query or the filesystem), and say in step 5 that the review
+was manual and why. Don't skip it, and don't add a remote to make the skill run.
+
 ## 4c. Acceptance (features and user-visible changes)
 
 Spawn the `acceptance` agent (ADR-009) when the change is a feature whose spec has a
