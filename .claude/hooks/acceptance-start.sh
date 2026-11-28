@@ -3,7 +3,7 @@
 # workspace state it checks (ADR-009).
 #
 # Fires as a SubagentStart hook for the `acceptance` agent. It creates
-# .claude/.state/acceptance/<fingerprint>/ (removing older evidence directories) and
+# .acceptance/<fingerprint>/ (removing older evidence directories) and
 # passes the path and the state id through `additionalContext`. The fingerprint is the
 # one verify-on-stop.sh caches in verify-pass and review-diff.sh names its diff with,
 # so the orchestrator can tell which tree was accepted. It never blocks.
@@ -31,7 +31,7 @@ export GIT_OPTIONAL_LOCKS=0
 
 fp="$(fingerprint)"
 [ -n "$fp" ] || unavailable "could not compute the workspace state"
-base=".claude/.state/acceptance"
+base=".acceptance"   # outside .claude/: Bash writes there need approval (ADR-010)
 mkdir -p "$base" || unavailable "cannot create $base"
 find "$base" -mindepth 1 -maxdepth 1 -type d ! -name "$fp" -exec rm -rf {} + 2>/dev/null
 mkdir -p "$base/$fp" || unavailable "cannot create $base/$fp"

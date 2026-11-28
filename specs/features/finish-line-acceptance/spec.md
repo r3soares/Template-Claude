@@ -107,7 +107,7 @@ is in the report, not only in a test log.
 - Guard hook: `PreToolUse` on `Read` denies paths under `src/` and `tests/` when
   `agent_type` is `acceptance`. Other agents are unaffected.
 - Start hook: `SubagentStart` for `acceptance` creates
-  `.claude/.state/acceptance/<state>/` and passes its path and the state id
+  `.acceptance/<state>/` (ADR-010) and passes its path and the state id
   (`fingerprint.sh`) via `additionalContext`.
 - **When acceptance runs** (decided by the orchestrator, or the main session in classic
   mode — never by the implementer, who would be judging its own change):

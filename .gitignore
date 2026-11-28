@@ -110,3 +110,6 @@ temp/
 .claude/settings.local.json
 CLAUDE.local.md
 .claude/.state/
+
+# Evidence from the acceptance agent (ADR-010). Never commit.
+.acceptance/

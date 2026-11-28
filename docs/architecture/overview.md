@@ -19,7 +19,7 @@ module under *Components* as the code grows.
 .
 ├── .claude/
 │   ├── settings.json     # Harness config: permissions (incl. gate-bypass deny rules), hooks
-│   ├── agents/           # orchestrator, implementer, reviewer, integrator (opt-in mode, ADR-005, 007); acceptance (ADR-009)
+│   ├── agents/           # orchestrator, implementer, reviewer, integrator (opt-in mode, ADR-005, 007); acceptance (ADR-009, 010)
 │   ├── hooks/            # verify-on-stop (self-correction loop), review-diff (reviewer's diff),
 │   │                     # acceptance-start/-guard (acceptance evidence, black box) + README
 │   ├── rules/            # Path-scoped instructions, loaded when Claude works on matching files
@@ -88,3 +88,4 @@ module under *Components* as the code grows.
 | Autonomous integration in orchestrated mode | [ADR-007](../adr/ADR-007-autonomous-integration-in-orchestrated-mode.md) |
 | Agent-enforced merge gate without rulesets | [ADR-008](../adr/ADR-008-agent-enforced-gate-without-rulesets.md) |
 | Black-box acceptance agent | [ADR-009](../adr/ADR-009-black-box-acceptance-agent.md) |
+| Acceptance evidence outside `.claude/` | [ADR-010](../adr/ADR-010-acceptance-evidence-outside-claude-dir.md) |

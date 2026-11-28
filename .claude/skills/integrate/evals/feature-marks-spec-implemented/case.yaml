@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: feature-marks-spec-implemented
+expected_outcome: |
+  A finished feature with an [ACCEPTED] spec goes through integrate: the spec's title
+  tag becomes [IMPLEMENTED] in the same merge as the code, the Finish Line is checked by
+  the acceptance agent, and nothing is pushed.
+context:
+  scaffold_script: place-files.sh

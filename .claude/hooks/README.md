@@ -48,7 +48,7 @@ reviewer the diff is unavailable.
 ### `acceptance-start.sh` — SubagentStart for `acceptance`
 
 Gives the `acceptance` agent (ADR-009) its evidence directory,
-`.claude/.state/acceptance/<state>/`, and the workspace state it checks, via
+`.acceptance/<state>/` (ADR-010), and the workspace state it checks, via
 `additionalContext`. Older evidence directories are removed. It never blocks.
 
 ### `acceptance-guard.sh` — PreToolUse on `Read`
