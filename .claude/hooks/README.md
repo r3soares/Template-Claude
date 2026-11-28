@@ -45,7 +45,21 @@ diff or textconv programs. `<state>` is the fingerprint from `fingerprint.sh`, t
 id `verify-on-stop` stores in `verify-pass`. It never blocks; on error it tells the
 reviewer the diff is unavailable.
 
-`fingerprint.sh` is not a hook: both scripts source it, so they name a tree state the
+### `acceptance-start.sh` — SubagentStart for `acceptance`
+
+Gives the `acceptance` agent (ADR-009) its evidence directory,
+`.claude/.state/acceptance/<state>/`, and the workspace state it checks, via
+`additionalContext`. Older evidence directories are removed. It never blocks.
+
+### `acceptance-guard.sh` — PreToolUse on `Read`
+
+Keeps the `acceptance` agent a black box: when `agent_type` is `acceptance` and the
+path is under `src/` or `tests/`, it denies the call with a reason. Every other agent
+and path passes with no output, and an unparseable payload is allowed (it guards
+against mistakes, not a determined bypass). Bash reads are covered by the agent's
+prompt only.
+
+`fingerprint.sh` is not a hook: these scripts source it, so they name a tree state the
 same way.
 
 ## Optional: format-on-edit (disabled by default)

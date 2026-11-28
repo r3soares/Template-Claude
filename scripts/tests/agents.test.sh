@@ -17,11 +17,12 @@
 
 AGENTS="$ROOT/.claude/agents"
 SETTINGS="$ROOT/.claude/settings.json"
-ORCHESTRATOR_TOOLS="Agent(implementer, reviewer, integrator), Read, Glob, Grep, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate"
+ORCHESTRATOR_TOOLS="Agent(implementer, reviewer, integrator, acceptance), Read, Glob, Grep, AskUserQuestion, TaskCreate, TaskGet, TaskList, TaskUpdate"
 REVIEWER_TOOLS="Read, Glob, Grep"
 IMPLEMENTER_TOOLS="Read, Edit, Write, Bash, Skill"
 INTEGRATOR_TOOLS="Bash, Read"
-KEYS=" name description tools model "
+ACCEPTANCE_TOOLS="Bash, Read"
+KEYS=" name description tools model effort "
 REQUIRED="name description tools"
 
 # frontmatter <file> — lines between a first-line `---` and the next `---`.
@@ -88,7 +89,7 @@ valid_agent() {
 # check already implies it; this keeps the intent readable in a failure).
 lacks_tool() { ! frontmatter "$1" | grep -E '^tools: ' | tr ',' '\n' | sed 's/^ *//' | grep -qxE "$2(\(.*)?"; }
 
-for a in orchestrator:ORCHESTRATOR_TOOLS reviewer:REVIEWER_TOOLS implementer:IMPLEMENTER_TOOLS integrator:INTEGRATOR_TOOLS; do
+for a in orchestrator:ORCHESTRATOR_TOOLS reviewer:REVIEWER_TOOLS implementer:IMPLEMENTER_TOOLS integrator:INTEGRATOR_TOOLS acceptance:ACCEPTANCE_TOOLS; do
   name="${a%%:*}" var="${a#*:}"
   check "$name: canonical frontmatter with exactly the expected tools" valid_agent "$AGENTS/$name.md" "${!var}"
 done
@@ -102,6 +103,14 @@ check "implementer: no Agent (no nested delegation)" lacks_tool "$AGENTS/impleme
 for t in Agent Edit Write NotebookEdit PowerShell Skill; do
   check "integrator: no $t" lacks_tool "$AGENTS/integrator.md" "$t"
 done
+# acceptance: no writes, no delegation, and no Glob/Grep — the guard hook covers Read only.
+for t in Agent Edit Write NotebookEdit PowerShell Skill Glob Grep WebFetch; do
+  check "acceptance: no $t" lacks_tool "$AGENTS/acceptance.md" "$t"
+done
+out="$(cat "$AGENTS/acceptance.md")"
+check "acceptance: forbids reading src/ and tests/ with Bash too" has 'not with Bash'
+check "acceptance: keeps FAIL and BLOCKED apart" has 'must not send correct code back for a fix'
+check "acceptance: isolates HOME and data" has 'to it and point the product'
 
 # integrator: the agent gate (ADR-008) keeps every check that stands in for a ruleset.
 out="$(cat "$AGENTS/integrator.md")"
@@ -123,6 +132,10 @@ check "settings: agent teams not enabled" lacks "CLAUDE_CODE_EXPERIMENTAL_AGENT_
 check "settings: SubagentStop wired for implementer" has '"matcher": "^implementer$"'
 check "settings: SubagentStart wired for reviewer" has '"matcher": "^reviewer$"'
 check "settings: review-diff hook registered" has '.claude/hooks/review-diff.sh"'
+check "settings: SubagentStart wired for acceptance" has '"matcher": "^acceptance$"'
+check "settings: acceptance-start hook registered" has '.claude/hooks/acceptance-start.sh"'
+check "settings: PreToolUse guard on Read" has '"matcher": "^Read$"'
+check "settings: acceptance-guard hook registered" has '.claude/hooks/acceptance-guard.sh"'
 
 # Mutations — each must be rejected, so a later edit can't silently loosen an agent.
 mut_dir="$(mktemp -d)"
@@ -141,8 +154,8 @@ rejects() {
 O="$ORCHESTRATOR_TOOLS"
 rejects "tools removed" orchestrator "$O" '/^tools: /d'
 rejects "Bash added" orchestrator "$O" 's/^tools: /tools: Bash, /'
-rejects "delegation widened" orchestrator "$O" 's/Agent(implementer, reviewer, integrator)/Agent(implementer, reviewer, integrator, Explore)/'
-rejects "unrestricted Agent" orchestrator "$O" 's/Agent(implementer, reviewer, integrator)/Agent/'
+rejects "delegation widened" orchestrator "$O" 's/Agent(implementer, reviewer, integrator, acceptance)/Agent(implementer, reviewer, integrator, acceptance, Explore)/'
+rejects "unrestricted Agent" orchestrator "$O" 's/Agent(implementer, reviewer, integrator, acceptance)/Agent/'
 rejects "duplicate tool entry" orchestrator "$O" 's/^tools: /tools: Read, /'
 rejects "tools as a YAML list" orchestrator "$O" 's/^tools: .*/tools:\n  - Read/'
 rejects "tools in brackets" orchestrator "$O" 's/^tools: \(.*\)/tools: [\1]/'
@@ -156,5 +169,7 @@ rejects "name differs from file" orchestrator "$O" 's/^name: .*/name: boss/'
 rejects "Edit added to reviewer" reviewer "$REVIEWER_TOOLS" 's/^tools: .*/&, Edit/'
 rejects "Agent added to implementer" implementer "$IMPLEMENTER_TOOLS" 's/^tools: .*/&, Agent/'
 rejects "Edit added to integrator" integrator "$INTEGRATOR_TOOLS" 's/^tools: .*/&, Edit/'
+rejects "Grep added to acceptance" acceptance "$ACCEPTANCE_TOOLS" 's/^tools: .*/&, Grep/'
+rejects "Write added to acceptance" acceptance "$ACCEPTANCE_TOOLS" 's/^tools: .*/&, Write/'
 
 finish

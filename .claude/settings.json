@@ -59,6 +59,28 @@
             "timeout": 60
           }
         ]
+      },
+      {
+        "matcher": "^acceptance$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/acceptance-start.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^Read$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/acceptance-guard.sh",
+            "timeout": 10
+          }
+        ]
       }
     ]
   }
