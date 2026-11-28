@@ -69,13 +69,13 @@ Forces:
 
 2. **Agent gate**: the integrator merges only when all hold, in order:
    1. `./scripts/verify full` is green locally (already ship's step 2).
-   2. **Up to date:** after `git fetch origin master`, `git merge-base --is-ancestor
-      origin/master HEAD` succeeds. If not, `gh pr update-branch` merges master into the
-      PR on GitHub (a conflict → stop and report, never resolve), and the checks below
-      run on the new head.
-   3. **CI green on the current head:** `gh pr checks --watch` finishes and the `verify`
-      check is `SUCCESS` on the PR's head commit. No checks reported (after the existing
-      retries) → stop; never merge without CI.
+   2. **Up to date:** after `git fetch origin`, `git merge-base --is-ancestor
+      origin/master origin/<branch>` succeeds. If not, GitHub's update-branch API merges
+      master into the PR (a conflict → stop and report, never resolve), and the check
+      repeats until the remote branch contains master.
+   3. **CI green on the exact head:** the `verify` check run of that head commit is
+      `completed success` (`gh api …/commits/<sha>/check-runs`). No checks reported
+      (after the existing retries) → stop; never merge without CI.
    4. **Merge the tested commit only:** `gh pr merge --merge --delete-branch
       --match-head-commit <sha>`, with `<sha>` the head CI verified. A push after the
       check makes the merge fail instead of merging untested code.
@@ -153,8 +153,9 @@ Forces:
   bypass flags, and `--match-head-commit` protects the head, but nothing on GitHub
   refuses a manual merge.
 - The integrator needs a few more commands allowed in `.claude/settings.local.json`
-  (`git fetch origin master`, `git merge-base --is-ancestor *`, `gh pr update-branch`,
-  `gh pr merge --merge *`).
+  (see `docs/architecture/orchestrated-mode.md`). They call the REST API through `gh api`,
+  because `gh pr update-branch` and `gh pr checks --json` are missing from older `gh`
+  releases such as Ubuntu's 2.45.
 
 ### Risks
 

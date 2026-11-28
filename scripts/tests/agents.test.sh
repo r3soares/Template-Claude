@@ -106,9 +106,14 @@ done
 # integrator: the agent gate (ADR-008) keeps every check that stands in for a ruleset.
 out="$(cat "$AGENTS/integrator.md")"
 check "integrator: agent gate detected by the rulesets 403" has 'Upgrade to GitHub Pro'
-check "integrator: agent gate requires an up-to-date branch" has 'git merge-base --is-ancestor origin/master HEAD'
-check "integrator: agent gate requires the verify check to pass" has 'select(.name == "verify") | .bucket'
+check "integrator: agent gate requires an up-to-date remote branch" has 'git merge-base --is-ancestor origin/master origin/<branch>'
+check "integrator: agent gate requires verify to pass on the exact head" has 'commits/<SHA>/check-runs'
+check "integrator: agent gate expects completed success" has 'completed success'
+check "integrator: no gh subcommands missing from older gh" lacks 'gh pr update-branch'
+check "integrator: no gh pr checks --json (missing from older gh)" lacks 'gh pr checks --json'
 check "integrator: agent gate merges only the verified head" has 'gh pr merge --merge --delete-branch --match-head-commit <SHA>'
+check "integrator: a fix round re-picks the gate" has 'skip to step 4, so the gate is picked again'
+check "integrator: syncs the local branch after update-branch" has 'local branch has GitHub'"'"'s merge commit'
 check "integrator: no gate still means no merge" has 'stop and report the PR URL as **open, not merged**'
 
 # settings.json: mode is per session, agent teams stay off, hooks are wired.

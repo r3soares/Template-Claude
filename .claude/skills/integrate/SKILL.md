@@ -112,16 +112,19 @@ gh pr checks --watch                         # wait for CI
 GitHub Free, or none configured). You enforce what the ruleset would (ADR-008):
 
 ```bash
-git fetch origin master
-git merge-base --is-ancestor origin/master HEAD   # exit 1 = behind → gh pr update-branch
-gh pr checks --watch                              # CI on the current head
-gh pr view --json headRefOid --jq .headRefOid     # the SHA CI verified
-gh pr checks --json name,bucket --jq '.[] | select(.name == "verify") | .bucket'   # must be: pass
+git fetch origin
+git merge-base --is-ancestor origin/master origin/<branch>   # exit 1 = behind:
+gh api -X PUT repos/{owner}/{repo}/pulls/<number>/update-branch   # async: wait, fetch, re-check
+git rev-parse origin/<branch>                     # <sha>: the head that must pass CI
+gh pr checks --watch                              # wait for CI
+gh api repos/{owner}/{repo}/commits/<sha>/check-runs --jq '.check_runs[] | select(.name == "verify") | .status + " " + (.conclusion // "")'   # must be: completed success
 gh pr merge --merge --delete-branch --match-head-commit <sha>
 ```
 
-Never merge without a passing `verify` check on the current head. `update-branch`
-conflicts → resolve on the branch locally, commit, push, and start the checks again.
+`gh api` works on every `gh` version; `gh pr update-branch` and `gh pr checks --json`
+don't exist in older ones (e.g. Ubuntu's 2.45). Never merge without `verify` passing on
+the exact head being merged. An update-branch conflict → merge master into the branch
+locally, resolve, commit, push, and start the checks again.
 
 - `--merge` makes a merge commit, the equivalent of `--no-ff`.
 - **CI fails** → `gh run view <run-id> --log-failed`, fix on the branch (the `verify`

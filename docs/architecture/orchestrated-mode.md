@@ -36,8 +36,9 @@ inherit them. To run without prompts, allow them in your untracked
   "Bash(git remote)", "Bash(git remote -v)", "Bash(gh auth status)",
   "Bash(gh pr create *)", "Bash(gh pr merge --auto *)", "Bash(sleep *)",
   "Bash(gh api repos/{owner}/{repo}/rules/branches/*)",
-  "Bash(git fetch origin master)", "Bash(git merge-base --is-ancestor *)",
-  "Bash(gh pr update-branch)", "Bash(gh pr merge --merge *)"
+  "Bash(git fetch origin)", "Bash(git merge-base --is-ancestor *)", "Bash(git rev-parse *)",
+  "Bash(gh api -X PUT repos/{owner}/{repo}/pulls/*/update-branch)",
+  "Bash(gh api repos/{owner}/{repo}/commits/*/check-runs *)", "Bash(gh pr merge * --match-head-commit *)"
 ] } }
 ```
 
@@ -113,7 +114,7 @@ perm=(--permission-mode acceptEdits --allowedTools 'Bash(./**)' 'Bash(chmod *)' 
 | 7 | Classic mode unchanged | `claude -p --permission-mode acceptEdits "Append a line to README.md"` | Stop hook runs verify; `verify-pass` equals the current fingerprint | Pass, automated (2.1.312) |
 | 8 | Background deferral (interactive) | `claude --agent orchestrator`, delegate a multi-file task; while the implementer runs, the orchestrator's turn ends | No verify failure reported mid-implementation; verify runs when the orchestrator stops after the result | Manual, not yet run |
 | 9 | Interactive niceties | Same session | `AskUserQuestion` available for approvals; workspace trust accepted, so project allow rules apply | Manual, not yet run |
-| 10 | Autonomous integration | In a throwaway repo with a GitHub remote, ruleset and CI: `claude --agent orchestrator`, a small task | One commit per task by the integrator; no reviewer for a non-risky small change; PR opened with auto-merge, merged after CI | Local mode (no remote): pass, automated (2.1.331) — branch, one commit, `verify full`, `merge --no-ff`. GitHub mode not yet run. Agent gate (private repo, GitHub Free; ADR-008): PR merged with `--match-head-commit` only after `verify` passed on an up-to-date head — not yet run |
+| 10 | Autonomous integration | In a throwaway repo with a GitHub remote, ruleset and CI: `claude --agent orchestrator`, a small task | One commit per task by the integrator; no reviewer for a non-risky small change; PR opened with auto-merge, merged after CI | Local mode (no remote): pass, automated (2.1.331) — branch, one commit, `verify full`, `merge --no-ff`. GitHub mode not yet run. Agent gate (private repo, GitHub Free; ADR-008), `claude -p --agent integrator "ship …"` with the allow rules above on a branch behind master: pass (2.1.332, `gh` 2.45) — 403 → agent gate, update-branch, `--ff-only` sync, `verify` `completed success` on the new head, merge with `--match-head-commit` |
 
 When upgrading Claude Code, re-run 1–7 (a few minutes, a few cents of tokens) and
 update the Status column.
