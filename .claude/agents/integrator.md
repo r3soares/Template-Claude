@@ -54,9 +54,12 @@ add or change an attribution line.
    `gh auth status`; if it fails, **stop**, report its output and leave master
    untouched — never fall back to local. No GitHub remote → local mode.
 4. **GitHub**:
-   1. `git push -u origin HEAD`
+   1. `git push -u origin HEAD`. Rejected as non-fast-forward (the remote branch has
+      a commit you lack, e.g. an earlier update-branch) → `git pull --ff-only`, then push
+      again once. The pull fails (the branches diverged) → stop and report.
    2. `gh pr view --json number,state,url` — an `OPEN` PR already exists for this
-      branch (a fix round): skip to step 6. Auto-merge, if armed, stays armed.
+      branch (a fix round): skip to step 4, so the gate is picked again. Re-arming
+      auto-merge in step 5 is harmless.
    3. `gh pr create --title '<title>' --body '<body>'` (single quotes, as in `commit`)
    4. `gh api repos/{owner}/{repo}/rules/branches/master --jq '.[].type'` — pick the
       gate (ADR-008):
@@ -77,16 +80,24 @@ add or change an attribution line.
    8. `git switch master`, then `git pull --ff-only`. Done.
    9. **Agent gate** — merge only when every check below holds; any other outcome →
       stop and report, never merge:
-      1. `git fetch origin master`, then `git merge-base --is-ancestor origin/master HEAD`.
-         Exit 0 → up to date. Exit 1 → behind: run `gh pr update-branch` (a conflict →
-         stop and report; never resolve it), then continue — CI re-runs on the new head.
-      2. `gh pr checks --watch`, with the same "no checks reported" retries and failure
+      Use `gh api` as written — it works on every `gh` version, unlike newer `gh pr`
+      subcommands and flags. `<branch>` is the name from step 1; `<number>` is the PR
+      number from step 2, or the end of the URL step 3 printed.
+      1. `git fetch origin`, then `git merge-base --is-ancestor origin/master origin/<branch>`.
+         Exit 0 → up to date: go to step 2. Exit 1 → behind: run
+         `gh api -X PUT repos/{owner}/{repo}/pulls/<number>/update-branch` (an error, e.g.
+         a merge conflict → stop and report; never resolve it), then `sleep 15` and repeat
+         this step — GitHub updates the branch asynchronously. Still behind after 4
+         rounds → stop. Once up to date after an update, run `git pull --ff-only` so the
+         local branch has GitHub's merge commit for any later fix round.
+      2. `git rev-parse origin/<branch>` — note this SHA: the head that must pass CI.
+      3. `gh pr checks --watch`, with the same "no checks reported" retries and failure
          handling as step 6.
-      3. `gh pr view --json headRefOid --jq .headRefOid` — note this SHA.
-      4. `gh pr checks --json name,bucket --jq '.[] | select(.name == "verify") | .bucket'`
-         must print exactly `pass`. Anything else (empty, `pending`, `fail`) → stop.
+      4. `gh api repos/{owner}/{repo}/commits/<SHA>/check-runs --jq '.check_runs[] | select(.name == "verify") | .status + " " + (.conclusion // "")'`
+         must print exactly `completed success`. Empty or not `completed` → `sleep 15` and
+         run it again, at most 4 times. Anything else → stop.
       5. `gh pr merge --merge --delete-branch --match-head-commit <SHA>` with the SHA from
-         step 3. If it fails because the head moved, stop and report.
+         step 2. If it fails because the head moved, stop and report.
       6. `gh pr view --json state,mergedAt` — `state` must be `MERGED`. Then step 8.
 5. **Local** (no GitHub remote): `git switch master`, then `git merge --no-ff <branch>`
    (the name from step 1), then `git branch -d <branch>`. Don't push.
