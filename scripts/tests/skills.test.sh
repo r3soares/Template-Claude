@@ -33,6 +33,7 @@ check "integrate: ship-it authorizes a local merge only" has 'is the go-ahead fo
 check "integrate: push, PR and tags still need explicit confirmation" has 'still needs an'
 check "integrate: a feature's spec becomes [IMPLEMENTED] in the merge" has 'IMPLEMENTED]` on the'
 check "integrate: checklist covers a traceability matrix" has 'traceability'
+check "integrate: manual security review when security-review can't run without a remote" has "don't add a remote to make the skill run"
 out="$(cat "$ROOT/.claude/skills/bootstrap/SKILL.md")"
 check "bootstrap: CHANGELOG gets a 0.1.0 section matching the tag" has '## [0.1.0] - <today>'
 check "bootstrap: points to /release for later versions" has '/release'
