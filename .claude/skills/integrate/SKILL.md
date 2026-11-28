@@ -89,7 +89,14 @@ git diff master...HEAD --stat
 git log master..HEAD --oneline
 ```
 
-Wait for explicit confirmation before integrating.
+Then integrate only with the developer's go-ahead:
+
+- **A request that already asks to ship, integrate or merge** ("ship it", "merge it",
+  "manda pra frente") is the go-ahead for a **local** merge (6a), once verify is green
+  and acceptance (if it ran) has no `FAIL`. Show this summary in the final report.
+- **Anything outward-facing** — `git push`, opening a PR (6b), a tag — still needs an
+  explicit confirmation in the conversation, even after "ship it".
+- Otherwise, show the summary and wait for the go-ahead.
 
 ## 6a. Integrate — Local mode
 

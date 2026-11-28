@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: already-bootstrapped-no-changes
+expected_outcome: |
+  The skill detects the project is already bootstrapped (SETUP.md gone, identity filled
+  in, v0.1.0 tagged), says so, and changes nothing.
+context:
+  scaffold_script: place-files.sh

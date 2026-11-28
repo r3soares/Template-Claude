@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: user-visible-fix-runs-acceptance
+expected_outcome: |
+  The change goes through integrate: commit on a branch, CHANGELOG entry, verify, then
+  the acceptance agent checks the fix from repro lines (before: 404, after: working
+  endpoints) and its verdict and evidence are reported before asking to merge.
+context:
+  scaffold_script: place-files.sh

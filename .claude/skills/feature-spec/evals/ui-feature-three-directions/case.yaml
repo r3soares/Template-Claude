@@ -1,0 +1,8 @@
+schema_version: "1.1"
+name: ui-feature-three-directions
+expected_outcome: |
+  A feature spec with Impact and Finish Line sections, three distinct self-contained
+  HTML mockups in the spec's directions/ folder, and a request for the developer to pick
+  a direction, with no change to the code.
+context:
+  scaffold_script: place-files.sh

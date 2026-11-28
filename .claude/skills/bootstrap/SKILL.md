@@ -15,8 +15,9 @@ those skills, don't repeat their steps.
 
 - `SETUP.md` is gone **and** `CLAUDE.md` no longer contains
   `Replace this line with the project identity` → the project is bootstrapped. If
-  `git tag -l v0.1.0` prints nothing, offer step 5.4; otherwise say so and stop. Change
-  nothing else.
+  `CLAUDE.md` still says `Reply to the developer in: <language>`, ask only for the
+  conversation language and fill that line in. If `git tag -l v0.1.0` prints nothing,
+  offer step 5.4. Otherwise say so and stop. Change nothing else.
 - Otherwise, check each step below before doing it and skip the ones already done
   (a run that was interrupted resumes where it stopped).
 
