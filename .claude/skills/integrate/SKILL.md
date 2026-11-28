@@ -67,9 +67,22 @@ the branch's changes. Fix confirmed findings (with a regression test) and re-run
 list anything left open in step 5. Skip it for other small changes — it costs tokens and
 lint/tests already cover them.
 
+## 4c. Acceptance (features and user-visible changes)
+
+Spawn the `acceptance` agent (ADR-009) when the change is a feature whose spec has a
+Finish Line — give it the spec path — or a small change that alters user-visible
+behavior (an endpoint, a screen, a command's output) — give it one or two repro lines,
+"before: …, after: …". Nothing about the implementation goes in its prompt. Skip it for
+refactors, docs, config and internal changes. You decide this, not the code you wrote.
+
+- `FAIL` → fix on the branch, re-run step 4, then re-run acceptance for the failed
+  criteria only. Same 3-attempt bound, then escalate.
+- `BLOCKED` → an environment or spec problem, not a code fix: report it in step 5.
+
 ## 5. Await dev review
 
-Show what will be integrated, plus the verify summary:
+Show what will be integrated, plus the verify summary and the acceptance verdict with
+its evidence directory (or why acceptance was skipped):
 
 ```bash
 git diff master...HEAD --stat

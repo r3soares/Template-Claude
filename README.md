@@ -121,6 +121,10 @@ when you understand what Claude does on its own versus what you decide.
   e.g. the documentation conventions load when it edits `docs/` or `specs/`.
 - **Triggers the right skill** from your request, and **reads the rest on demand** —
   no need to paste docs into the prompt.
+- **Checks features like a user** — every feature spec has a *Finish Line* (an
+  observable outcome); the `acceptance` agent runs the product and checks it without
+  reading the code, for features and user-visible fixes (ADR-009). Evidence
+  (HTTP transcripts, screenshots) lands in `.claude/.state/acceptance/`.
 - **Verifies its own work** — runs `./scripts/verify`, and the `verify-on-stop` hook
   makes it fix failures (root cause, no skipped/weakened tests) before handing back.
   After 3 failed attempts it stops and gives you an escalation report.
@@ -145,7 +149,7 @@ when you understand what Claude does on its own versus what you decide.
 
 | You want… | Say something like… | What happens |
 |-----------|---------------------|--------------|
-| A feature | "New feature: … — write the spec first" | `feature-spec` → you approve → implement → tests → verify → merge |
+| A feature | "New feature: … — write the spec first" | `feature-spec` (impact, finish line, 3 directions for UI) → you approve → implement → tests → verify → acceptance → merge |
 | A decision | "Record an ADR for choosing X over Y" | `adr` (use for libraries, data models, hard-to-reverse choices) |
 | A small fix | "Fix … — this is a small fix" | regression test → fix → verify → commit → CHANGELOG → merge |
 | Tests | "Cover feature X with tests" | real tests in `tests/` derived from the spec |
@@ -185,12 +189,13 @@ project. As modules multiply:
 ### Orchestrated mode (optional)
 
 For larger tasks, `claude --agent orchestrator` starts a session whose main agent can't
-write: it plans, delegates to an `implementer` (one task at a time), a read-only
+write: it plans, delegates to an `implementer` (one task at a time), a black-box
+`acceptance` agent that runs the product against the spec's Finish Line, a read-only
 `reviewer` and an `integrator` that commits and merges via a CI-gated PR (ruleset, or the agent
 gate on private GitHub Free repos), and reports.
 The reviewer gets the real diff from a hook, and the same verify gates block the
 implementer. Classic mode stays the default. See `docs/architecture/orchestrated-mode.md`,
-ADR-005, ADR-007 and ADR-008.
+ADR-005, ADR-007, ADR-008 and ADR-009.
 
 ### Maintenance
 

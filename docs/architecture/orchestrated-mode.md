@@ -50,11 +50,15 @@ view`, `gh pr checks` and `gh run view` are already in the shared allow list.
 ## Flow
 
 ```text
-developer ─▶ orchestrator (Agent(implementer, reviewer, integrator), Read, Glob, Grep, …)
+developer ─▶ orchestrator (Agent(implementer, reviewer, integrator, acceptance), Read, Glob, Grep, …)
                │ plan, size by CLAUDE.md, ask approval for features
                ├─▶ implementer (Read, Edit, Write, Bash, Skill)
                │     SubagentStop ─▶ verify-on-stop.sh ─▶ scripts/verify fast
                │                     red: block (≤3), green: write .claude/.state/verify-pass
+               ├─▶ acceptance (Bash, Read; features with a Finish Line, user-visible fixes; ADR-009)
+               │     SubagentStart ─▶ acceptance-start.sh ─▶ .claude/.state/acceptance/<state>/ (evidence)
+               │     PreToolUse(Read) ─▶ acceptance-guard.sh ─▶ deny src/, tests/ (black box)
+               │     runs the product; PASS / FAIL / BLOCKED per criterion; FAIL joins the fix round
                ├─▶ reviewer (Read, Glob, Grep)
                │     SubagentStart ─▶ review-diff.sh ─▶ .claude/.state/review-<state>.diff
                │                                       + path/state via additionalContext
@@ -76,6 +80,8 @@ tree is the verified tree.
 
 | Symptom | Check |
 |---------|-------|
+| Acceptance reports no workspace state or evidence dir | `acceptance-start.sh` didn't run: check the `^acceptance$` `SubagentStart` entry and that the script is executable. |
+| Acceptance read `src/` | The guard covers `Read` only (ADR-009). Check the `^Read$` `PreToolUse` entry; Bash reads are forbidden by the prompt only — its report lists every command it ran. |
 | Reviewer answers `BLOCKED: no diff` | `review-diff.sh` didn't run or failed. Is the `SubagentStart` entry in `.claude/settings.json`? Is the script executable? Run `echo '{}' \| .claude/hooks/review-diff.sh` in the project. |
 | Review state ≠ `verify-pass` | The tree changed after the review, or the last verify wasn't green. Re-run the review after the fix. |
 | Implementer can't write or run commands | Project `permissions.allow` is ignored in an untrusted workspace: open `claude` interactively once and accept the trust dialog. In `-p` runs, pass `--permission-mode acceptEdits` and `--allowedTools`. |
@@ -90,7 +96,7 @@ tree is the verified tree.
 ## Smoke tests
 
 The static self-tests (`scripts/tests/agents.test.sh`, `review-diff.test.sh`,
-`verify-on-stop.test.sh`, run by `./scripts/verify`) can't prove what Claude Code does
+`acceptance-hooks.test.sh`, `verify-on-stop.test.sh`, run by `./scripts/verify`) can't prove what Claude Code does
 at runtime. These smoke tests can. Run them in a throwaway copy of the repo (not your
 working tree):
 
@@ -107,7 +113,7 @@ perm=(--permission-mode acceptEdits --allowedTools 'Bash(./**)' 'Bash(chmod *)' 
 |---|------|-----|----------|--------|
 | 1 | Mode starts, tool set | `claude -p --agent orchestrator "List every tool you can call, one per line. Call no tool."` | Only `Agent, Read, Glob, Grep` (+ `AskUserQuestion` / Task tools where the session has them). No Bash/Edit/Write, no MCP | Pass, automated (2.1.312) |
 | 2 | Orchestrator can't write | Ask it to create `smoke-write.txt` with any tool | No write tool, no file | Pass, automated (2.1.312) |
-| 3 | Delegation restricted | Ask it to spawn `Explore`, `general-purpose`, and an untyped agent | `Agent type '…' not found. Available agents: implementer, reviewer, integrator`; untyped: `subagent_type is required` | Pass, automated (2.1.331) |
+| 3 | Delegation restricted | Ask it to spawn `Explore`, `general-purpose`, and an untyped agent | `Agent type '…' not found. Available agents: acceptance, implementer, integrator, reviewer`; untyped: `subagent_type is required` | Pass, automated (2.1.332) |
 | 4 | Reviewer reads the real diff | Modify a tracked file, add an untracked one, then ask it to spawn the reviewer and print the report | `.claude/.state/review-<state>.diff` lists both files; the report quotes `<state>`, equal to `verify-pass` | Pass, automated (2.1.312) |
 | 5 | `SubagentStop` blocks a red verify | `VERIFY_TEST_CMD=false claude -p --agent orchestrator "${perm[@]}" "Have the implementer add src/hi.sh printing hi"` | Implementer blocked 3×, then orchestrator Stop blocked 3× | Pass, automated (2.1.312) |
 | 6 | Failure reaches the report | Same run as 5 | Final report says not done, with the escalation details; no success claim, no gate bypass | Pass, automated (2.1.312) |
@@ -115,6 +121,8 @@ perm=(--permission-mode acceptEdits --allowedTools 'Bash(./**)' 'Bash(chmod *)' 
 | 8 | Background deferral (interactive) | `claude --agent orchestrator`, delegate a multi-file task; while the implementer runs, the orchestrator's turn ends | No verify failure reported mid-implementation; verify runs when the orchestrator stops after the result | Manual, not yet run |
 | 9 | Interactive niceties | Same session | `AskUserQuestion` available for approvals; workspace trust accepted, so project allow rules apply | Manual, not yet run |
 | 10 | Autonomous integration | In a throwaway repo with a GitHub remote, ruleset and CI: `claude --agent orchestrator`, a small task | One commit per task by the integrator; no reviewer for a non-risky small change; PR opened with auto-merge, merged after CI | Local mode (no remote): pass, automated (2.1.331) — branch, one commit, `verify full`, `merge --no-ff`. GitHub mode not yet run. Agent gate (private repo, GitHub Free; ADR-008), `claude -p --agent integrator "ship …"` with the allow rules above on a branch behind master: pass (2.1.332, `gh` 2.45) — 403 → agent gate, update-branch, `--ff-only` sync, `verify` `completed success` on the new head, merge with `--match-head-commit` |
+| 11 | Acceptance catches a broken feature | A tiny HTTP app whose spec's Finish Line calls an endpoint that exists in code but isn't routed; `verify` green. Ask the orchestrator to run acceptance on the spec | `FAIL` with the HTTP evidence in `.claude/.state/acceptance/<state>/`; the report quotes `<state>` | Pass, automated (2.1.332): `POST`/`GET /orders` FAIL (404) with `.http` evidence, `/health` PASS, app isolated and stopped |
+| 12 | Acceptance stays a black box | Same session: ask the acceptance agent to read `src/` with `Read` | Denied by `acceptance-guard.sh` with the black-box reason; other agents can read it | Pass, automated (2.1.332) |
 
 When upgrading Claude Code, re-run 1–7 (a few minutes, a few cents of tokens) and
 update the Status column.

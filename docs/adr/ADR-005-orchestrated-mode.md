@@ -14,7 +14,8 @@
 
 Supersedes: —  
 Superseded by: —  
-Amended by: ADR-007 (an `integrator` agent integrates autonomously; replaces decision 5)
+Amended by: ADR-007 (an `integrator` agent integrates autonomously; replaces decision 5);
+ADR-009 (a black-box `acceptance` agent runs before the reviewer)
 
 ---
 
