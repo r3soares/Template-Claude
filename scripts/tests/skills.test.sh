@@ -23,6 +23,9 @@ check "bootstrap: no application code or tests" has 'no application code and no 
 check "bootstrap: guard checks the tag" has 'git tag -l v0.1.0'
 check "bootstrap: guard fills a missing conversation language" has 'ask only for the'
 check "bootstrap: tag needs confirmation" has 'confirm before each command'
+check "bootstrap: suggests grill-me for an unclear stack or modules" has '/grill-me'
+out="$(cat "$ROOT/.claude/skills/grill-me/SKILL.md")"
+check "grill-me: hands a not-yet-bootstrapped project to /bootstrap" has 'Replace this line with the project identity'
 
 
 out="$(cat "$ROOT/.claude/skills/integrate/SKILL.md")"

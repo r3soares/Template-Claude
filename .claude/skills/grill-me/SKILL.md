@@ -1,6 +1,6 @@
 ---
 name: grill-me
-description: Interview the developer relentlessly about a plan, design or decision until every branch is settled, then hand off to feature-spec or adr. Use when asked to grill, stress-test or poke holes in a plan, or before a spec when key decisions are still open.
+description: Interview the developer relentlessly about a plan, design or decision until every branch is settled, then hand off to feature-spec, adr or /bootstrap. Use when asked to grill, stress-test or poke holes in a plan, or before a spec when key decisions are still open.
 ---
 
 # Grill me
@@ -59,3 +59,7 @@ decisions and offer the next step:
 - a feature or user-facing change → the `feature-spec` skill (the decisions fill Impact,
   Scope and the Finish Line; nothing should be left for Open Questions);
 - one hard-to-reverse technical choice → the `adr` skill.
+- the project itself (what it is, stack, where it runs, module split) in a repo not set
+  up yet — `CLAUDE.md` still contains `Replace this line with the project identity` →
+  `/bootstrap` (the developer runs it; it doesn't load on its own). Hand over the
+  answers to its five questions so it asks only what is left.

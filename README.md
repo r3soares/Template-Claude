@@ -162,7 +162,7 @@ when you understand what Claude does on its own versus what you decide.
 |-----------|---------------------|--------------|
 | A feature | "New feature: … — write the spec first" | `feature-spec` (impact, finish line, 3 directions for UI) → you approve → implement → tests → verify → acceptance → merge |
 | A decision | "Record an ADR for choosing X over Y" | `adr` (use for libraries, data models, hard-to-reverse choices) |
-| Settle a plan | "Grill me on this plan: …" | `grill-me`: rounds of numbered questions with recommendations → `feature-spec` or `adr` |
+| Settle a plan | "Grill me on this plan: …" | `grill-me`: rounds of numbered questions with recommendations → `feature-spec`, `adr`, or `/bootstrap` in a repo not set up yet |
 | A reported bug | "Bug: … returns 500 when …" | `diagnosing-bugs`: red loop → minimise → hypotheses → regression test → fix → `integrate` |
 | A small fix | "Fix … — this is a small fix" | regression test → fix → verify → commit → CHANGELOG → merge |
 | Tests | "Cover feature X with tests" | real tests in `tests/` derived from the spec |
