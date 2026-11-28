@@ -56,7 +56,7 @@ developer ─▶ orchestrator (Agent(implementer, reviewer, integrator, acceptan
                │     SubagentStop ─▶ verify-on-stop.sh ─▶ scripts/verify fast
                │                     red: block (≤3), green: write .claude/.state/verify-pass
                ├─▶ acceptance (Bash, Read; features with a Finish Line, user-visible fixes; ADR-009)
-               │     SubagentStart ─▶ acceptance-start.sh ─▶ .claude/.state/acceptance/<state>/ (evidence)
+               │     SubagentStart ─▶ acceptance-start.sh ─▶ .acceptance/<state>/ (evidence)
                │     PreToolUse(Read) ─▶ acceptance-guard.sh ─▶ deny src/, tests/ (black box)
                │     runs the product; PASS / FAIL / BLOCKED per criterion; FAIL joins the fix round
                ├─▶ reviewer (Read, Glob, Grep; effort high)
@@ -121,7 +121,7 @@ perm=(--permission-mode acceptEdits --allowedTools 'Bash(./**)' 'Bash(chmod *)' 
 | 8 | Background deferral (interactive) | `claude --agent orchestrator`, delegate a multi-file task; while the implementer runs, the orchestrator's turn ends | No verify failure reported mid-implementation; verify runs when the orchestrator stops after the result | Manual, not yet run |
 | 9 | Interactive niceties | Same session | `AskUserQuestion` available for approvals; workspace trust accepted, so project allow rules apply | Manual, not yet run |
 | 10 | Autonomous integration | In a throwaway repo with a GitHub remote, ruleset and CI: `claude --agent orchestrator`, a small task | One commit per task by the integrator; no reviewer for a non-risky small change; PR opened with auto-merge, merged after CI | Local mode (no remote): pass, automated (2.1.331) — branch, one commit, `verify full`, `merge --no-ff`. GitHub mode not yet run. Agent gate (private repo, GitHub Free; ADR-008), `claude -p --agent integrator "ship …"` with the allow rules above on a branch behind master: pass (2.1.332, `gh` 2.45) — 403 → agent gate, update-branch, `--ff-only` sync, `verify` `completed success` on the new head, merge with `--match-head-commit` |
-| 11 | Acceptance catches a broken feature | A tiny HTTP app whose spec's Finish Line calls an endpoint that exists in code but isn't routed; `verify` green. Ask the orchestrator to run acceptance on the spec | `FAIL` with the HTTP evidence in `.claude/.state/acceptance/<state>/`; the report quotes `<state>` | Pass, automated (2.1.332): `POST`/`GET /orders` FAIL (404) with `.http` evidence, `/health` PASS, app isolated and stopped |
+| 11 | Acceptance catches a broken feature | A tiny HTTP app whose spec's Finish Line calls an endpoint that exists in code but isn't routed; `verify` green. Ask the orchestrator to run acceptance on the spec | `FAIL` with the HTTP evidence in `.acceptance/<state>/`; the report quotes `<state>` | Pass, automated (2.1.332): `POST`/`GET /orders` FAIL (404) with `.http` evidence, `/health` PASS, app isolated and stopped |
 | 12 | Acceptance stays a black box | Same session: ask the acceptance agent to read `src/` with `Read` | Denied by `acceptance-guard.sh` with the black-box reason; other agents can read it | Pass, automated (2.1.332) |
 
 When upgrading Claude Code, re-run 1–7 (a few minutes, a few cents of tokens) and

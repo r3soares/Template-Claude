@@ -53,7 +53,7 @@ PY
   echo "## tags"; git tag
   echo "## log since start"; git log --oneline "$head_before"..HEAD 2>/dev/null; git log --oneline --all -8
   echo "## status"; git status --porcelain=v1 --untracked-files=all
-  echo "## acceptance evidence"; find .claude/.state/acceptance -type f 2>/dev/null || echo "(none)"
+  echo "## acceptance evidence"; find .acceptance -type f 2>/dev/null || echo "(none)"
 } >"$run/outputs/repo-state.txt"
 git diff "$head_before" >"$run/outputs/diff-vs-start.patch" 2>/dev/null
 git ls-files -o --exclude-standard | while read -r f; do echo "### $f"; cat "$f"; done >"$run/outputs/new-files.txt" 2>/dev/null

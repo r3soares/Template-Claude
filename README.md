@@ -133,7 +133,7 @@ when you understand what Claude does on its own versus what you decide.
 - **Checks features like a user** — every feature spec has a *Finish Line* (an
   observable outcome); the `acceptance` agent runs the product and checks it without
   reading the code, for features and user-visible fixes (ADR-009). Evidence
-  (HTTP transcripts, screenshots) lands in `.claude/.state/acceptance/`.
+  (HTTP transcripts, screenshots) lands in `.acceptance/` (gitignored, ADR-010).
 - **Verifies its own work** — runs `./scripts/verify`, and the `verify-on-stop` hook
   makes it fix failures (root cause, no skipped/weakened tests) before handing back.
   After 3 failed attempts it stops and gives you an escalation report.

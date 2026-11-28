@@ -13,7 +13,8 @@
 
 Supersedes: —  
 Superseded by: —  
-Amends: ADR-005 (orchestrator's delegation list), ADR-002 ("done" for features)
+Amends: ADR-005 (orchestrator's delegation list), ADR-002 ("done" for features)  
+Amended by: ADR-010 (decision 3: evidence moves to `.acceptance/<state>/`)
 
 ---
 
@@ -53,7 +54,7 @@ Facts that shape the options:
 3. **Evidence by state**: a `SubagentStart` hook (`acceptance-start.sh`) creates
    `.claude/.state/acceptance/<state>/`, named by the `fingerprint.sh` workspace state,
    and passes the path and the state id via `additionalContext`, as `review-diff.sh`
-   does for the reviewer.
+   does for the reviewer. *(Amended by ADR-010: `.acceptance/<state>/`.)*
 4. **When it runs** (the orchestrator or the classic main session decides, never the
    implementer): feature-tier changes whose spec has a Finish Line, and small changes
    that alter user-visible behavior, using one or two repro lines as the finish line.
