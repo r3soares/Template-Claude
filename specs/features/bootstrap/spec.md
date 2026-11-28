@@ -1,4 +1,4 @@
-# Feature: Bootstrap a New Project [ACCEPTED]
+# Feature: Bootstrap a New Project [IMPLEMENTED]
 
 > `/bootstrap` turns a fresh copy of the template into the developer's project in one
 > guided session, replacing the manual `SETUP.md` checklist.
@@ -82,9 +82,10 @@ in, Docker/CI decided and configured, `verify` green, the setup merged and tagge
     *Components*.
   - `.claude/rules/architecture.md` (only for "API and implementation modules"):
     `paths: ["src/**"]`, the module list, the allowed dependency direction, no cycles.
-  - `CHANGELOG.md`: reset to the header plus `[Unreleased]` with one dated entry
-    ("project created from Template-Claude"); the template's history doesn't belong to
-    the project.
+  - `CHANGELOG.md`: reset to the header, an empty `[Unreleased]` and a
+    `[0.1.0] - <date>` section with one dated entry ("project created from
+    Template-Claude"), matching the `v0.1.0` tag; the template's history doesn't belong
+    to the project.
   - `.gitignore`: uncomment the stack's section; `.editorconfig` if the stack differs.
 - **Delegates** to the existing skills: `dockerize` (its decision guide), then
   `setup-ci` (verify stages, CI runtime, Dependabot ecosystem, `VERIFY_STRICT`, ruleset
@@ -112,7 +113,7 @@ in, Docker/CI decided and configured, `verify` green, the setup merged and tagge
 
 - [ ] On a fresh copy of the template, `/bootstrap` asks only the questions not
       answered in the request, then leaves: no template placeholder in `CLAUDE.md`,
-      `README.md` or `overview.md`; `CHANGELOG.md` with one project entry; no
+      `README.md` or `overview.md`; `CHANGELOG.md` with one project entry under `[0.1.0]`; no
       `SETUP.md`.
 - [ ] Choosing "API and implementation modules" creates
       `.claude/rules/architecture.md` with `paths:` and the module dependency rules;
@@ -140,7 +141,7 @@ in, Docker/CI decided and configured, `verify` green, the setup merged and tagge
 - **Check:**
   1. `grep -n "Replace this line" CLAUDE.md` → no match; `CLAUDE.md` has the project
      identity and language.
-  2. `SETUP.md` → absent; `CHANGELOG.md` → one `[Unreleased]` entry.
+  2. `SETUP.md` → absent; `CHANGELOG.md` → empty `[Unreleased]`, one entry under `[0.1.0]`.
   3. With "API and implementation modules": `.claude/rules/architecture.md` exists with
      `paths:`.
   4. `./scripts/verify full` → `verify: OK`.

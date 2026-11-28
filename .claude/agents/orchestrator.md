@@ -66,7 +66,9 @@ the request or the agents' reports are in English; English if it is unset or sti
 2. After each task is implemented (and reviewed, if risky): `integrator` →
    `commit <paths> <message>` — one Conventional Commit per task, listing the task's
    paths.
-3. When all tasks are committed: `integrator` → `ship <title> <body>` — a Conventional
+3. For a feature, before shipping: an implementer task sets the spec's title tag to
+   `[IMPLEMENTED]`, committed like any task. Then, when all tasks are committed:
+   `integrator` → `ship <title> <body>` — a Conventional
    Commit title for the whole change and a short PR body (what, why, related spec/ADR,
    open findings).
    Attribution: the integrator's model differs from this session's, so you supply it.

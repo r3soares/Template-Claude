@@ -38,7 +38,10 @@ actual stack:
 
 ## Step 3 — Wire it in
 
-- Document the run commands in `README.md` (`docker build`, `docker compose up`).
+- Document the run commands in `README.md` (`docker build`, `docker compose up`), and
+  update its **Environments** section (create it if missing): the command that starts
+  the product locally and the URL or port it answers on. The `acceptance` agent starts
+  the product from that section (ADR-009), so it must match how the product runs now.
 - If the project has integration tests, wire them as `INTEGRATION_CMD` in
   `scripts/verify` (e.g. `with_compose pytest -q tests/integration`).
 - If a hard-to-reverse choice was made (base image strategy, orchestration), record it

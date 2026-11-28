@@ -31,6 +31,17 @@ check "grill-me: hands a not-yet-bootstrapped project to /bootstrap" has 'Replac
 out="$(cat "$ROOT/.claude/skills/integrate/SKILL.md")"
 check "integrate: ship-it authorizes a local merge only" has 'is the go-ahead for a **local** merge'
 check "integrate: push, PR and tags still need explicit confirmation" has 'still needs an'
+check "integrate: a feature's spec becomes [IMPLEMENTED] in the merge" has 'IMPLEMENTED]` on the'
+check "integrate: checklist covers a traceability matrix" has 'traceability'
+out="$(cat "$ROOT/.claude/skills/bootstrap/SKILL.md")"
+check "bootstrap: CHANGELOG gets a 0.1.0 section matching the tag" has '## [0.1.0] - <today>'
+check "bootstrap: points to /release for later versions" has '/release'
+out="$(cat "$ROOT/.claude/skills/dockerize/SKILL.md")"
+check "dockerize: keeps the README Environments section current" has 'Environments'
+out="$(cat "$ROOT/.claude/skills/adr/SKILL.md")"
+check "adr: suggests grill-me while options are open" has '/grill-me'
+out="$(cat "$ROOT/.claude/agents/orchestrator.md")"
+check "orchestrator: a feature's spec becomes [IMPLEMENTED] before ship" has '[IMPLEMENTED]'
 
 # release: deliberate only; nothing written before confirmation; tag after the merge.
 out="$(awk 'NR == 1 && $0 == "---" { next } $0 == "---" { exit } { print }' "$ROOT/.claude/skills/release/SKILL.md")"

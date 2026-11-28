@@ -1,4 +1,4 @@
-# Feature: Release — version, CHANGELOG section and tag [ACCEPTED]
+# Feature: Release — version, CHANGELOG section and tag [IMPLEMENTED]
 
 > `/release` cuts a version: proposes the next SemVer number from `[Unreleased]`, moves
 > those entries into a dated section, integrates that, tags the merge, and offers a

@@ -82,8 +82,11 @@ step 5 does, after verify is green.
   auto-accepted: expected. Declined or not possible (a non-interactive run) → show the
   content, ask the developer to create it, and stop; a later `/bootstrap` resumes.
 - **`CHANGELOG.md`** — keep the header (title, intro, format/versioning lines), replace
-  everything below with `## [Unreleased]`, `### Added` and one dated entry:
-  "Project created from Template-Claude." The template's history isn't the project's.
+  everything below with an empty `## [Unreleased]`, then `## [0.1.0] - <today>`,
+  `### Added` and one dated entry: "Project created from Template-Claude." The
+  template's history isn't the project's, and the section matches the `v0.1.0` tag of
+  step 5 — `/release` starts from it. Because this file *is* the bootstrap's CHANGELOG
+  change, `integrate` adds no other entry.
 - **`.gitignore`** — uncomment the stack's section. **`.editorconfig`** — adjust if the
   stack's conventions differ.
 
@@ -118,5 +121,5 @@ hooks, `templates/`. The project's own ADRs take the next free number.
 ## 6. Summary
 
 List what was filled in, the Docker/CI decisions, the gate (ruleset, agent gate or
-local), anything left unconfigured, and the next step: the first feature with the
-`feature-spec` skill.
+local), anything left unconfigured, and the next steps: the first feature with the
+`feature-spec` skill, and `/release` to cut each later version.

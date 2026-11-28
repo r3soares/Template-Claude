@@ -35,7 +35,8 @@ Small fixes (see the decision rule in `CLAUDE.md`) skip this entirely.
      Technical Notes. When the feature changes an existing screen, include a "before"
      screenshot next to the chosen direction.
 4. **Status tag** in the title: start `[DRAFT]`, move to `[REVIEW]` when ready, then
-   `[ACCEPTED]` once approved. Do not implement before `[ACCEPTED]`.
+   `[ACCEPTED]` once approved. Do not implement before `[ACCEPTED]`. `integrate` sets
+   `[IMPLEMENTED]` on the branch that merges the code.
 5. **Related section is the feature index**: as you implement, fill in the Source files
    and Tests paths there. The spec describes the *present* desired state — "what changed"
    is answered by git (`git log -p -- <spec>`), not a hand-maintained history table.
