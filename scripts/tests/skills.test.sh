@@ -29,6 +29,17 @@ out="$(cat "$ROOT/.claude/skills/integrate/SKILL.md")"
 check "integrate: ship-it authorizes a local merge only" has 'is the go-ahead for a **local** merge'
 check "integrate: push, PR and tags still need explicit confirmation" has 'still needs an'
 
+# release: deliberate only; nothing written before confirmation; tag after the merge.
+out="$(awk 'NR == 1 && $0 == "---" { next } $0 == "---" { exit } { print }' "$ROOT/.claude/skills/release/SKILL.md")"
+check "release: not auto-invoked" has 'disable-model-invocation: true'
+out="$(cat "$ROOT/.claude/skills/release/SKILL.md")"
+check "release: waits for confirmation before writing" has 'Wait for the developer'"'"'s'
+check "release: integrates through integrate" has "Run \`integrate\`"
+check "release: tags only after the merge" has 'only after the release commit is on'
+check "release: annotated tag" has 'git tag -a vx.y.z'
+check "release: reads the default branch" has './scripts/default-branch'
+check "release: refuses an existing tag" has 'already exists'
+
 # Adopted skills (Matt Pocock's collection, MIT): notice kept, invocation as designed.
 for sk in grill-me diagnosing-bugs handoff retro; do
   out="$(cat "$ROOT/.claude/skills/$sk/LICENSE" 2>/dev/null)"

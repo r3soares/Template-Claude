@@ -1,6 +1,6 @@
 ---
 name: integrate
-description: Branch, Conventional Commit, verify, await review, and merge to master — locally or via a CI-gated pull request. Use when asked to commit, ship, integrate or merge.
+description: Branch, Conventional Commit, verify, await review, and merge to the default branch — locally or via a CI-gated pull request. Use when asked to commit, ship, integrate or merge.
 ---
 
 # Integrate a Change
@@ -13,14 +13,17 @@ orchestrator's reviewer, run for every feature and risky change, replaces step 4
 Branch → commit → CHANGELOG → verify → review → integrate. Works for both tiers — only
 the linked artifacts differ. Integration has two modes (ADR-002):
 
-| Mode | When | Gate before master |
+| Mode | When | Gate before `<default>` |
 |------|------|--------------------|
 | **Local** | No GitHub remote, or the developer asks for local | `./scripts/verify full` |
 | **GitHub** | `origin` is on GitHub (if `gh auth status` fails, stop — never fall back to local) | Same, **plus** CI `verify` passing on an up-to-date PR (ruleset or agent gate, 6b) |
 
+`<default>` is the default branch: `./scripts/default-branch` prints it (`main`,
+`master`, …). If it fails, ask the developer which branch it is.
+
 ## 1. Branch
 
-Never commit work directly to `master`/`main`. Name the branch `<type>/<short-name>`
+Never commit work directly to `<default>`. Name the branch `<type>/<short-name>`
 (kebab-case), with the same `type` as the commit: `feat/user-auth`, `fix/expired-token`,
 `docs/adr-005`.
 
@@ -85,8 +88,8 @@ Show what will be integrated, plus the verify summary and the acceptance verdict
 its evidence directory (or why acceptance was skipped):
 
 ```bash
-git diff master...HEAD --stat
-git log master..HEAD --oneline
+git diff <default>...HEAD --stat
+git log <default>..HEAD --oneline
 ```
 
 Then integrate only with the developer's go-ahead:
@@ -101,12 +104,12 @@ Then integrate only with the developer's go-ahead:
 ## 6a. Integrate — Local mode
 
 ```bash
-git switch master
+git switch <default>
 git merge --no-ff <branch>
 git branch -d <branch>
 ```
 
-`--no-ff` keeps the branch visible in history. Pushing master afterwards is optional
+`--no-ff` keeps the branch visible in history. Pushing `<default>` afterwards is optional
 and needs explicit confirmation (and fails if the repo has the GitHub ruleset — use
 GitHub mode there).
 
@@ -118,7 +121,7 @@ Pushing is outward-facing: **confirm with the developer first.**
 git push -u origin <branch>
 gh pr create --title "<type>(<scope>): <description>" --body-file <body.md>
                                              # body = .github/PULL_REQUEST_TEMPLATE.md, filled in
-gh api repos/{owner}/{repo}/rules/branches/master --jq '.[].type'   # which gate?
+gh api repos/{owner}/{repo}/rules/branches/<default> --jq '.[].type'   # which gate?
 ```
 
 **Ruleset gate** — the output lists `required_status_checks`; GitHub enforces CI:
@@ -133,7 +136,7 @@ GitHub Free, or none configured). You enforce what the ruleset would (ADR-008):
 
 ```bash
 git fetch origin
-git merge-base --is-ancestor origin/master origin/<branch>   # exit 1 = behind:
+git merge-base --is-ancestor origin/<default> origin/<branch>   # exit 1 = behind:
 gh api -X PUT repos/{owner}/{repo}/pulls/<number>/update-branch   # async: wait, fetch, re-check
 git rev-parse origin/<branch>                     # <sha>: the head that must pass CI
 gh pr checks --watch                              # wait for CI
@@ -143,14 +146,14 @@ gh pr merge --merge --delete-branch --match-head-commit <sha>
 
 `gh api` works on every `gh` version; `gh pr update-branch` and `gh pr checks --json`
 don't exist in older ones (e.g. Ubuntu's 2.45). Never merge without `verify` passing on
-the exact head being merged. An update-branch conflict → merge master into the branch
+the exact head being merged. An update-branch conflict → merge `<default>` into the branch
 locally, resolve, commit, push, and start the checks again.
 
 - `--merge` makes a merge commit, the equivalent of `--no-ff`.
 - **CI fails** → `gh run view <run-id> --log-failed`, fix on the branch (the `verify`
   skill), commit, `git push`. Auto-merge (ruleset gate) stays armed. Same 3-attempt
   bound, then escalate.
-- **After the merge**: `git switch master && git pull --ff-only`.
+- **After the merge**: `git switch <default> && git pull --ff-only`.
 - Never `--admin`, never force-push (permission deny rules block both).
 
 ---

@@ -1,6 +1,6 @@
 ---
 name: setup-ci
-description: Configure quality gates — scripts/verify stage commands for the stack, the GitHub Actions workflow, branch protection. Use when asked to add CI, run tests on push, or protect master.
+description: Configure quality gates — scripts/verify stage commands for the stack, the GitHub Actions workflow, branch protection. Use when asked to add CI, run tests on push, or protect the default branch.
 ---
 
 # Set up CI and quality gates
