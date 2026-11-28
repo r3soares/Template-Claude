@@ -115,7 +115,9 @@ check "acceptance: isolates HOME and data" has 'to it and point the product'
 # integrator: the agent gate (ADR-008) keeps every check that stands in for a ruleset.
 out="$(cat "$AGENTS/integrator.md")"
 check "integrator: agent gate detected by the rulesets 403" has 'Upgrade to GitHub Pro'
-check "integrator: agent gate requires an up-to-date remote branch" has 'git merge-base --is-ancestor origin/master origin/<branch>'
+check "integrator: agent gate requires an up-to-date remote branch" has 'git merge-base --is-ancestor origin/<default> origin/<branch>'
+check "integrator: reads the default branch instead of assuming one" has './scripts/default-branch'
+check "integrator: no hard-coded master" lacks 'switch master'
 check "integrator: agent gate requires verify to pass on the exact head" has 'commits/<SHA>/check-runs'
 check "integrator: agent gate expects completed success" has 'completed success'
 check "integrator: no gh subcommands missing from older gh" lacks 'gh pr update-branch'

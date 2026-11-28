@@ -105,7 +105,7 @@ hooks, `templates/`. The project's own ADRs take the next free number.
 4. After the merge, offer the first tag — confirm before each command:
 
    ```bash
-   git switch master && git pull --ff-only   # skip the pull without a remote
+   git switch "$(./scripts/default-branch)" && git pull --ff-only   # skip the pull without a remote
    git tag -a v0.1.0 -m "v0.1.0: project bootstrapped from Template-Claude"
    git push origin v0.1.0                    # only with a remote
    ```

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# default-branch — print the repository's default branch name (e.g. main or master).
+#
+# One plain command, so agents limited to simple commands can run it (integrator).
+# Order: origin/HEAD → origin's HEAD over the network → init.defaultBranch if that
+# branch exists locally → the only one of main/master that exists locally.
+# Exits 1 with a message on stderr when none of these gives a single answer.
+set -uo pipefail
+
+ref="$(git symbolic-ref -q --short refs/remotes/origin/HEAD 2>/dev/null)"
+if [ -n "$ref" ]; then
+  echo "${ref#origin/}"
+  exit 0
+fi
+
+if git remote get-url origin >/dev/null 2>&1; then
+  ref="$(git ls-remote --symref origin HEAD 2>/dev/null | awk '$1 == "ref:" { sub("refs/heads/", "", $2); print $2; exit }')"
+  if [ -n "$ref" ]; then
+    echo "$ref"
+    exit 0
+  fi
+fi
+
+local_branch() { git show-ref -q --verify "refs/heads/$1"; }
+
+ref="$(git config --get init.defaultBranch 2>/dev/null)"
+if [ -n "$ref" ] && local_branch "$ref"; then
+  echo "$ref"
+  exit 0
+fi
+
+found=()
+for ref in main master; do
+  local_branch "$ref" && found+=("$ref")
+done
+if [ "${#found[@]}" -eq 1 ]; then
+  echo "${found[0]}"
+  exit 0
+fi
+
+echo "default-branch: cannot tell the default branch (no origin/HEAD; local main/master: ${found[*]:-none})" >&2
+exit 1
