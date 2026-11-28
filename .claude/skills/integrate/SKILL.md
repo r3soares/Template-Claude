@@ -6,7 +6,8 @@ description: Branch, Conventional Commit, verify, await review, and merge to mas
 # Integrate a Change
 
 In orchestrated mode the `integrator` agent runs these steps instead (ADR-007). The
-gates (verify, required CI check, ruleset) replace step 5's confirmation, and the
+gates (verify, then CI enforced by the ruleset or by the agent gate, ADR-008) replace
+step 5's confirmation, and the
 orchestrator's reviewer, run for every feature and risky change, replaces step 4b.
 
 Branch → commit → CHANGELOG → verify → review → integrate. Works for both tiers — only
@@ -15,7 +16,7 @@ the linked artifacts differ. Integration has two modes (ADR-002):
 | Mode | When | Gate before master |
 |------|------|--------------------|
 | **Local** | No GitHub remote, or the developer asks for local | `./scripts/verify full` |
-| **GitHub** | `origin` is on GitHub (if `gh auth status` fails, stop — never fall back to local) | Same, **plus** CI `verify` as a required check on a PR |
+| **GitHub** | `origin` is on GitHub (if `gh auth status` fails, stop — never fall back to local) | Same, **plus** CI `verify` passing on an up-to-date PR (ruleset or agent gate, 6b) |
 
 ## 1. Branch
 
@@ -97,16 +98,35 @@ Pushing is outward-facing: **confirm with the developer first.**
 git push -u origin <branch>
 gh pr create --title "<type>(<scope>): <description>" --body-file <body.md>
                                              # body = .github/PULL_REQUEST_TEMPLATE.md, filled in
+gh api repos/{owner}/{repo}/rules/branches/master --jq '.[].type'   # which gate?
+```
+
+**Ruleset gate** — the output lists `required_status_checks`; GitHub enforces CI:
+
+```bash
 gh pr merge --auto --merge --delete-branch   # merges once required checks pass
 gh pr checks --watch                         # wait for CI
 ```
 
+**Agent gate** — anything else: no ruleset (`Upgrade to GitHub Pro` on a private repo on
+GitHub Free, or none configured). You enforce what the ruleset would (ADR-008):
+
+```bash
+git fetch origin master
+git merge-base --is-ancestor origin/master HEAD   # exit 1 = behind → gh pr update-branch
+gh pr checks --watch                              # CI on the current head
+gh pr view --json headRefOid --jq .headRefOid     # the SHA CI verified
+gh pr checks --json name,bucket --jq '.[] | select(.name == "verify") | .bucket'   # must be: pass
+gh pr merge --merge --delete-branch --match-head-commit <sha>
+```
+
+Never merge without a passing `verify` check on the current head. `update-branch`
+conflicts → resolve on the branch locally, commit, push, and start the checks again.
+
 - `--merge` makes a merge commit, the equivalent of `--no-ff`.
 - **CI fails** → `gh run view <run-id> --log-failed`, fix on the branch (the `verify`
-  skill), commit, `git push`. Auto-merge stays armed. Same 3-attempt bound, then
-  escalate.
-- **Auto-merge unavailable** (not enabled on the repo, or no ruleset): wait for
-  `gh pr checks --watch` to pass, then `gh pr merge --merge --delete-branch`.
+  skill), commit, `git push`. Auto-merge (ruleset gate) stays armed. Same 3-attempt
+  bound, then escalate.
 - **After the merge**: `git switch master && git pull --ff-only`.
 - Never `--admin`, never force-push (permission deny rules block both).
 

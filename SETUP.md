@@ -53,9 +53,10 @@ git commit -m "chore: initial project structure from template"
 - **Checks + CI**: use the `setup-ci` skill. It fills the stage commands in
   `scripts/verify` (the only place they live), adds the runtime setup to
   `.github/workflows/ci.yml`, sets `VERIFY_STRICT=1`, and — if the repo is on GitHub —
-  applies the branch ruleset and enables auto-merge (it asks first). Orchestrated mode
-  merges on its own only when that ruleset requires the CI check (ADR-007); without it,
-  it stops at the open PR. Keep the template's
+  applies the branch ruleset and enables auto-merge (it asks first). Private repos on
+  GitHub Free can't have rulesets: there CI is enforced by the agent gate instead
+  (ADR-008), and orchestrated mode still merges on its own. A repo that could have a
+  ruleset but doesn't stops at the open PR (ADR-007). Keep the template's
   self-tests first in the test stage: `TEST_CMD="template_test && <your tests>"` — under
   `VERIFY_STRICT=1`, `template_test` alone fails as not configured. Add the stack's
   ecosystem to `.github/dependabot.yml`, and pin any action you add by SHA.
@@ -103,7 +104,7 @@ code, and keep `docs/architecture/overview.md` current when a module is added.
 - [ ] `CHANGELOG.md` reset
 - [ ] Docker decision made (`dockerize` skill if applicable)
 - [ ] `scripts/verify` stages configured (`TEST_CMD` = `template_test && …`) and `./scripts/verify` green (`setup-ci` skill)
-- [ ] CI runtime filled in, stack ecosystem in `dependabot.yml`, `VERIFY_STRICT=1` set, branch ruleset applied (GitHub only)
+- [ ] CI runtime filled in, stack ecosystem in `dependabot.yml`, `VERIFY_STRICT=1` set, branch ruleset applied (GitHub only; skipped on private GitHub Free repos)
 - [ ] `.gitignore` stack section uncommented
 - [ ] `SETUP.md` deleted from new project
 - [ ] First feature spec created (or first small fix shipped)

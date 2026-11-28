@@ -29,7 +29,7 @@ module under *Components* as the code grows.
 │   └── workflows/        # ci.yml runs scripts/verify (job `verify`); audit.yml weekly CVE scan;
 │                         # tool-versions.yml weekly check of the pinned tools
 ├── docs/                 # What the system IS now (git holds the history)
-│   ├── adr/              # Architecture Decision Records (ADR-001–004, 006: quality gates; 005, 007: orchestrated mode)
+│   ├── adr/              # Architecture Decision Records (ADR-001–004, 006, 008: quality gates; 005, 007: orchestrated mode)
 │   ├── architecture/     # THIS FILE + component/system docs
 │   └── traceability/     # OPTIONAL — formal matrix, compliance projects only
 ├── specs/features/       # What features SHOULD do — one folder per feature, spec.md
@@ -84,3 +84,4 @@ module under *Components* as the code grows.
 | Optional orchestrated mode (native subagents) | [ADR-005](../adr/ADR-005-orchestrated-mode.md) |
 | CI skips the redundant post-merge run | [ADR-006](../adr/ADR-006-skip-ci-on-pr-merge-push.md) |
 | Autonomous integration in orchestrated mode | [ADR-007](../adr/ADR-007-autonomous-integration-in-orchestrated-mode.md) |
+| Agent-enforced merge gate without rulesets | [ADR-008](../adr/ADR-008-agent-enforced-gate-without-rulesets.md) |
